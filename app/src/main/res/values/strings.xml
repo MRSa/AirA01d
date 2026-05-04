@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">AirA01d</string>
+    <string name="permission_not_granted">Permissions not granted by the user.</string>
+
+    <string name="dialog_title_confirm_power_off">Exit Application</string>
+    <string name="dialog_message_power_off">Turn off the camera and exit the application.</string>
+    <string name="button_power_off_confirm">OK(Exit)</string>
+    <string name="button_cancel">Cancel</string>
+
+    <string name="dialog_title_connect_failed">Connect failed.</string>
+    <string name="dialog_button_retry">Retry</string>
+    <string name="dialog_button_network_settings">WiFi Settings</string>
+    <string name="camera_not_connected">Unable to connect to the camera&#8230;</string>
+</resources>
