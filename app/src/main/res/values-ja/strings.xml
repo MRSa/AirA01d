@@ -11,4 +11,6 @@
     <string name="dialog_button_retry">再試行</string>
     <string name="dialog_button_network_settings">WiFi設定</string>
     <string name="camera_not_connected">カメラと接続できませんでした&#8230;</string>
+
+    <string name="dialog_title_selection">変更</string>
 </resources>

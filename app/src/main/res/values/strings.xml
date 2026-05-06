@@ -11,4 +11,7 @@
     <string name="dialog_button_retry">Retry</string>
     <string name="dialog_button_network_settings">WiFi Settings</string>
     <string name="camera_not_connected">Unable to connect to the camera&#8230;</string>
+
+    <string name="dialog_title_selection">Change</string>
+
 </resources>

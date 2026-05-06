@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.widget
+package jp.osdn.gokigen.aira01d.ui.component.widget.connect
 
 import android.app.Activity
 import androidx.compose.foundation.layout.size
@@ -8,14 +8,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,8 @@ import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 @Composable
 fun PowerOffButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifier)
 {
+    val haptic = LocalHapticFeedback.current
+
     // Contextを取得し、Activityにキャストする
     val context = LocalContext.current
     val activity = context as? Activity
@@ -34,7 +37,10 @@ fun PowerOffButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifi
 
     // ----- ボタン表示 （押されたらダイアログを表示して確認する）
     IconButton(
-        onClick = { showDialog = true },
+        onClick = {
+            showDialog = true
+            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                  },
         modifier = modifier.size(48.dp)
     ) {
         Icon(
@@ -68,7 +74,7 @@ fun PowerOffConfirmationDialog(
             Icon(
                 painter = painterResource(R.drawable.outline_power_settings_new_24),
                 contentDescription = "Power",
-                tint = MaterialTheme.colorScheme.primary
+                //tint = MaterialTheme.colorScheme.primary
             )
         },
         title = { Text(text = stringResource(R.string.dialog_title_confirm_power_off)) },

@@ -22,7 +22,9 @@
       <w>exprev</w>
       <w>focallength</w>
       <w>focalvalue</w>
+      <w>getlastjpg</w>
       <w>getlist</w>
+      <w>getrecview</w>
       <w>imagingstate</w>
       <w>isospeedvalue</w>
       <w>lensmountstatus</w>
@@ -50,6 +52,7 @@
       <w>takemotion</w>
       <w>telefocallength</w>
       <w>telemove</w>
+      <w>upperlimit</w>
       <w>utctimediff</w>
       <w>wbvalue</w>
       <w>widefocallength</w>

@@ -2,44 +2,96 @@ package jp.osdn.gokigen.aira01d.ui.model
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus.CameraConnectionStatus
-import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
-import jp.osdn.gokigen.a01lib.camera.interfaces.screen.IAutoFocusFrameDisplay
-import jp.osdn.gokigen.a01lib.camera.interfaces.screen.IIndicatorControl
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
 import jp.osdn.gokigen.aira01d.AppSingleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.text.isNotEmpty
 
 // ----- カメラ状態を保持し、画面表示のためにデータを提供する
-class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventNotify, IIndicatorControl
+class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventNotify, ICameraStatusUpdateNotify
 {
-    private lateinit var cameraControl : ICameraControl
-
+    private lateinit var cameraStatus: ICameraStatus
     private val _cameraConnectionStatus : MutableLiveData<CameraConnectionStatus> by lazy { MutableLiveData<CameraConnectionStatus>() }
     val cameraConnectionStatus: LiveData<CameraConnectionStatus> = _cameraConnectionStatus
 
     private val _isConnectError : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
     val isConnectError : LiveData<Boolean> = _isConnectError
 
+    private val _takeMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val takeMode : LiveData<String> = _takeMode
+
+    private val _tv : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val tv : LiveData<String> = _tv
+
+    private val _av : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val av : LiveData<String> = _av
+
+    private val _xv : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val xv : LiveData<String> = _xv
+
+    private val _sv : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val sv : LiveData<String> = _sv
+
+    private val _wb : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val wb : LiveData<String> = _wb
+
+    private val _focusMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val focusMode : LiveData<String> = _focusMode
+
+    private val _driveMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val driveMode : LiveData<String> = _driveMode
+
+    private val _pictureEffect : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val pictureEffect : LiveData<String> = _pictureEffect
+
+    private val _exposureWarning : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val exposureWarning : LiveData<String> = _exposureWarning
+
+    var propertyList by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    var activeProperty by mutableStateOf<ICameraStatus.CameraProperty?>(null)
+        private set
+
     fun initializeViewModel()
     {
         try
         {
-            this.cameraControl = AppSingleton.cameraControl
-
             // ----- カメラの接続状態を初期化
-            _cameraConnectionStatus.value = cameraControl.getCameraConnectionStatus()
-            cameraControl.subscribeCameraConnectionStatus(this)
-            cameraControl.subscribeEventReceiver(this)
+            _cameraConnectionStatus.value = AppSingleton.cameraControl.getCameraConnectionStatus()
+            AppSingleton.cameraControl.subscribeCameraConnectionStatus(this)
+            AppSingleton.cameraControl.subscribeEventReceiver(this)
+            AppSingleton.cameraControl.subscribeCameraStatus(this)
             // ----- （保持している）カメラ状態を更新
 
+            cameraStatus = AppSingleton.cameraControl.getCameraStatus()
+
+            // ----- 保持状態を初期化
             _isConnectError.postValue(false)
+            _takeMode.postValue("")
+            _tv.postValue("")
+            _av.postValue("")
+            _sv.postValue("")
+            _xv.postValue("")
+            _wb.postValue("")
+            _focusMode.postValue("")
+            _exposureWarning.postValue("")
+            _driveMode.postValue("")
         }
         catch (e: Exception)
         {
@@ -73,9 +125,141 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     }
 
     override fun getSubscribeId(): String { return ("CameraStatusViewModel") }
-    override fun receivedCameraEvent(eventMessage: String)
+    override fun receivedCameraEvent(eventMessage: ByteArray)
     {
         // ----- カメラのステータスが変化したときの処理
+        if (eventMessage.size < 4) return  // 期待した文字列の長さがなかったので解析はしない
+        val appId = eventMessage[0]
+        val event = (eventMessage[1].toInt() and 0xFF).toByte() // eventMessage[1]
+        val length = ((eventMessage[2].toInt() and 0xFF) shl 8) or (eventMessage[3].toInt() and 0xFF)
+        val dataBody = String(eventMessage, 4, eventMessage.size - 4, Charsets.UTF_8)
+        Log.v(TAG, " - - - - - - - - - receivedCameraEvent(CameraStatusViewModel) : $appId [evt:$event] len:$length   '$dataBody'")
+    }
+
+    override fun changedTakeMode(newMode: String)
+    {
+        if ((newMode.isNotEmpty())&&(_takeMode.value != newMode))
+        {
+            _takeMode.postValue(newMode)
+        }
+    }
+
+    override fun updatedShutterSpeed(tv: String) {
+        if ((tv.isNotEmpty())&&(_tv.value != tv))
+        {
+            _tv.postValue(tv)
+        }
+    }
+
+    override fun updatedAperture(av: String) {
+        if ((av.isNotEmpty())&&(_av.value != av))
+        {
+            _av.postValue(av)
+        }
+    }
+
+    override fun updatedExposureCompensation(xv: String) {
+        if (_xv.value != xv)
+        {
+            _xv.postValue(xv)
+        }
+    }
+
+    override fun updateIsoSensitivity(sv: String) {
+        if ((sv.isNotEmpty())&&(_sv.value != sv))
+        {
+            _sv.postValue(sv)
+        }
+    }
+
+    override fun updateFocusMode(focusMode: String) {
+        if ((focusMode.isNotEmpty())&&(_focusMode.value != focusMode))
+        {
+            _focusMode.postValue(focusMode)
+        }
+    }
+
+    override fun updateExposureWarning(exposureWarning: String) {
+        if (_exposureWarning.value != exposureWarning)
+        {
+            _exposureWarning.postValue(exposureWarning)
+        }
+    }
+
+    override fun updateDriveMode(driveMode: String) {
+        if ((driveMode.isNotEmpty())&&(_driveMode.value != driveMode))
+        {
+            _driveMode.postValue(driveMode)
+        }
+    }
+
+    override fun updatePictureEffect(pictureEffect: String) {
+        if ((pictureEffect.isNotEmpty())&&(_pictureEffect.value != pictureEffect))
+        {
+            _pictureEffect.postValue(pictureEffect)
+        }
+    }
+
+    override fun updatedWhiteBalance(whiteBalance: String) {
+        if ((whiteBalance.isNotEmpty())&&(_wb.value != whiteBalance))
+        {
+            _wb.postValue(whiteBalance)
+        }
+    }
+
+    fun getPropertyValueList(key: ICameraStatus.CameraProperty) : List<String>
+    {
+        try
+        {
+            return AppSingleton.cameraControl.getCameraStatus().getStatusList(key)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return ArrayList()
+    }
+
+    fun loadPropertyList(key: ICameraStatus.CameraProperty)
+    {
+        if (activeProperty != null) return  // 既に loadPropertyListが動作中
+        activeProperty = key
+        propertyList = emptyList()
+
+        viewModelScope.launch(Dispatchers.IO) {
+            activeProperty = key
+            try
+            {
+                val result = getPropertyValueList(key)
+                withContext(Dispatchers.Main) {
+                    // Log.v(TAG, "Received property list: $result (size: ${result.size})")
+                    if (activeProperty == key) {
+                        propertyList = result
+                    }
+                }
+            }
+            catch (e: Exception)
+            {
+                withContext(Dispatchers.Main) {
+                    activeProperty = null
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    // ダイアログを閉じたことをViewModelに知らせる（状態リセット用）
+    fun onSelectPropertyDialogDismissed() {
+        activeProperty = null
+        propertyList = emptyList()
+    }
+
+    fun setProperty(key: ICameraStatus.CameraProperty, value: String)
+    {
+        // ----- カメラに対して選択されたプロパティを設定する
+        CoroutineScope(Dispatchers.IO).launch {
+            AppSingleton.cameraControl.getCameraStatus().setStatus(key, value)
+        }
     }
 
     // ----- カメラの電源をOFFにしてから、アプリケーションを終了させる
@@ -84,7 +268,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         CoroutineScope(Dispatchers.Main).launch {
             try
             {
-                cameraControl.finishCamera(true)
+                AppSingleton.cameraControl.finishCamera(true)
                 onFinish()
             }
             catch (e: Exception)
@@ -101,7 +285,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             try
             {
                 _isConnectError.postValue(false)
-                cameraControl.disconnectFromCamera()
+                AppSingleton.cameraControl.disconnectFromCamera()
             }
             catch (e: Exception)
             {
@@ -117,7 +301,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             try
             {
                 _isConnectError.postValue(false)
-                cameraControl.connectToCamera()
+                AppSingleton.cameraControl.connectToCamera()
             }
             catch (e: Exception)
             {
@@ -133,7 +317,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             try
             {
                 _isConnectError.postValue(false)
-                cameraControl.startCamera(context)
+                AppSingleton.cameraControl.startCamera(context)
             }
             catch (e: Exception)
             {
@@ -142,20 +326,19 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         }
     }
 
-    override fun onAfLockUpdate(focusingStatus: IAutoFocusFrameDisplay.FocusFrameStatus) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onShootingStatusUpdate(status: IIndicatorControl.ShootingStatus?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onMovieStatusUpdate(status: IIndicatorControl.ShootingStatus?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onBracketingStatusUpdate(message: String?) {
-        TODO("Not yet implemented")
+    // ----- 撮影を行う
+    fun doCapture(captureAction: ICaptureControl.CaptureAction)
+    {
+        CoroutineScope(Dispatchers.Main).launch {
+            try
+            {
+                AppSingleton.cameraControl.getCaptureControl().doCapture(captureAction)
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+        }
     }
 
     companion object

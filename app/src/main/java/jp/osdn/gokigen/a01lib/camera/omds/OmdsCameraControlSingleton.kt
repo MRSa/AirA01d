@@ -7,14 +7,13 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus.CameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
-import jp.osdn.gokigen.a01lib.camera.interfaces.IDisplayInjector
 import jp.osdn.gokigen.a01lib.camera.interfaces.IFocusingControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
+import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.interfaces.IOperationCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.IZoomLensControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
-import jp.osdn.gokigen.a01lib.camera.interfaces.screen.IAutoFocusFrameDisplay
-import jp.osdn.gokigen.a01lib.camera.interfaces.screen.IIndicatorControl
 import jp.osdn.gokigen.a01lib.camera.omds.connection.OmdsCameraConnection
 import jp.osdn.gokigen.a01lib.camera.omds.liveview.OmdsLiveViewControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCamIndStatus
@@ -23,10 +22,12 @@ import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCameraStatus
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCommPathControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCommPathStatus
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsGetCommand
+import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsPostCommand
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsRunModeControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsTimeSync
 import jp.osdn.gokigen.a01lib.camera.omds.status.OmdsCameraStatusWatcher
+import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsCaptureControl
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsFocusControl
 
 class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatcher.IOpcEventReceive, ICameraControl
@@ -48,10 +49,12 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     private lateinit var camInState: OmdsCamIndStatus
     private lateinit var camCommPathStatus: OmdsCommPathStatus
     private lateinit var focusControl: OmdsFocusControl
+    private lateinit var captureControl: OmdsCaptureControl
+    private lateinit var getRecordImage: OmdsGetRecordImage
 
     private var isInitialized  = false
 
-    override fun initialize(imageReceiver: IImageDataReceiver, frameDisplayer: IAutoFocusFrameDisplay, indicator: IIndicatorControl)
+    override fun initialize(imageReceiver: IImageDataReceiver)
     {
         if (!isInitialized)
         {
@@ -67,7 +70,9 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
                 this.postCommand = OmdsPostCommand()
                 this.camInState = OmdsCamIndStatus()
                 this.camCommPathStatus = OmdsCommPathStatus()
-                this.focusControl = OmdsFocusControl(frameDisplayer, indicator)
+                this.focusControl = OmdsFocusControl()
+                this.captureControl = OmdsCaptureControl(statusWatcher)
+                this.getRecordImage = OmdsGetRecordImage()
                 this.subscriberList.clear()
                 this.connectionStatusReceiverList.clear()
 
@@ -185,27 +190,18 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
 
     override fun needRotateImage(): Boolean { return false }
 
-    override fun getDisplayInjector(): IDisplayInjector
-    {
-        TODO("Not yet implemented")
-    }
-
     override fun getCameraStatus() : ICameraStatus { return statusWatcher }
 
-    override fun getFocusingControl(): IFocusingControl?
-    {
-        TODO("Not yet implemented")
-    }
+    override fun getFocusingControl(): IFocusingControl { return focusControl }
 
     override fun getZoomControl(): IZoomLensControl?
     {
         TODO("Not yet implemented")
     }
 
-    override fun getCaptureControl(): ICaptureControl?
-    {
-        TODO("Not yet implemented")
-    }
+    override fun getCaptureControl(): ICaptureControl { return captureControl }
+
+    override fun getGetRecordImage(): IGetRecordImage { return getRecordImage }
 
     override fun onStatusNotify(status: CameraConnectionStatus)
     {
@@ -268,11 +264,19 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         }
     }
 
-    override fun receivedOpcEvent(value: String)
+    override fun subscribeCameraStatus(subscriber: ICameraStatusUpdateNotify) {
+        statusWatcher.subscribe(subscriber)
+    }
+
+    override fun unsubscribeCameraStatus(subscriber: ICameraStatusUpdateNotify) {
+        statusWatcher.unsubscribe(subscriber)
+    }
+
+    override fun receivedOpcEvent(value: ByteArray)
     {
         try
         {
-            // Log.v(TAG, "receivedCameraEvent() [subscriber: ${subscriberList.size}]")
+            //Log.v(TAG, "receivedCameraEvent() [subscriber: ${subscriberList.size}]")
             subscriberList.forEach { subscriber ->
                 try
                 {

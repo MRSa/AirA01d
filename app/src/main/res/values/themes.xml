@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <!-- スプラッシュ画面用のテーマ -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- スプラッシュの背景色 -->
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+        <!-- 中央に表示するアイコン -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <!-- スプラッシュ終了後に切り替わる本来のアプリテーマ -->
+        <item name="postSplashScreenTheme">@style/Theme.AirA01d</item>
+    </style>
+    <!-- 本来のアプリテーマの定義 -->
     <style name="Theme.AirA01d" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

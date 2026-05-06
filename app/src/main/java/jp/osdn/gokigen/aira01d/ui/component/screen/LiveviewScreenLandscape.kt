@@ -15,11 +15,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import jp.osdn.gokigen.aira01d.ui.component.widget.ConnectButton
-import jp.osdn.gokigen.aira01d.ui.component.widget.LiveviewWidget
-import jp.osdn.gokigen.aira01d.ui.component.widget.MirrorImage
-import jp.osdn.gokigen.aira01d.ui.component.widget.PowerOffButton
-import jp.osdn.gokigen.aira01d.ui.component.widget.WifiConfigButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.AFLockUnlockButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.ApertureButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.ExposureCompensationButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.ExposureWarningText
+import jp.osdn.gokigen.aira01d.ui.component.widget.FocusModeButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.IsoSensitivityButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.connect.ConnectButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.drawer.LiveviewWidget
+import jp.osdn.gokigen.aira01d.ui.component.widget.MirrorImageButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.PictureEffectButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.connect.PowerOffButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.ShowGridButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.ShutterButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.ShutterSpeedButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.TakeModeButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.WhiteBalanceButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.connect.WifiConfigButton
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 
@@ -29,13 +41,20 @@ fun LiveviewScreenLandscape(navController: NavHostController, liveviewModel: Liv
     Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         // 上部：ステータス/設定ボタン群
         Row(modifier = Modifier.fillMaxWidth().height(50.dp)) {
-            PowerOffButton(cameraStatusViewModel)
+            TakeModeButton(cameraStatusViewModel)
+            ShutterSpeedButton(cameraStatusViewModel)
+            ApertureButton(cameraStatusViewModel)
+            IsoSensitivityButton(cameraStatusViewModel)
+            PictureEffectButton(cameraStatusViewModel)
+            WhiteBalanceButton(cameraStatusViewModel)
         }
 
         Row(modifier = Modifier.fillMaxSize()) {
             // 左側：ドライブモード・電池など
             Column(modifier = Modifier.width(110.dp).fillMaxHeight()) {
+                PowerOffButton(cameraStatusViewModel)
                 ConnectButton(cameraStatusViewModel)
+                WifiConfigButton(liveviewModel)
             }
 
             // 中央：メインライブビュー
@@ -45,9 +64,13 @@ fun LiveviewScreenLandscape(navController: NavHostController, liveviewModel: Liv
 
             // 右側：シャッター・アイコン群
             Column(modifier = Modifier.width(110.dp).fillMaxHeight()) {
-                ConnectButton(cameraStatusViewModel)
-                WifiConfigButton(liveviewModel)
-                MirrorImage(liveviewModel)
+                AFLockUnlockButton(liveviewModel)
+                MirrorImageButton(liveviewModel)
+                ShowGridButton(liveviewModel)
+                ShutterButton(liveviewModel, cameraStatusViewModel)
+                FocusModeButton(cameraStatusViewModel)
+                ExposureCompensationButton(cameraStatusViewModel)
+                ExposureWarningText(cameraStatusViewModel)
             }
         }
     }

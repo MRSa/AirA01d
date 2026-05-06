@@ -11,43 +11,34 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
 import jp.osdn.gokigen.aira01d.R
+import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 
 @Composable
-fun MirrorImageButton(viewModel: LiveviewViewModel, modifier: Modifier = Modifier)
+fun ShutterButton(viewModel: LiveviewViewModel, controlModel: CameraStatusViewModel, modifier: Modifier = Modifier)
 {
     val haptic = LocalHapticFeedback.current
 
     // ----- ステータスを監視する
-    val isMirrorMode = viewModel.isMirrorMode.observeAsState()
     val isLvActivated = viewModel.isLvActivated.observeAsState()
 
     // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId = if (isMirrorMode.value == true) { R.drawable.outline_flip_camera_ios_24 } else { R.drawable.outline_photo_camera_24 }
+    val iconId = R.drawable.baseline_camera_24
     val iconColor = if (isLvActivated.value == true) { MaterialTheme.colorScheme.primary } else { MaterialTheme.colorScheme.onSurfaceVariant }
 
     // ----- ボタンの表示
     IconButton(
         onClick = {
-            if (isMirrorMode.value == false)
-            {
-                // ----- 鏡像表示モードに切り替える
-                viewModel.setMirrorMode(true)
-                haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
-            }
-            else
-            {
-                // ----- 通常表示モードに切り替える
-                viewModel.setMirrorMode(false)
-                haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
-            }
+            controlModel.doCapture(ICaptureControl.CaptureAction.ON)  // そのうち、撮影状態によって、操作を変える予定。
+            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
         },
-        modifier = modifier.size(48.dp)
+        modifier = modifier.size(96.dp)  // シャッターボタンは通常のボタンの倍のサイズ
     ) {
         Icon(
             painter = painterResource(iconId),
-            contentDescription = "mirror image",
+            contentDescription = "camera shutter",
             tint = iconColor
         )
     }

@@ -53,11 +53,7 @@ class MainActivity : ComponentActivity()
             PreferenceValueInitializer().initializePreferences(this)
 
             // ViewModelの初期化 (イベント登録の関係から、CameraControl の方を先に初期化する必要あり...）
-            AppSingleton.cameraControl.initialize(
-                myLiveviewViewModel,
-                myLiveviewViewModel,
-                myCameraStatusViewModel
-            )
+            AppSingleton.cameraControl.initialize(myLiveviewViewModel)
             myLiveviewViewModel.initializeViewModel(applicationContext)
             myCameraStatusViewModel.initializeViewModel()
 

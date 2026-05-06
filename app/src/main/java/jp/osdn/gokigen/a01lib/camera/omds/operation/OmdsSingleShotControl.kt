@@ -1,17 +1,14 @@
 package jp.osdn.gokigen.a01lib.camera.omds.operation
 
-
 import android.util.Log
-import jp.osdn.gokigen.a01lib.camera.interfaces.screen.IAutoFocusFrameDisplay
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.lang.Exception
 import java.util.HashMap
 
-class OmdsSingleShotControl(private val frameDisplayer: IAutoFocusFrameDisplay, userAgent: String = "OlympusCameraKit", private val executeUrl : String = "http://192.168.0.10")
+class OmdsSingleShotControl(userAgent: String = "OlympusCameraKit", private val executeUrl : String = "http://192.168.0.10", private val useOpcProtocol: Boolean = true)
 {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
-    private var useOpcProtocol = true
 
     fun singleShot()
     {
@@ -25,14 +22,13 @@ class OmdsSingleShotControl(private val frameDisplayer: IAutoFocusFrameDisplay, 
                     val reply: String = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
                     if (!reply.contains("ok"))
                     {
-                        Log.v(TAG, "Capture Failure... : $reply")
+                        Log.v(TAG, "Capture Failure... : $reply ($sendUrl)")
                     }
                 }
                 catch (e: Exception)
                 {
                     e.printStackTrace()
                 }
-                frameDisplayer.hideFocusFrame()
             }
             thread.start()
         }

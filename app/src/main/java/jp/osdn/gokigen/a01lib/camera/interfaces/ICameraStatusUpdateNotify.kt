@@ -1,21 +1,21 @@
 package jp.osdn.gokigen.a01lib.camera.interfaces
 
-/**
- *
- *
- */
 interface ICameraStatusUpdateNotify
 {
-    fun updatedTakeMode(mode: String?)
-    fun updatedShutterSpeed(tv: String?)
-    fun updatedAperture(av: String?)
-    fun updatedExposureCompensation(xv: String?)
-    fun updatedMeteringMode(meteringMode: String?)
-    fun updatedWBMode(wbMode: String?)
-    fun updateRemainBattery(percentage: Int)
-    fun updateFocusedStatus(focused: Boolean, focusLocked: Boolean)
-    fun updateIsoSensitivity(sv: String?)
-    fun updateWarning(warning: String?)
-    fun updateStorageStatus(status: String?)
-    fun updateShootMode(shootMode: String?)
+    fun changedTakeMode(newMode: String)
+    fun updatedShutterSpeed(tv: String)
+    fun updatedAperture(av: String)
+    fun updatedExposureCompensation(xv: String)
+    fun updateIsoSensitivity(sv: String)
+    fun updateFocusMode(focusMode: String)
+    fun updateExposureWarning(exposureWarning: String)
+    fun updateDriveMode(driveMode: String)
+    fun updatePictureEffect(pictureEffect: String)
+    fun updatedWhiteBalance(whiteBalance: String)
+
+    //fun updatedMeteringMode(meteringMode: String?)
+    //fun updateRemainBattery(percentage: Int)
+
+    //fun updateStorageStatus(status: String?)
+    //fun updateShootMode(shootMode: String?)
 }

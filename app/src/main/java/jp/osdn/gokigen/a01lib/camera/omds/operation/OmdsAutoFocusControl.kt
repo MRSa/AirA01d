@@ -3,23 +3,25 @@ package jp.osdn.gokigen.a01lib.camera.omds.operation
 import android.graphics.PointF
 import android.graphics.RectF
 import android.util.Log
-import jp.osdn.gokigen.a01lib.camera.interfaces.screen.IAutoFocusFrameDisplay
-import jp.osdn.gokigen.a01lib.camera.interfaces.screen.IIndicatorControl
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.lang.Exception
 import java.util.*
 import kotlin.math.floor
 
-class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, private val indicator: IIndicatorControl, userAgent: String = "OlympusCameraKit", private val executeUrl : String = "http://192.168.0.10")
-{
+class OmdsAutoFocusControl(
+    //private val frameDisplayer: IAutoFocusFrameDisplay,
+    //private val indicator: IIndicatorControl,
+    userAgent: String = "OlympusCameraKit",
+    private val executeUrl : String = "http://192.168.0.10",
+    private val useOpcProtocol : Boolean = true
+) {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
     private lateinit var preFocusFrameRect : RectF
-    private var useOpcProtocol = true
 
     fun lockAutoFocus(point: PointF)
     {
-        Log.v(TAG, "lockAutoFocus() : [" + point.x + ", " + point.y + "]")
+        // Log.v(TAG, "lockAutoFocus() : [" + point.x + ", " + point.y + "]")
         try
         {
             val thread = Thread {
@@ -42,7 +44,7 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
                     try
                     {
                         preFocusFrameRect = getPreFocusFrameRect(point)
-                        showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Errored, 1.0)
+                        //showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Errored, 1.0)
                     }
                     catch (ee: Exception)
                     {
@@ -68,7 +70,7 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
             val preReply: String = http.httpGetWithHeader(releaseUrl, headerMap, null, TIMEOUT_MS) ?: ""
             Log.v(TAG, "setTouchAFPosition() pre-release. : $releaseUrl ($preReply)")
 
-            showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Running, 0.0)
+            //showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Running, 0.0)
             val posX = floor((point.x * SCALE_X).toDouble()).toInt()
             val posY = floor((point.y * SCALE_Y).toDouble()).toInt()
             Log.v(TAG, "AF ($posX, $posY)")
@@ -82,13 +84,13 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
             {
                 // AF FOCUSED
                 Log.v(TAG, "lockAutoFocus() : FOCUSED")
-                showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Focused, 0.0)
+                //showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Focused, 0.0)
             }
             else
             {
                 // AF FOCUS FAILURE
                 Log.v(TAG, "lockAutoFocus() : ERROR")
-                showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Failed, 1.0)
+                //showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Failed, 1.0)
             }
         }
         catch (e: Exception)
@@ -102,23 +104,25 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
         preFocusFrameRect = getPreFocusFrameRect(point)
         try
         {
+            // ----- Unlock AF
             val releaseUrl = executeUrl + AF_UNLOCK_COMMAND_OPC
             val preReply: String = http.httpGetWithHeader(releaseUrl, headerMap, null, TIMEOUT_MS) ?: ""
             Log.v(TAG, "unlock AF : $releaseUrl ($preReply)")
 
-            showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Running, 0.0)
+            // ----- フォーカスを表示
+            //showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Running, 0.0)
             val posX = floor((point.x * SCALE_X).toDouble()).toInt()
             val posY = floor((point.y * SCALE_Y).toDouble()).toInt()
-            Log.v(TAG, "AF ($posX, $posY)")
-            val sendUrl = String.format(Locale.US, "%s%s&point=%04dx%04d", executeUrl, AF_FRAME_COMMAND_OPC, posX, posY)
-            val reply: String = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
 
+            // ----- Drive AF
+            val sendUrl = String.format(Locale.US, "%s%s&point=%04dx%04d", executeUrl, AF_FRAME_COMMAND_OPC, posX, posY)
+            val reply = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
+            Log.v(TAG, "Drive : AF ($posX, $posY) : $sendUrl ($reply)")
+
+            // ----- AF Lock
             val lockUrl = executeUrl + AF_LOCK_COMMAND_OPC
-            val lockReply: String = http.httpGetWithHeader(lockUrl, headerMap, null, TIMEOUT_MS) ?: ""
-            if (!lockReply.contains("ok"))
-            {
-                Log.v(TAG, "OPC: setTouchAFPosition() (size:${lockReply.length}) : $lockReply $reply ($lockUrl)")
-            }
+            val lockReply = http.httpGetWithHeader(lockUrl, headerMap, null, TIMEOUT_MS) ?: ""
+            Log.v(TAG, "Focus Lock ($posX, $posY) : $lockUrl ($lockReply)")
         }
         catch (e: Exception)
         {
@@ -126,25 +130,9 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
         }
     }
 
-    /**
-     * シャッター半押し処理
-     *
-     */
-    fun halfPressShutter(isPressed: Boolean)
-    {
-        if (isPressed)
-        {
-            lockAutoFocus(PointF(0.5f, 0.5f))
-        }
-        else
-        {
-            unlockAutoFocus()
-        }
-    }
-
     fun unlockAutoFocus()
     {
-        Log.v(TAG, "unlockAutoFocus()")
+        // Log.v(TAG, "unlockAutoFocus()")
         try {
             val thread = Thread {
                 if (useOpcProtocol)
@@ -174,7 +162,7 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
             {
                 Log.v(TAG, "unlockAutoFocus() reply is null.")
             }
-            hideFocusFrame()
+            //hideFocusFrame()
         }
         catch (e: Exception)
         {
@@ -196,7 +184,7 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
             {
                 Log.v(TAG, "unlockAutoFocus() reply is null.")
             }
-            hideFocusFrame()
+            //hideFocusFrame()
         }
         catch (e: Exception)
         {
@@ -204,6 +192,7 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
         }
     }
 
+/*
     private fun showFocusFrame(rect: RectF, status: IAutoFocusFrameDisplay.FocusFrameStatus, duration: Double)
     {
         frameDisplayer.showFocusFrame(rect, status, duration.toFloat())
@@ -215,11 +204,12 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
         frameDisplayer.hideFocusFrame()
         indicator.onAfLockUpdate(IAutoFocusFrameDisplay.FocusFrameStatus.None)
     }
+ */
 
     private fun getPreFocusFrameRect(point: PointF): RectF
     {
-        val imageWidth: Float = frameDisplayer.getContentSizeWidth()
-        val imageHeight: Float = frameDisplayer.getContentSizeHeight()
+        val imageWidth: Float = SCALE_X  // frameDisplayer.getContentSizeWidth()
+        val imageHeight: Float = SCALE_Y // frameDisplayer.getContentSizeHeight()
 
         // Display a provisional focus frame at the touched point.
         val focusWidth = 0.125f // 0.125 is rough estimate.
@@ -268,5 +258,4 @@ class OmdsAutoFocusControl(private val frameDisplayer: IAutoFocusFrameDisplay, p
         private const val SCALE_X = 640.0f
         private const val SCALE_Y = 480.0f
     }
-
 }

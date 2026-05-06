@@ -15,31 +15,31 @@ import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 
 @Composable
-fun MirrorImageButton(viewModel: LiveviewViewModel, modifier: Modifier = Modifier)
+fun ShowGridButton(viewModel: LiveviewViewModel, modifier: Modifier = Modifier)
 {
     val haptic = LocalHapticFeedback.current
 
     // ----- ステータスを監視する
-    val isMirrorMode = viewModel.isMirrorMode.observeAsState()
+    val isGridOn = viewModel.isGridOn.observeAsState()
     val isLvActivated = viewModel.isLvActivated.observeAsState()
 
     // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId = if (isMirrorMode.value == true) { R.drawable.outline_flip_camera_ios_24 } else { R.drawable.outline_photo_camera_24 }
+    val iconId = if (isGridOn.value == true) { R.drawable.outline_grid_off_24 } else { R.drawable.outline_grid_on_24 }
     val iconColor = if (isLvActivated.value == true) { MaterialTheme.colorScheme.primary } else { MaterialTheme.colorScheme.onSurfaceVariant }
 
     // ----- ボタンの表示
     IconButton(
         onClick = {
-            if (isMirrorMode.value == false)
+            if (isGridOn.value == false)
             {
-                // ----- 鏡像表示モードに切り替える
-                viewModel.setMirrorMode(true)
+                // ----- グリッド表示モードに切り替える
+                viewModel.setGridOn(true)
                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             }
             else
             {
-                // ----- 通常表示モードに切り替える
-                viewModel.setMirrorMode(false)
+                // ----- グリッド非表示モードに切り替える
+                viewModel.setGridOn(false)
                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
             }
         },
@@ -47,7 +47,7 @@ fun MirrorImageButton(viewModel: LiveviewViewModel, modifier: Modifier = Modifie
     ) {
         Icon(
             painter = painterResource(iconId),
-            contentDescription = "mirror image",
+            contentDescription = "grid on/off",
             tint = iconColor
         )
     }

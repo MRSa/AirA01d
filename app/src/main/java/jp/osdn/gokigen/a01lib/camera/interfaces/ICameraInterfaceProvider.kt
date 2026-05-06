@@ -17,7 +17,7 @@ interface ICameraInterfaceProvider
     fun getLiveViewControl(): ILiveViewController
     fun getCameraInformation(): ICameraInformation
 
-    fun getDisplayInjector(): IDisplayInjector?
+    //fun getDisplayInjector(): IDisplayInjector?
 
     fun getPlaybackControl(): IPlaybackControl?
 }

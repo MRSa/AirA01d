@@ -19,7 +19,7 @@
         android:enableOnBackInvokedCallback="true"
         android:supportsRtl="true"
         android:name=".AppSingleton"
-        android:theme="@style/Theme.AirA01d">
+        android:theme="@style/Theme.App.Starting">
         <activity
             android:name=".MainActivity"
             android:exported="true"

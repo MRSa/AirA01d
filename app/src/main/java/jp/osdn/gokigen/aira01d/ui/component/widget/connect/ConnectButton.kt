@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.widget
+package jp.osdn.gokigen.aira01d.ui.component.widget.connect
 
 import android.content.Intent
 import android.provider.Settings
@@ -12,7 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -23,6 +25,7 @@ import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 @Composable
 fun ConnectButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifier)
 {
+    val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
 
     // ----- ステータスを監視する
@@ -35,7 +38,7 @@ fun ConnectButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifie
             R.drawable.outline_cloud_done_24 to MaterialTheme.colorScheme.primary // 接続済み：メインカラー
 
         ICameraConnectionStatus.CameraConnectionStatus.DISCONNECTED ->
-            R.drawable.outline_cloud_off_24 to MaterialTheme.colorScheme.onSurfaceVariant // 切断：控えめな色
+            R.drawable.outline_cloud_off_24 to MaterialTheme.colorScheme.primary // 切断：控えめな色
 
         ICameraConnectionStatus.CameraConnectionStatus.ERROR ->
             R.drawable.outline_cloud_alert_24 to MaterialTheme.colorScheme.error // 異常：警告の赤
@@ -47,7 +50,7 @@ fun ConnectButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifie
             R.drawable.outline_cloud_sync_24 to MaterialTheme.colorScheme.tertiary // 進行中2：第3色（少し目立つ色）
 
         ICameraConnectionStatus.CameraConnectionStatus.CONNECTING ->
-            R.drawable.outline_cloud_sync_24 to MaterialTheme.colorScheme.onSurfaceVariant // 進行中3：第3色（少し目立つ色）
+            R.drawable.outline_cloud_sync_24 to MaterialTheme.colorScheme.secondary // 進行中3：第2色
 
         ICameraConnectionStatus.CameraConnectionStatus.CHECK_WIFI ->
             R.drawable.outline_cloud_24 to MaterialTheme.colorScheme.tertiary // 進行中1：第3色（少し目立つ色）
@@ -63,12 +66,17 @@ fun ConnectButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifie
             {
                 viewModel.disconnectFromCamera()
             }
+            else if (cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.DISCONNECTED)
+            {
+                viewModel.connectToCamera()
+            }
             else if ((cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.DISCONNECTED) ||
                 (cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.ERROR) ||
                 (cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.NOT_FOUND))
             {
                 viewModel.startCamera(context)
             }
+            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
         },
         modifier = modifier.size(48.dp)
     ) {

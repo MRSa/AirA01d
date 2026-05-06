@@ -3,7 +3,6 @@ package jp.osdn.gokigen.a01lib.camera.omds.liveview
 import android.util.Log
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.ILiveViewController
-import jp.osdn.gokigen.a01lib.camera.omds.status.OmdsCameraStatusWatcher
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import kotlinx.coroutines.*
 import java.net.DatagramPacket
@@ -32,9 +31,9 @@ class OmdsLiveViewControl(
     private var job: Job? = null
 
     private var imageDataReceiver: IImageDataReceiver? = null
-    private var statusWatcher: OmdsCameraStatusWatcher? = null
+    private var statusWatcher: ILiveviewRtpHeaderReceiver? = null
 
-    fun setReceiver(imageDataReceiver: IImageDataReceiver, statusWatcher: OmdsCameraStatusWatcher)
+    fun setReceiver(imageDataReceiver: IImageDataReceiver, statusWatcher: ILiveviewRtpHeaderReceiver)
     {
         this.imageDataReceiver = imageDataReceiver
         this.statusWatcher = statusWatcher
@@ -159,8 +158,7 @@ class OmdsLiveViewControl(
             {
                 // フレームの開始パケットと判断
                 // JPEG開始位置までのデータをRTPヘッダー（拡張情報込）としてWatcherに渡す
-                val rtpHeaderWithExtension = data.copyOfRange(0, jpegStart)
-                statusWatcher?.setRtpHeader(rtpHeaderWithExtension)
+                statusWatcher?.receiveRtpHeader(data.copyOfRange(0, jpegStart))
 
                 receivedImageBufferOffset = 0
                 nextSequenceNumber = seqNum
