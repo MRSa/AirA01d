@@ -30,24 +30,30 @@ import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 
 @Composable
-fun TakeModeButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifier)
+fun TakeModeButton(
+    viewModel: LiveviewViewModel,
+    controlModel: CameraStatusViewModel,
+    modifier: Modifier = Modifier
+)
 {
+    val targetProperty = ICameraStatus.CameraProperty.TakeMode
     val haptic = LocalHapticFeedback.current
 
     // ----- ステータスを監視する
-    val takeMode = viewModel.takeMode.observeAsState()
+    val takeMode = controlModel.takeMode.observeAsState()
+    val isLvActivated = viewModel.isLvActivated.observeAsState()
 
-    // ----- ダイアログの表示状態と、表示する選択肢リストを管理
+    val textDecoration = if (isLvActivated.value == true) { TextDecoration.Underline } else { TextDecoration.None }
+
+    // ----- ダイアログの表示状態を管理
     var showDialog by remember { mutableStateOf(false) }
 
-    // --- ポイント：通信完了を監視してダイアログを開く --- 一覧が更新され、かつ空でない場合にダイアログを表示
-    LaunchedEffect(viewModel.propertyList, viewModel.activeProperty) {
-        if ((viewModel.activeProperty == ICameraStatus.CameraProperty.TakeMode)&&(viewModel.propertyList.isNotEmpty())) {
+    // --- 通信完了を監視してダイアログを開く --- 一覧が更新され、かつ空でない場合にダイアログを表示
+    LaunchedEffect(controlModel.propertyList, controlModel.activeProperty) {
+        if ((controlModel.activeProperty == targetProperty)&&(controlModel.propertyList.isNotEmpty())) {
             showDialog = true
         }
     }
@@ -55,11 +61,8 @@ fun TakeModeButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifi
     // ----- ボタンの表示
     TextButton(
         onClick = {
-            // ----- 振動フィードバック
-            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-
             // ---- 変更用の選択肢を取得する
-            viewModel.loadPropertyList(ICameraStatus.CameraProperty.TakeMode)
+            controlModel.loadPropertyList(targetProperty)
         },
         modifier = modifier
             .height(48.dp)
@@ -68,7 +71,7 @@ fun TakeModeButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifi
         Text(
             text = takeMode.value ?: "???",
             style = TextStyle(
-                textDecoration = TextDecoration.Underline,
+                textDecoration = textDecoration,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -78,10 +81,13 @@ fun TakeModeButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifi
     // ----- モード変更ダイアログの表示
     if (showDialog)
     {
+        // ----- 振動フィードバック
+        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+
         AlertDialog(
             onDismissRequest = {
                 showDialog = false
-                viewModel.onSelectPropertyDialogDismissed()
+                controlModel.onSelectPropertyDialogDismissed()
             },
             title = { Text(text = "${stringResource(R.string.dialog_title_selection)} : ${takeMode.value}") },
             text = {
@@ -91,22 +97,22 @@ fun TakeModeButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifi
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    viewModel.propertyList.forEach { mode ->
+                    controlModel.propertyList.forEach { mode ->
                         OutlinedButton(
                             onClick = {
-                                // 選択したモードをViewModelに反映（メソッド名は仮定）
-                                viewModel.setProperty(ICameraStatus.CameraProperty.TakeMode, mode)
+                                // 選択したアイテムで Propertyを更新
+                                controlModel.setProperty(targetProperty, mode)
                                 showDialog = false
-                                viewModel.onSelectPropertyDialogDismissed()
+                                controlModel.onSelectPropertyDialogDismissed()
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
                                 text = mode,
-                                modifier = Modifier.padding(vertical = 8.dp),
+                                modifier = Modifier.padding(vertical = 2.dp),
                                 style =  TextStyle(
-                                    textDecoration = TextDecoration.None,
-                                    fontWeight = FontWeight.Normal,
+                                    textDecoration = if (mode == takeMode.value) { TextDecoration.Underline } else { TextDecoration.None },
+                                    fontWeight = if (mode == takeMode.value) { FontWeight.Bold } else { FontWeight.Normal },
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             )
@@ -118,7 +124,7 @@ fun TakeModeButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifi
                 OutlinedButton(
                     onClick = {
                         showDialog = false
-                        viewModel.onSelectPropertyDialogDismissed()
+                        controlModel.onSelectPropertyDialogDismissed()
                     }
                 ) {
                     Text(

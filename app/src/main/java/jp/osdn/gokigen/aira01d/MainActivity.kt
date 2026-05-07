@@ -18,12 +18,14 @@ import jp.osdn.gokigen.aira01d.preference.PreferenceValueInitializer
 import jp.osdn.gokigen.aira01d.ui.component.ViewRootComponent
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
+import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
 import jp.osdn.gokigen.aira01d.ui.theme.AirA01dTheme
 
 class MainActivity : ComponentActivity()
 {
     private val myLiveviewViewModel: LiveviewViewModel by viewModels()
     private val myCameraStatusViewModel: CameraStatusViewModel by viewModels()
+    private val mySelfTimerViewModel: SelfTimerViewModel by viewModels()
 
     // 権限リクエストのランチャーは、onCreateの直下（またはプロパティ初期化時）で登録する
     private val requestPermissionLauncher = registerForActivityResult(
@@ -56,12 +58,12 @@ class MainActivity : ComponentActivity()
             AppSingleton.cameraControl.initialize(myLiveviewViewModel)
             myLiveviewViewModel.initializeViewModel(applicationContext)
             myCameraStatusViewModel.initializeViewModel()
-
+            mySelfTimerViewModel.initializeViewModel()
         }
 
         // Composeのセットアップ
         val rootComponent = ViewRootComponent(applicationContext)
-        rootComponent.setViewModels(myLiveviewViewModel, myCameraStatusViewModel)
+        rootComponent.setViewModels(myLiveviewViewModel, myCameraStatusViewModel, mySelfTimerViewModel)
 
         setContent {
             AirA01dTheme {

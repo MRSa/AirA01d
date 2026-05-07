@@ -33,7 +33,7 @@ fun PictureEffectButton(viewModel: CameraStatusViewModel, modifier: Modifier = M
             .widthIn(min = 48.dp, max = 106.dp)
     ) {
         Text(
-            text = pictureEffect.value ?: "",
+            text = pictureEffect.value ?: "???",
             style = TextStyle(
                 textDecoration = TextDecoration.Underline,
                 fontWeight = FontWeight.Bold,

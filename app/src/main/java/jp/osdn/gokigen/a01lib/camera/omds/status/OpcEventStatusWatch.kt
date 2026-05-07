@@ -25,7 +25,7 @@ class OpcEventStatusWatch(
         {
             // OPC機のイベント受信
             val opcEventUrl = "$executeUrl/get_camprop.cgi?com=getlist"
-            val postData = "<?xml version=\"1.0\"?><get><prop name=\"AE\"/><prop name=\"APERTURE\"/><prop name=\"BATTERY_LEVEL\"/><prop name=\"COLORTONE\"/><prop name=\"EXPREV\"/><prop name=\"ISO\"/><prop name=\"RECENTLY_ART_FILTER\"/><prop name=\"SHUTTER\"/><prop name=\"TAKEMODE\"/><prop name=\"TAKE_DRIVE\"/><prop name=\"WB\"/><prop name=\"AE_LOCK_STATE\"/><prop name=\"AF_LOCK_STATE\"/></get>"
+            val postData = "<?xml version=\"1.0\"?><get><prop name=\"AE\"/><prop name=\"APERTURE\"/><prop name=\"BATTERY_LEVEL\"/><prop name=\"COLORTONE\"/><prop name=\"EXPREV\"/><prop name=\"ISO\"/><prop name=\"RECENTLY_ART_FILTER\"/><prop name=\"SHUTTER\"/><prop name=\"TAKEMODE\"/><prop name=\"TAKE_DRIVE\"/><prop name=\"WB\"/><prop name=\"AE_LOCK_STATE\"/><prop name=\"AF_LOCK_STATE\"/><prop name=\"RAW\"/><prop name=\"ASPECT_RATIO\"/></get>"
             val eventResponse = http.httpPostWithHeader(opcEventUrl, postData, headerMap, null,
                 TIMEOUT_MS
             ) ?: ""
@@ -54,6 +54,8 @@ class OpcEventStatusWatch(
             checkDriveMode(getPropertyValue(eventResponse, "<prop name=\"TAKE_DRIVE\">"))
             checkAeLockState(getPropertyValue(eventResponse, "<prop name=\"AE_LOCK_STATE\">"))
             checkAfLockState(getPropertyValue(eventResponse, "<prop name=\"AF_LOCK_STATE\">"))
+            checkRawMode(getPropertyValue(eventResponse, "<prop name=\"RAW\">"))
+            checkAspectRatio(getPropertyValue(eventResponse, "<prop name=\"ASPECT_RATIO\">"))
         }
         catch (e: Exception)
         {
@@ -107,6 +109,7 @@ class OpcEventStatusWatch(
         if (aeLockState != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.AeLockState] = aeLockState
+            statusProvider.updatedAeLockState(aeLockState)
         }
     }
 
@@ -116,6 +119,26 @@ class OpcEventStatusWatch(
         if (afLockState != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.AfLockState] = afLockState
+        }
+    }
+
+    private fun checkRawMode(rawMode: String)
+    {
+        val currentValue = this.currentStatuses[ICameraStatus.CameraProperty.RawMode] ?: ""
+        if (rawMode != currentValue)
+        {
+            currentStatuses[ICameraStatus.CameraProperty.RawMode] = rawMode
+            statusProvider.updatedRawMode(rawMode)
+        }
+    }
+
+    private fun checkAspectRatio(aspectRatio: String)
+    {
+        val currentValue = this.currentStatuses[ICameraStatus.CameraProperty.AspectRatio] ?: ""
+        if (aspectRatio != currentValue)
+        {
+            currentStatuses[ICameraStatus.CameraProperty.AspectRatio] = aspectRatio
+            statusProvider.updatedAspectRatio(aspectRatio)
         }
     }
 
@@ -170,6 +193,6 @@ class OpcEventStatusWatch(
         private val TAG = OpcEventStatusWatch::class.java.simpleName
 
         private const val TIMEOUT_MS = 2500
-        private const val DUMP_LOG = false
+        private const val DUMP_LOG = true
     }
 }

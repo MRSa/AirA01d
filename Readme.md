@@ -6,7 +6,7 @@ This document is written in Japanese.
 
 -----------
 
-AirA01 は、デジタルカメラ OLYMPUS AIR A01 にWi-Fi経由で接続し制御するアプリケーションです。
+AirA01d は、デジタルカメラ OLYMPUS AIR A01 にWi-Fi経由で接続し制御するアプリケーションです。
 
 詳細は、[操作説明のページ](https://github.com/MRSa/GokigenOSDN_documents/blob/main/Applications/AirA01d/Readme.md)を参照してください。
 

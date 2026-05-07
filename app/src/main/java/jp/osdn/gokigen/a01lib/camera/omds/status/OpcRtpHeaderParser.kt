@@ -193,7 +193,7 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
             return
         }
         val exposureWarningValue = ((((buffer[position + 4].toUInt()).toInt() and 0xff) * 16777216)) + (((buffer[position + 5].toUInt()).toInt() and 0xff) * 65536) + (((buffer[position + 6].toUInt()).toInt() and 0xff) * 256) + ((buffer[position + 7].toUInt()).toInt() and 0x00ff)
-        val exposureWarning = if (exposureWarningValue != 0) { "Exp.WARN" } else { "" }
+        val exposureWarning = if (exposureWarningValue != 0) { "Exp.WARN" } else { " " }
         statusProvider.updateExposureWarning(exposureWarning)
     }
 

@@ -22,6 +22,13 @@ class PreferenceValueInitializer
                         IPreferencePropertyAccessor.PREFERENCE_CAMERA_METHOD_INDEX_DEFAULT_VALUE
                     )
                 }
+
+                if (!items.containsKey(IPreferencePropertyAccessor.PREFERENCE_CAMERA_CONNECT_AUTOMATICALLY)) {
+                    putString(
+                        IPreferencePropertyAccessor.PREFERENCE_CAMERA_CONNECT_AUTOMATICALLY,
+                        IPreferencePropertyAccessor.PREFERENCE_CAMERA_CONNECT_AUTOMATICALLY_DEFAULT_VALUE
+                    )
+                }
             }
         }
         catch (e: Exception)

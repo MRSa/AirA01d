@@ -11,13 +11,11 @@ class AppSingleton : Application()
         super.onCreate()
         Log.v(TAG, "AppSingleton::create()")
         cameraControl = OmdsCameraControlSingleton()
-        //vibrator = MyVibrator()
     }
 
     companion object
     {
         private val TAG = AppSingleton::class.java.simpleName
         lateinit var cameraControl: OmdsCameraControlSingleton
-        //lateinit var vibrator: MyVibrator
     }
 }

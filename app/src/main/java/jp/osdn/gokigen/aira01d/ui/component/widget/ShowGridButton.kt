@@ -24,8 +24,8 @@ fun ShowGridButton(viewModel: LiveviewViewModel, modifier: Modifier = Modifier)
     val isLvActivated = viewModel.isLvActivated.observeAsState()
 
     // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId = if (isGridOn.value == true) { R.drawable.outline_grid_off_24 } else { R.drawable.outline_grid_on_24 }
-    val iconColor = if (isLvActivated.value == true) { MaterialTheme.colorScheme.primary } else { MaterialTheme.colorScheme.onSurfaceVariant }
+    val iconId = if (isGridOn.value == true) { R.drawable.outline_grid_on_24 } else { R.drawable.outline_grid_off_24 }
+    val iconColor = MaterialTheme.colorScheme.primary
 
     // ----- ボタンの表示
     IconButton(

@@ -1,6 +1,5 @@
 package jp.osdn.gokigen.a01lib.camera.omds.operation
 
-import android.util.Log
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.lang.Exception
@@ -13,7 +12,7 @@ class OmdsGetRecordImage(userAgent: String = "OlympusCameraKit", private val exe
 
     override fun getCapturedImage(isLastJpeg: Boolean, callback: IGetRecordImage.RecordImageCallback)
     {
-        // Log.v(TAG, "getCapturedImage()")
+        // ----- 撮影した画像をカメラに要求する （画像を取得しないと先に進まない様子...）
         try
         {
             val thread = Thread {
@@ -68,7 +67,6 @@ class OmdsGetRecordImage(userAgent: String = "OlympusCameraKit", private val exe
 
     companion object
     {
-        private val TAG = OmdsGetRecordImage::class.java.simpleName
         private const val TIMEOUT_MS = 3000
     }
 

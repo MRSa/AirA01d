@@ -9,8 +9,6 @@ import java.util.*
 import kotlin.math.floor
 
 class OmdsAutoFocusControl(
-    //private val frameDisplayer: IAutoFocusFrameDisplay,
-    //private val indicator: IIndicatorControl,
     userAgent: String = "OlympusCameraKit",
     private val executeUrl : String = "http://192.168.0.10",
     private val useOpcProtocol : Boolean = true

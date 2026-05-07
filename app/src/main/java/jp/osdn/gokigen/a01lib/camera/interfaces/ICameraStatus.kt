@@ -15,6 +15,8 @@ interface ICameraStatus
         DriveMode,       // ドライブモード（単写/連写)
         AfLockState,     // AFロック状態
         AeLockState,     // AEロック状態
+        RawMode,         // RAW撮影モード
+        AspectRatio,     // アスペクト比
         MeteringMode,    // 測光モード
         CaptureMode,     // キャプチャーモード
         BatteryRemain,   // バッテリ残量

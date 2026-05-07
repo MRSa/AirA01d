@@ -18,13 +18,14 @@ import androidx.navigation.NavHostController
 import jp.osdn.gokigen.aira01d.ui.component.widget.AFLockUnlockButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.ApertureButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.ExposureCompensationButton
-import jp.osdn.gokigen.aira01d.ui.component.widget.ExposureWarningText
+import jp.osdn.gokigen.aira01d.ui.component.widget.InformationArea1
 import jp.osdn.gokigen.aira01d.ui.component.widget.FocusModeButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.IsoSensitivityButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.connect.ConnectButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.drawer.LiveviewWidget
 import jp.osdn.gokigen.aira01d.ui.component.widget.MirrorImageButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.PictureEffectButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.SelfTimerButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.connect.PowerOffButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.ShowGridButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.ShutterButton
@@ -34,14 +35,20 @@ import jp.osdn.gokigen.aira01d.ui.component.widget.WhiteBalanceButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.connect.WifiConfigButton
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
+import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
 
 @Composable
-fun LiveviewScreenLandscape(navController: NavHostController, liveviewModel: LiveviewViewModel, cameraStatusViewModel: CameraStatusViewModel)
+fun LiveviewScreenLandscape(
+    navController: NavHostController,
+    liveviewModel: LiveviewViewModel,
+    cameraStatusViewModel: CameraStatusViewModel,
+    selfTimerViewModel: SelfTimerViewModel
+)
 {
     Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         // 上部：ステータス/設定ボタン群
         Row(modifier = Modifier.fillMaxWidth().height(50.dp)) {
-            TakeModeButton(cameraStatusViewModel)
+            TakeModeButton(liveviewModel, cameraStatusViewModel)
             ShutterSpeedButton(cameraStatusViewModel)
             ApertureButton(cameraStatusViewModel)
             IsoSensitivityButton(cameraStatusViewModel)
@@ -59,18 +66,19 @@ fun LiveviewScreenLandscape(navController: NavHostController, liveviewModel: Liv
 
             // 中央：メインライブビュー
             Box(modifier = Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
-                LiveviewWidget(liveviewModel, Modifier.fillMaxWidth())
+                LiveviewWidget(liveviewModel, selfTimerViewModel, Modifier.fillMaxWidth())
             }
 
             // 右側：シャッター・アイコン群
             Column(modifier = Modifier.width(110.dp).fillMaxHeight()) {
                 AFLockUnlockButton(liveviewModel)
+                SelfTimerButton(selfTimerViewModel, liveviewModel)
                 MirrorImageButton(liveviewModel)
                 ShowGridButton(liveviewModel)
-                ShutterButton(liveviewModel, cameraStatusViewModel)
+                ShutterButton(liveviewModel, cameraStatusViewModel, selfTimerViewModel)
                 FocusModeButton(cameraStatusViewModel)
                 ExposureCompensationButton(cameraStatusViewModel)
-                ExposureWarningText(cameraStatusViewModel)
+                InformationArea1(cameraStatusViewModel)
             }
         }
     }

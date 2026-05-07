@@ -25,7 +25,7 @@ fun MirrorImageButton(viewModel: LiveviewViewModel, modifier: Modifier = Modifie
 
     // ----- ステータスに合わせてアイコンをと色を決める
     val iconId = if (isMirrorMode.value == true) { R.drawable.outline_flip_camera_ios_24 } else { R.drawable.outline_photo_camera_24 }
-    val iconColor = if (isLvActivated.value == true) { MaterialTheme.colorScheme.primary } else { MaterialTheme.colorScheme.onSurfaceVariant }
+    val iconColor = if (isMirrorMode.value == true) { MaterialTheme.colorScheme.onSurfaceVariant } else { MaterialTheme.colorScheme.primary }
 
     // ----- ボタンの表示
     IconButton(

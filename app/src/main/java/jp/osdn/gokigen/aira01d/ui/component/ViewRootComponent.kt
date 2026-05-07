@@ -16,16 +16,22 @@ import androidx.navigation.compose.rememberNavController
 import jp.osdn.gokigen.aira01d.ui.component.screen.LiveviewScreen
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
+import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
 
 class ViewRootComponent @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : AbstractComposeView(context, attrs, defStyleAttr)
 {
     private lateinit var myLiveviewViewModel : LiveviewViewModel
     private lateinit var myCameraStatusViewModel: CameraStatusViewModel
+    private lateinit var mySelfTimerViewModel: SelfTimerViewModel
 
-    fun setViewModels(liveViewModel : LiveviewViewModel, cameraStatusViewModel: CameraStatusViewModel)
-    {
+    fun setViewModels(
+        liveViewModel : LiveviewViewModel,
+        cameraStatusViewModel: CameraStatusViewModel,
+        selfTimerViewModel: SelfTimerViewModel
+    ) {
         this.myLiveviewViewModel = liveViewModel
         this.myCameraStatusViewModel = cameraStatusViewModel
+        this.mySelfTimerViewModel = selfTimerViewModel
         Log.v(TAG, " ...setViewModels...")
     }
 
@@ -37,7 +43,9 @@ class ViewRootComponent @JvmOverloads constructor(context: Context, attrs: Attri
             NavigationMain(
                 navController = navController,
                 liveViewModel = this.myLiveviewViewModel,
-                cameraStatusViewModel = this.myCameraStatusViewModel)
+                cameraStatusViewModel = this.myCameraStatusViewModel,
+                selfTimerViewModel = mySelfTimerViewModel
+            )
         }
         Log.v(TAG, " ...NavigationRootComponent...")
     }
@@ -52,7 +60,8 @@ class ViewRootComponent @JvmOverloads constructor(context: Context, attrs: Attri
 fun NavigationMain(
     navController: NavHostController,
     liveViewModel : LiveviewViewModel,
-    cameraStatusViewModel: CameraStatusViewModel
+    cameraStatusViewModel: CameraStatusViewModel,
+    selfTimerViewModel: SelfTimerViewModel
 )
 {
     MaterialTheme {
@@ -65,7 +74,8 @@ fun NavigationMain(
                 LiveviewScreen(
                     navController = navController,
                     liveviewModel = liveViewModel,
-                    cameraStatusViewModel = cameraStatusViewModel
+                    cameraStatusViewModel = cameraStatusViewModel,
+                    selfTimerViewModel = selfTimerViewModel
                 )
             }
         }

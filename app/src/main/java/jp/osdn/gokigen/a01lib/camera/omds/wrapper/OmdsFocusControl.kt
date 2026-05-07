@@ -30,7 +30,6 @@ class OmdsFocusControl : IFocusingControl
         try
         {
             afControl.unlockAutoFocus()
-            //frameDisplay.hideFocusFrame()
         }
         catch (e: Exception)
         {

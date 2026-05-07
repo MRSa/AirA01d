@@ -27,10 +27,10 @@ fun AFLockUnlockButton(viewModel: LiveviewViewModel, modifier: Modifier = Modifi
     val (iconId, iconColor) = when (focusFrameStatus.value) {
         LiveviewViewModel.FocusFrameStatus.Focused ->
             // ----- フォーカスロック中
-            R.drawable.outline_filter_center_focus_24 to Color.Green
+            R.drawable.outline_reset_focus_24 to MaterialTheme.colorScheme.onSurfaceVariant
         else ->
             // ----- フォーカスなし
-            R.drawable.outline_filter_center_focus_24 to MaterialTheme.colorScheme.onSurfaceVariant
+            R.drawable.outline_filter_center_focus_24 to MaterialTheme.colorScheme.primary
     }
 
     // ----- ボタンの表示

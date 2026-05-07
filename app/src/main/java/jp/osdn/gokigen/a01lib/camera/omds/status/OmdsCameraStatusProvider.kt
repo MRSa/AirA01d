@@ -59,26 +59,44 @@ class OmdsCameraStatusProvider : ICameraStatusUpdateNotify
     }
 
     // ----- 露出警告
-    private var currentExposureWarning = ""
+    private var currentExposureWarning = " "
     override fun updateExposureWarning(exposureWarning: String) {
-        currentExposureWarning = notifyIfChanged(currentExposureWarning, exposureWarning) { it.updateFocusMode(exposureWarning) }
+        currentExposureWarning = notifyIfChanged(currentExposureWarning, exposureWarning) { it.updateExposureWarning(exposureWarning) }
     }
 
     // ----- ドライブモード
     private var currentDriveMode = ""
     override fun updateDriveMode(driveMode: String) {
-        currentDriveMode = notifyIfChanged(currentDriveMode, driveMode) { it.updateFocusMode(driveMode) }
+        currentDriveMode = notifyIfChanged(currentDriveMode, driveMode) { it.updateDriveMode(driveMode) }
     }
 
     // ----- ピクチャーモード
     private var currentPictureEffect = ""
     override fun updatePictureEffect(pictureEffect: String) {
-        currentPictureEffect = notifyIfChanged(currentPictureEffect, pictureEffect) { it.updateFocusMode(pictureEffect) }
+        currentPictureEffect = notifyIfChanged(currentPictureEffect, pictureEffect) { it.updatePictureEffect(pictureEffect) }
     }
 
     // ----- ホワイトバランス
     private var currentWhiteBalance = ""
     override fun updatedWhiteBalance(whiteBalance: String) {
-        currentWhiteBalance = notifyIfChanged(currentWhiteBalance, whiteBalance) { it.updateFocusMode(whiteBalance) }
+        currentWhiteBalance = notifyIfChanged(currentWhiteBalance, whiteBalance) { it.updatedWhiteBalance(whiteBalance) }
+    }
+
+    // ----- RAWモード
+    private var currentRawMode = ""
+    override fun updatedRawMode(rawMode: String) {
+        currentRawMode = notifyIfChanged(currentRawMode, rawMode) { it.updatedRawMode(rawMode) }
+    }
+
+    // ----- アスペクト比
+    private var currentAspectRatio = ""
+    override fun updatedAspectRatio(aspectRatio: String) {
+        currentAspectRatio = notifyIfChanged(currentAspectRatio, aspectRatio) { it.updatedAspectRatio(aspectRatio) }
+    }
+
+    // ----- AEロック状態
+    private var currentAeLockState = ""
+    override fun updatedAeLockState(aeLockState: String) {
+        currentAeLockState = notifyIfChanged(currentAeLockState, aeLockState) { it.updatedAeLockState(aeLockState) }
     }
 }

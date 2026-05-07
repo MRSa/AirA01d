@@ -12,7 +12,11 @@ interface ICameraStatusUpdateNotify
     fun updateDriveMode(driveMode: String)
     fun updatePictureEffect(pictureEffect: String)
     fun updatedWhiteBalance(whiteBalance: String)
+    fun updatedRawMode(rawMode: String)
+    fun updatedAspectRatio(aspectRatio: String)
+    fun updatedAeLockState(aeLockState: String)
 
+    // fun updatedAfLockState(afLockState: String)
     //fun updatedMeteringMode(meteringMode: String?)
     //fun updateRemainBattery(percentage: Int)
 

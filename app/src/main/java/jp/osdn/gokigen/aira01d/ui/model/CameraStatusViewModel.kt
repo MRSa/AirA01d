@@ -62,6 +62,15 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     private val _exposureWarning : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val exposureWarning : LiveData<String> = _exposureWarning
 
+    private val _rawMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val rawMode : LiveData<String> = _rawMode
+
+    private val _aspectRatio : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val aspectRatio : LiveData<String> = _aspectRatio
+
+    private val _aeLockState : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val aeLockState : LiveData<String> = _aeLockState
+
     var propertyList by mutableStateOf<List<String>>(emptyList())
         private set
 
@@ -194,6 +203,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     }
 
     override fun updatePictureEffect(pictureEffect: String) {
+        Log.v(TAG, "PICTURE EFFECT: $pictureEffect")
         if ((pictureEffect.isNotEmpty())&&(_pictureEffect.value != pictureEffect))
         {
             _pictureEffect.postValue(pictureEffect)
@@ -204,6 +214,29 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         if ((whiteBalance.isNotEmpty())&&(_wb.value != whiteBalance))
         {
             _wb.postValue(whiteBalance)
+        }
+    }
+
+    override fun updatedRawMode(rawMode: String) {
+        Log.v(TAG, "RAW MODE: $rawMode")
+        if ((rawMode.isNotEmpty())&&(_rawMode.value != rawMode))
+        {
+            _rawMode.postValue(rawMode)
+        }
+    }
+
+    override fun updatedAspectRatio(aspectRatio: String) {
+        Log.v(TAG, "ASPECT RATIO: $aspectRatio")
+        if ((aspectRatio.isNotEmpty())&&(_aspectRatio.value != aspectRatio))
+        {
+            _aspectRatio.postValue(aspectRatio)
+        }
+    }
+
+    override fun updatedAeLockState(aeLockState: String) {
+        if ((aeLockState.isNotEmpty())&&(_aeLockState.value != aeLockState))
+        {
+            _aeLockState.postValue(aeLockState)
         }
     }
 

@@ -55,4 +55,5 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.ui.graphics)
 }
