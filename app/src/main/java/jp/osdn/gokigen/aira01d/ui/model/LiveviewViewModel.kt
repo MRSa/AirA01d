@@ -19,11 +19,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IGetRecordImage.RecordImageCallback
 {
     private val _liveViewBitmap = MutableStateFlow<Bitmap?>(null)
     val liveViewBitmap: StateFlow<Bitmap?> = _liveViewBitmap.asStateFlow()
+
+    private val _lastCapturedImage = MutableStateFlow<Bitmap?>(null)
+    val lastCapturedImage: StateFlow<Bitmap?> = _lastCapturedImage.asStateFlow()
 
     private val _receiveCount : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
     val receiveCount : LiveData<Int> = _receiveCount
@@ -72,6 +76,18 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
                     // 既存の Bitmap があれば解放し、読み込んだ初期データをセットする
                     _liveViewBitmap.value?.recycle()
                     _liveViewBitmap.value = dummyBitmap
+                }
+                // リソースからビットマップデータを生成する
+                val lastImageBitmap = BitmapFactory.decodeResource(
+                    context.resources,
+                    jp.osdn.gokigen.aira01d.R.drawable.outline_image_24,
+                    options
+                )
+                if (lastImageBitmap != null)
+                {
+                    // 既存の Bitmap があれば解放し、読み込んだ初期データをセットする
+                    _lastCapturedImage.value?.recycle()
+                    _lastCapturedImage.value = lastImageBitmap
                 }
             }
             _receiveCount.postValue(0)
@@ -228,6 +244,7 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
     {
         super.onCleared()
         _liveViewBitmap.value = null
+        _lastCapturedImage.value = null
         _receiveCount.postValue(0)
         _isMirrorMode.postValue(false)
         _isLvActivated.postValue(false)
@@ -344,9 +361,28 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
         return frame
     }
 
-    override fun receivedRecordImage(isLastJpeg: Boolean, receivedContent: String)
+    override fun receivedRecordImage(isLastJpeg: Boolean, receivedContent: ByteArray?)
     {
-        Log.v(TAG, "receivedRecordImage() : length: ${receivedContent.length}")
+        Log.v(TAG, "receivedRecordImage() : length: ${receivedContent?.size}")
+        viewModelScope.launch {
+            val bitmap = if (receivedContent != null) {
+                // 重いデコード処理を Default ディスパッチャ（バックグラウンド）で実行
+                withContext(Dispatchers.Default) {
+                    try {
+                        BitmapFactory.decodeByteArray(receivedContent, 0, receivedContent.size)
+                    }
+                    catch (e: Exception)
+                    {
+                        Log.e(TAG, "Error decoding bitmap", e)
+                        null
+                    }
+                }
+            } else {
+                null
+            }
+            // StateFlow の更新（メインスレッドで安全に実行される）
+            _lastCapturedImage.value = bitmap
+        }
     }
 
     private enum class CameraEvent {

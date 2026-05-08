@@ -11,7 +11,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
@@ -34,9 +33,9 @@ fun AELockStateButton(
     val iconId =
         when (aeLockState.value)
         {
-            "UNLOCK" -> R.drawable.str_ae_l
-            "LOCK" -> R.drawable.str_ae_l
-            else -> R.drawable.outline_indeterminate_question_box_24
+            "UNLOCK" -> R.drawable.ae_unlock
+            "LOCK" -> R.drawable.ae_lock
+            else -> R.drawable.ae_unlock
         }
     val iconColor = if (isLvActivated.value == true) {
         when (aeLockState.value)
@@ -52,10 +51,10 @@ fun AELockStateButton(
     // ----- ボタンの表示
     IconButton(
         onClick = {
-            // ----- コマンド実行
+            // ----- AE Lock / Unlock コマンド実行
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            val command = if (aeLockState.value == "UNLOCK") { "LOCK" } else { "UNLOCK" }
-            controlModel.setProperty(ICameraStatus.CameraProperty.AeLockState, command)
+            val command = (aeLockState.value == "UNLOCK")
+            controlModel.changeAELockState(command)
         },
         modifier = modifier.size(48.dp)
     ) {
@@ -63,6 +62,7 @@ fun AELockStateButton(
             painter = painterResource(iconId),
             contentDescription = "AE lock",
             tint = iconColor,
+            modifier = Modifier.size(42.dp)
         )
     }
 }

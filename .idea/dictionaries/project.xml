@@ -18,6 +18,7 @@
       <w>desclist</w>
       <w>drivemode</w>
       <w>electriczoom</w>
+      <w>execaelock</w>
       <w>expcomp</w>
       <w>exprev</w>
       <w>focallength</w>
@@ -33,7 +34,9 @@
       <w>macrosetting</w>
       <w>newassignafframe</w>
       <w>newctrlzoom</w>
+      <w>newexecaelock</w>
       <w>newexecaflock</w>
+      <w>newreleaseaelock</w>
       <w>newreleaseafframe</w>
       <w>newreleaseaflock</w>
       <w>newstarttake</w>
@@ -42,6 +45,7 @@
       <w>propname</w>
       <w>pushevent</w>
       <w>pwoff</w>
+      <w>releaseaelock</w>
       <w>releaseafframe</w>
       <w>shutspeedvalue</w>
       <w>startliveview</w>

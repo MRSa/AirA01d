@@ -111,7 +111,7 @@ fun LiveviewScreenPortrait(
 
             // --- 撮影画像、シャッター、そして露出補正、鏡像表示、セルフタイマー
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                RecordImageButton(navController, cameraStatusViewModel, Modifier.weight(1f).height(80.dp))
+                RecordImageButton(navController, liveviewModel, cameraStatusViewModel, Modifier.weight(1f).height(80.dp))
                 ShutterButton(liveviewModel, cameraStatusViewModel, selfTimerViewModel, Modifier.weight(1f).height(80.dp).padding(horizontal = 4.dp))
                 Column(Modifier.weight(1f)) {
                     ExposureCompensationButton(liveviewModel, cameraStatusViewModel, Modifier.fillMaxWidth())

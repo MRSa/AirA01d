@@ -4,7 +4,7 @@ interface IGetRecordImage
 {
     interface RecordImageCallback
     {
-        fun receivedRecordImage(isLastJpeg: Boolean, receivedContent: String)
+        fun receivedRecordImage(isLastJpeg: Boolean, receivedContent: ByteArray?)
     }
     fun getCapturedImage(isLastJpeg: Boolean, callback: RecordImageCallback)
 

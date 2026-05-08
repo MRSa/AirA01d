@@ -159,6 +159,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     }
 
     override fun getSubscribeId(): String { return ("CameraStatusViewModel") }
+
     override fun receivedCameraEvent(eventMessage: ByteArray)
     {
         // ----- カメラのステータスが変化したときの処理
@@ -405,6 +406,27 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             try
             {
                 AppSingleton.cameraControl.getCaptureControl().doCapture(captureAction)
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun changeAELockState(isLock: Boolean)
+    {
+        CoroutineScope(Dispatchers.IO).launch {
+            try
+            {
+                if (isLock)
+                {
+                    AppSingleton.cameraControl.getFocusingControl().lockAutoExposure()
+                }
+                else
+                {
+                    AppSingleton.cameraControl.getFocusingControl().unlockAutoExposure()
+                }
             }
             catch (e: Exception)
             {

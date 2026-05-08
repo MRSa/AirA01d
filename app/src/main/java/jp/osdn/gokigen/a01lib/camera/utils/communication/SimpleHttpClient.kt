@@ -101,7 +101,10 @@ class SimpleHttpClient
         callback: IReceivedMessageCallback
     ) {
         var conn: HttpURLConnection? = null
-        try {
+        var isFinished = false // 二重呼び出し防止フラグ
+
+        try
+        {
             conn = setupConnection(url, requestMethod, setProperty, contentType, timeoutMs, postData)
             val responseCode = conn.responseCode
 
@@ -120,17 +123,31 @@ class SimpleHttpClient
                 while (true) {
                     val readSize = input.read(buffer)
                     if (readSize == -1) break
-                    callback.onReceive(totalReadBytes, contentLength, readSize, buffer)
+
+                    // 受信した分だけをコピーして渡す（参照による上書き防止）
+                    val currentChunk = buffer.copyOf(readSize)
+
+                    callback.onReceive(totalReadBytes, contentLength, readSize, currentChunk)
                     totalReadBytes += readSize
                 }
             }
             callback.onCompleted()
-        } catch (e: Exception) {
+            isFinished = true // 正常完了
+        }
+        catch (e: Exception)
+        {
             Log.w(TAG, "HTTP Bytes Exception: $url", e)
             callback.onErrorOccurred(e)
-        } finally {
+            isFinished = true // エラーとして終了
+        }
+        finally
+        {
             conn?.disconnect()
-            callback.onCompleted() // 二重呼び出し防止のためfinallyで
+            // --- try/catch 内でonCompletedが呼ばれなかった場合のみonCompletedを呼ぶ
+            if (!isFinished)
+            {
+                callback.onCompleted()
+            }
         }
     }
 
@@ -173,8 +190,8 @@ class SimpleHttpClient
     fun httpPutWithHeader(url: String, putData: String?, headerMap: Map<String, String>?, contentType: String?, timeoutMs: Int) =
         httpCommand(url, "PUT", putData, headerMap, contentType, timeoutMs)
 
-    fun httpGetBytes(url: String, setProperty: Map<String, String>?, timeoutMs: Int, callback: IReceivedMessageCallback) =
-        httpCommandBytes(url, "GET", null, setProperty, null, timeoutMs, callback)
+    fun httpGetBytes(url: String, headerMap: Map<String, String>?, timeoutMs: Int, contentType: String?, callback: IReceivedMessageCallback) =
+        httpCommandBytes(url, "GET", null, headerMap, contentType, timeoutMs, callback)
 
     fun httpGetBitmap(url: String, setProperty: Map<String, String>?, timeoutMs: Int) =
         httpCommandBitmap(url, "GET", null, setProperty, null, timeoutMs)

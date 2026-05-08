@@ -108,7 +108,7 @@ fun LiveviewScreenLandscape(
                     WifiConfigButton(liveviewModel)
                     CameraPropertyListButton(navController, cameraStatusViewModel)
                 }
-                RecordImageButton(navController, cameraStatusViewModel, Modifier.weight(2f).height(80.dp))
+                RecordImageButton(navController, liveviewModel, cameraStatusViewModel, Modifier.weight(2f).height(80.dp))
             }
 
             Row {
