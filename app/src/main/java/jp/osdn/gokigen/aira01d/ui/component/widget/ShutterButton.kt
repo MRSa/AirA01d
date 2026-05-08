@@ -48,7 +48,7 @@ fun ShutterButton(
             }
             else
             {
-                if (isTimerActivated == true)
+                if (isTimerActivated)
                 {
                     // ----- セルフタイマー稼働中の時は、カウントダウンを止める
                     selfTimerModel.abortSelfTimer()
@@ -66,7 +66,8 @@ fun ShutterButton(
         Icon(
             painter = painterResource(iconId),
             contentDescription = "camera shutter",
-            tint = iconColor
+            tint = iconColor,
+            modifier = Modifier.size(90.dp)
         )
     }
 }

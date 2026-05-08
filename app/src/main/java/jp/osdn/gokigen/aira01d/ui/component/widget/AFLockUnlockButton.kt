@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -30,7 +29,7 @@ fun AFLockUnlockButton(viewModel: LiveviewViewModel, modifier: Modifier = Modifi
             R.drawable.outline_reset_focus_24 to MaterialTheme.colorScheme.onSurfaceVariant
         else ->
             // ----- フォーカスなし
-            R.drawable.outline_filter_center_focus_24 to MaterialTheme.colorScheme.primary
+            R.drawable.outline_center_focus_weak_24 to MaterialTheme.colorScheme.primary
     }
 
     // ----- ボタンの表示

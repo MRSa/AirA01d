@@ -8,18 +8,21 @@ interface ICameraStatus
         ShutterSpeed,  // シャッタースピード
         Aperture,      // 絞り値
         ExposureCompensation,  // 露出補正値
+
         IsoSensitivity,  // ISO感度
         WhiteBalance,    // ホワイトバランス
         PictureEffect,   // ピクチャーエフェクト（フォトスタイル）
         FocusMode,     // フォーカス状態 (SAF/CAF/MF)
+
         DriveMode,       // ドライブモード（単写/連写)
         AfLockState,     // AFロック状態
         AeLockState,     // AEロック状態
         RawMode,         // RAW撮影モード
+
         AspectRatio,     // アスペクト比
+        BatteryRemain,   // バッテリ残量
         MeteringMode,    // 測光モード
         CaptureMode,     // キャプチャーモード
-        BatteryRemain,   // バッテリ残量
         TorchMode,       // トーチモード
         FocalLength,     // 焦点距離
         RemainShots,     // 残り撮影枚数

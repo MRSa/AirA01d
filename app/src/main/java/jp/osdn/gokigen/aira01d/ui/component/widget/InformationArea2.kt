@@ -14,10 +14,21 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 
-
 @Composable
 fun InformationArea2(viewModel: CameraStatusViewModel, modifier: Modifier = Modifier)
 {
+    // ----- ステータスを監視する
+    val cameraInformation = viewModel.cameraInformation.observeAsState()
+    val informationLevel = viewModel.cameraInformationLevel.observeAsState()
+
+    // ----- 表示文字の装飾
+    val informationLevelValue = informationLevel.value ?: 10
+    val fontWeight = if (informationLevelValue > 2) { FontWeight.Normal } else { FontWeight.Bold }
+    val textColor =
+        if (informationLevelValue > 5 ) { MaterialTheme.colorScheme.primary }
+        else if (informationLevelValue > 3 ) { MaterialTheme.colorScheme.tertiary }
+        else { MaterialTheme.colorScheme.error }
+
     // ----- ボタンの表示
     TextButton(
         onClick = { },
@@ -26,11 +37,11 @@ fun InformationArea2(viewModel: CameraStatusViewModel, modifier: Modifier = Modi
             .widthIn(min = 48.dp, max = 106.dp)
     ) {
         Text(
-            text = "???",
+            text = cameraInformation.value ?: "",
             style = TextStyle(
                 textDecoration = TextDecoration.None,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.tertiary
+                fontWeight = fontWeight,
+                color = textColor
             )
         )
     }

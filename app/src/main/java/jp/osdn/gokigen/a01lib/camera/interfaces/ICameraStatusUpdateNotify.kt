@@ -15,9 +15,11 @@ interface ICameraStatusUpdateNotify
     fun updatedRawMode(rawMode: String)
     fun updatedAspectRatio(aspectRatio: String)
     fun updatedAeLockState(aeLockState: String)
+    fun updateRemainBattery(batteryLevel: String)
+    fun updatedMeteringMode(meteringMode: String)
 
     // fun updatedAfLockState(afLockState: String)
-    //fun updatedMeteringMode(meteringMode: String?)
+
     //fun updateRemainBattery(percentage: Int)
 
     //fun updateStorageStatus(status: String?)

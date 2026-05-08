@@ -11,14 +11,13 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 
 
 @Composable
-fun AELockStateButton(
+fun LiveviewMagnifyButton(
     viewModel: LiveviewViewModel,
     controlModel: CameraStatusViewModel,
     modifier: Modifier = Modifier
@@ -28,41 +27,43 @@ fun AELockStateButton(
 
     // ----- ステータスを監視する
     val isLvActivated = viewModel.isLvActivated.observeAsState()
-    val aeLockState = controlModel.aeLockState.observeAsState()
+    val lvMagnifySize = controlModel.liveViewMagnifySize.observeAsState()
 
     // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId =
-        when (aeLockState.value)
-        {
-            "UNLOCK" -> R.drawable.str_ae_l
-            "LOCK" -> R.drawable.str_ae_l
-            else -> R.drawable.outline_indeterminate_question_box_24
-        }
-    val iconColor = if (isLvActivated.value == true) {
-        when (aeLockState.value)
-        {
-            "UNLOCK" -> MaterialTheme.colorScheme.primary
-            "LOCK" ->MaterialTheme.colorScheme.tertiary
-            else -> MaterialTheme.colorScheme.onSurfaceVariant
-        }
-    } else {
-        MaterialTheme.colorScheme.primary
+    val iconId = when (lvMagnifySize.value)
+    {
+        5 -> R.drawable.times_5
+        7 -> R.drawable.times_7
+        10 -> R.drawable.times_10
+        14 -> R.drawable.times_14
+        else -> R.drawable.outline_zoom_in_24
+    }
+    val iconColor = when (lvMagnifySize.value)
+    {
+        5 -> MaterialTheme.colorScheme.tertiary
+        7 -> MaterialTheme.colorScheme.tertiary
+        10 -> MaterialTheme.colorScheme.tertiary
+        14 -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.primary
     }
 
     // ----- ボタンの表示
     IconButton(
         onClick = {
-            // ----- コマンド実行
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            val command = if (aeLockState.value == "UNLOCK") { "LOCK" } else { "UNLOCK" }
-            controlModel.setProperty(ICameraStatus.CameraProperty.AeLockState, command)
+            if (isLvActivated.value == true)
+            {
+                // ----- ライブビュー表示時、ライブビューの拡大を実行
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                controlModel.changeLiveviewScale()
+            }
         },
         modifier = modifier.size(48.dp)
     ) {
         Icon(
             painter = painterResource(iconId),
-            contentDescription = "AE lock",
-            tint = iconColor,
+            contentDescription = "liveview zoom",
+            tint = iconColor
         )
     }
+
 }

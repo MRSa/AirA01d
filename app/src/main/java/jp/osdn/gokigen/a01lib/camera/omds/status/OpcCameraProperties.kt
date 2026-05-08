@@ -28,7 +28,13 @@ class OpcCameraProperties(
                 CameraProperty.WhiteBalance -> sendSetPropertyRequest("WB", value)
                 CameraProperty.PictureEffect -> sendSetPropertyRequest("COLORTONE", value)
                 CameraProperty.DriveMode -> sendSetPropertyRequest("TAKE_DRIVE", value)
-                else -> { }
+                CameraProperty.RawMode -> sendSetPropertyRequest("RAW", value)
+                CameraProperty.AspectRatio -> sendSetPropertyRequest("ASPECT_RATIO", value)
+                CameraProperty.MeteringMode -> sendSetPropertyRequest("AE", value)
+                CameraProperty.AfLockState -> sendSetPropertyRequest("AF_LOCK_STATE", value)
+                CameraProperty.AeLockState -> sendSetPropertyRequest("AE_LOCK_STATE", value)
+                CameraProperty.BatteryRemain -> sendSetPropertyRequest("BATTERY_LEVEL", value)
+                else -> { Log.v(TAG, " Not support Property key(SET) : $key") }
             }
         }
         catch (e: Exception)
@@ -52,6 +58,12 @@ class OpcCameraProperties(
                 CameraProperty.WhiteBalance -> "WB"
                 CameraProperty.PictureEffect -> "COLORTONE"
                 CameraProperty.DriveMode -> "TAKE_DRIVE"
+                CameraProperty.RawMode -> "RAW"
+                CameraProperty.AspectRatio -> "ASPECT_RATIO"
+                CameraProperty.MeteringMode -> "AE"
+                CameraProperty.AfLockState -> "AF_LOCK_STATE"
+                CameraProperty.AeLockState -> "AE_LOCK_STATE"
+                CameraProperty.BatteryRemain -> "BATTERY_LEVEL"
                 else -> ""
             }
             if (propertyKey.isNotEmpty())
@@ -59,7 +71,7 @@ class OpcCameraProperties(
                 val response = sendGetPropertyDescriptionRequest(propertyKey)
                 return (getPropertySelectionList(response, propertyKey))
             }
-            Log.v(TAG, " Not support Property key : $key")
+            Log.v(TAG, " Not support Property key(GET) : $key")
         }
         catch (e: Exception)
         {
@@ -147,9 +159,7 @@ class OpcCameraProperties(
     companion object
     {
         private val TAG = OpcCameraProperties::class.java.simpleName
-
         private const val TIMEOUT_MS = 2500
-
         private const val DUMP_LOG = false
     }
 }

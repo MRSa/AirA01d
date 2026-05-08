@@ -2,6 +2,7 @@ package jp.osdn.gokigen.aira01d.ui.model
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -31,6 +32,15 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
 
     private val _isConnectError : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
     val isConnectError : LiveData<Boolean> = _isConnectError
+
+    private val _cameraInformation : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val cameraInformation : LiveData<String> = _cameraInformation
+
+    private val _cameraInformationLevel : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val cameraInformationLevel : LiveData<Int> = _cameraInformationLevel
+
+    private val _liveviewMagnifySize : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val liveViewMagnifySize : LiveData<Int> = _liveviewMagnifySize
 
     private val _takeMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val takeMode : LiveData<String> = _takeMode
@@ -71,6 +81,12 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     private val _aeLockState : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val aeLockState : LiveData<String> = _aeLockState
 
+    private val _batteryLevel : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val batteryLevel : LiveData<String> = _batteryLevel
+
+    private val _meteringMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val meteringMode : LiveData<String> = _meteringMode
+
     var propertyList by mutableStateOf<List<String>>(emptyList())
         private set
 
@@ -92,6 +108,9 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
 
             // ----- 保持状態を初期化
             _isConnectError.postValue(false)
+            _cameraInformation.postValue("")
+            _cameraInformationLevel.postValue(10)
+            _liveviewMagnifySize.postValue(1)
             _takeMode.postValue("")
             _tv.postValue("")
             _av.postValue("")
@@ -101,6 +120,8 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             _focusMode.postValue("")
             _exposureWarning.postValue("")
             _driveMode.postValue("")
+            _batteryLevel.postValue("")
+            _meteringMode.postValue("")
         }
         catch (e: Exception)
         {
@@ -240,6 +261,20 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         }
     }
 
+    override fun updateRemainBattery(batteryLevel: String) {
+        if ((batteryLevel.isNotEmpty())&&(_batteryLevel.value != batteryLevel))
+        {
+            _batteryLevel.postValue(batteryLevel)
+        }
+    }
+
+    override fun updatedMeteringMode(meteringMode: String) {
+        if ((meteringMode.isNotEmpty())&&(_meteringMode.value != meteringMode))
+        {
+            _meteringMode.postValue(meteringMode)
+        }
+    }
+
     fun getPropertyValueList(key: ICameraStatus.CameraProperty) : List<String>
     {
         try
@@ -372,6 +407,38 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
                 e.printStackTrace()
             }
         }
+    }
+
+    fun changeLiveviewScale()
+    {
+        val nextSize = when (_liveviewMagnifySize.value)
+        {
+            5 -> 7
+            7 -> 10
+            10 -> 14
+            14 -> 1
+            else -> 5
+        }
+
+        // ----- カメラに対して選択されたプロパティを設定する
+        CoroutineScope(Dispatchers.IO).launch {
+            // ----- ライブビューの画像拡大
+            when (nextSize) {
+                1 -> {
+                    // ----- ライブビューの拡大を止める
+                    AppSingleton.cameraControl.getLiveviewMagnify().stopMagnify()
+                }
+                5 -> {
+                    // ----- ライブビューの拡大をスタート
+                    AppSingleton.cameraControl.getLiveviewMagnify().startMagnify(nextSize)
+                }
+                else -> {
+                    // ----- ライブビューの拡大サイズを変更する
+                    AppSingleton.cameraControl.getLiveviewMagnify().changeMagnify(nextSize)
+                }
+            }
+        }
+        _liveviewMagnifySize.postValue(nextSize)
     }
 
     companion object

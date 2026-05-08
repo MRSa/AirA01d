@@ -99,4 +99,16 @@ class OmdsCameraStatusProvider : ICameraStatusUpdateNotify
     override fun updatedAeLockState(aeLockState: String) {
         currentAeLockState = notifyIfChanged(currentAeLockState, aeLockState) { it.updatedAeLockState(aeLockState) }
     }
+
+    // ----- バッテリー残量
+    private var currentBatteryLevel = ""
+    override fun updateRemainBattery(batteryLevel: String) {
+        currentBatteryLevel = notifyIfChanged(currentBatteryLevel, batteryLevel) { it.updateRemainBattery(batteryLevel) }
+    }
+
+    // ----- 測光モード
+    private var currentMeteringMode = ""
+    override fun updatedMeteringMode(meteringMode: String) {
+        currentMeteringMode = notifyIfChanged(currentMeteringMode, meteringMode) { it.updatedMeteringMode(meteringMode) }
+    }
 }

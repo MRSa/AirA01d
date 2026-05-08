@@ -24,13 +24,13 @@ import jp.osdn.gokigen.aira01d.ui.component.widget.ApplicationPreferencesButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.AspectRatioButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.CameraPropertyListButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.CameraTuningButton
-import jp.osdn.gokigen.aira01d.ui.component.widget.DigitalZoomButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.DriveModeButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.ExposureCompensationButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.InformationArea1
 import jp.osdn.gokigen.aira01d.ui.component.widget.FocusModeButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.InformationArea2
 import jp.osdn.gokigen.aira01d.ui.component.widget.IsoSensitivityButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.LiveviewMagnifyButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.connect.ConnectButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.drawer.LiveviewWidget
 import jp.osdn.gokigen.aira01d.ui.component.widget.MirrorImageButton
@@ -65,11 +65,11 @@ fun LiveviewScreenPortrait(
         // --- 上部固定エリア(アイコンを6つ横に並べる)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             val modifier = Modifier.weight(1f)
-            ConnectButton(cameraStatusViewModel, modifier);
-            WifiConfigButton(liveviewModel, modifier);
+            ConnectButton(cameraStatusViewModel, modifier)
+            WifiConfigButton(liveviewModel, modifier)
             CameraPropertyListButton(navController, cameraStatusViewModel, modifier)
-            ApplicationPreferencesButton(navController, cameraStatusViewModel, modifier);
-            ShowGridButton(liveviewModel, modifier);
+            ApplicationPreferencesButton(navController, cameraStatusViewModel, modifier)
+            ShowGridButton(liveviewModel, modifier)
             PowerOffButton(cameraStatusViewModel, modifier)
         }
 
@@ -79,11 +79,7 @@ fun LiveviewScreenPortrait(
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             InformationArea1(cameraStatusViewModel, Modifier.weight(1f).height(50.dp))
             SelfTimerButton(selfTimerViewModel, liveviewModel)
-            RemainBatteryArea(cameraStatusViewModel)
-            //Column(Modifier.padding(start = 4.dp)) {
-            //    SelfTimerButton(selfTimerViewModel, liveviewModel)
-            //    RemainBatteryArea(cameraStatusViewModel)
-            //}
+            RemainBatteryArea(liveviewModel, cameraStatusViewModel)
         }
 
         // --- ライブビューの表示画面 ---
@@ -104,22 +100,22 @@ fun LiveviewScreenPortrait(
         ) {
             // 撮影モード、シャッタースピード、絞り値の表示
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TakeModeButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f));
-                ShutterSpeedButton(cameraStatusViewModel, Modifier.weight(1f));
-                ApertureButton(cameraStatusViewModel, Modifier.weight(1f))
+                TakeModeButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                ShutterSpeedButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                ApertureButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
             }
 
             Spacer(Modifier.height(4.dp))
 
-            // --- 撮影画像、シャッター、そして露出補正、鏡像表示、デジタルズーム
+            // --- 撮影画像、シャッター、そして露出補正、鏡像表示、セルフタイマー
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 RecordImageButton(navController, cameraStatusViewModel, Modifier.weight(1f).height(80.dp))
                 ShutterButton(liveviewModel, cameraStatusViewModel, selfTimerViewModel, Modifier.weight(1f).height(80.dp).padding(horizontal = 4.dp))
                 Column(Modifier.weight(1f)) {
-                    ExposureCompensationButton(cameraStatusViewModel, Modifier.fillMaxWidth())
+                    ExposureCompensationButton(liveviewModel, cameraStatusViewModel, Modifier.fillMaxWidth())
                     Row(Modifier.fillMaxWidth()) {
                         MirrorImageButton(liveviewModel, Modifier.weight(1f))
-                        DigitalZoomButton(cameraStatusViewModel, Modifier.weight(1f))
+                        LiveviewMagnifyButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
                     }
                 }
             }
@@ -128,9 +124,9 @@ fun LiveviewScreenPortrait(
 
             // ISO, WB, Picture Effect
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                IsoSensitivityButton(cameraStatusViewModel, Modifier.weight(1f))
-                WhiteBalanceButton(cameraStatusViewModel, Modifier.weight(1f))
-                PictureEffectButton(cameraStatusViewModel, Modifier.weight(1f))
+                IsoSensitivityButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                WhiteBalanceButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                PictureEffectButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
             }
 
             Spacer(Modifier.height(4.dp))
@@ -138,9 +134,9 @@ fun LiveviewScreenPortrait(
             // AEロック状態、AEモード、ドライブモード、フォーカスモード、AFロックモード、カメラチューニング
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 val mod = Modifier.weight(1f)
-                AELockStateButton(cameraStatusViewModel, mod)
-                AEModeButton(cameraStatusViewModel, mod)
-                DriveModeButton(cameraStatusViewModel, mod)
+                AELockStateButton(liveviewModel, cameraStatusViewModel, mod)
+                AEModeButton(liveviewModel, cameraStatusViewModel, mod)
+                DriveModeButton(liveviewModel, cameraStatusViewModel, mod)
                 FocusModeButton(cameraStatusViewModel,mod)
                 AFLockUnlockButton(liveviewModel,mod)
                 CameraTuningButton(cameraStatusViewModel, mod)
@@ -150,9 +146,9 @@ fun LiveviewScreenPortrait(
 
             // アスペクト比、Rawモード、情報表示エリア
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                AspectRatioButton(cameraStatusViewModel)
+                AspectRatioButton(liveviewModel, cameraStatusViewModel)
                 Spacer(Modifier.width(4.dp))
-                RawModeButton(cameraStatusViewModel)
+                RawModeButton(liveviewModel, cameraStatusViewModel)
                 InformationArea2(cameraStatusViewModel, Modifier.weight(1f).height(50.dp).padding(start = 4.dp))
             }
         }

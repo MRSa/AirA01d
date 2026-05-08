@@ -49,11 +49,11 @@ fun LiveviewScreenLandscape(
         // 上部：ステータス/設定ボタン群
         Row(modifier = Modifier.fillMaxWidth().height(50.dp)) {
             TakeModeButton(liveviewModel, cameraStatusViewModel)
-            ShutterSpeedButton(cameraStatusViewModel)
-            ApertureButton(cameraStatusViewModel)
-            IsoSensitivityButton(cameraStatusViewModel)
-            PictureEffectButton(cameraStatusViewModel)
-            WhiteBalanceButton(cameraStatusViewModel)
+            ShutterSpeedButton(liveviewModel, cameraStatusViewModel)
+            ApertureButton(liveviewModel, cameraStatusViewModel)
+            IsoSensitivityButton(liveviewModel, cameraStatusViewModel)
+            PictureEffectButton(liveviewModel, cameraStatusViewModel)
+            WhiteBalanceButton(liveviewModel, cameraStatusViewModel)
         }
 
         Row(modifier = Modifier.fillMaxSize()) {
@@ -77,7 +77,7 @@ fun LiveviewScreenLandscape(
                 ShowGridButton(liveviewModel)
                 ShutterButton(liveviewModel, cameraStatusViewModel, selfTimerViewModel)
                 FocusModeButton(cameraStatusViewModel)
-                ExposureCompensationButton(cameraStatusViewModel)
+                ExposureCompensationButton(liveviewModel, cameraStatusViewModel)
                 InformationArea1(cameraStatusViewModel)
             }
         }

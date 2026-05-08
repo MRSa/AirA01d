@@ -9,6 +9,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus.CameraCo
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.IFocusingControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraLiveviewMagnify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.interfaces.IOperationCallback
@@ -23,6 +24,7 @@ import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCommPathControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCommPathStatus
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsGetCommand
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsGetRecordImage
+import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsOpcLiveviewMagnifyControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsPostCommand
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsRunModeControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsTimeSync
@@ -51,6 +53,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     private lateinit var focusControl: OmdsFocusControl
     private lateinit var captureControl: OmdsCaptureControl
     private lateinit var getRecordImage: OmdsGetRecordImage
+    private lateinit var liveviewMagnify: OmdsOpcLiveviewMagnifyControl
 
     private var isInitialized  = false
 
@@ -73,6 +76,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
                 this.focusControl = OmdsFocusControl()
                 this.captureControl = OmdsCaptureControl(statusWatcher)
                 this.getRecordImage = OmdsGetRecordImage()
+                this.liveviewMagnify = OmdsOpcLiveviewMagnifyControl()
                 this.subscriberList.clear()
                 this.connectionStatusReceiverList.clear()
 
@@ -202,6 +206,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     override fun getCaptureControl(): ICaptureControl { return captureControl }
 
     override fun getGetRecordImage(): IGetRecordImage { return getRecordImage }
+    override fun getLiveviewMagnify(): ICameraLiveviewMagnify { return liveviewMagnify }
 
     override fun onStatusNotify(status: CameraConnectionStatus)
     {

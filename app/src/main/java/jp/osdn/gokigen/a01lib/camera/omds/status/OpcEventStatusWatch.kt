@@ -56,6 +56,8 @@ class OpcEventStatusWatch(
             checkAfLockState(getPropertyValue(eventResponse, "<prop name=\"AF_LOCK_STATE\">"))
             checkRawMode(getPropertyValue(eventResponse, "<prop name=\"RAW\">"))
             checkAspectRatio(getPropertyValue(eventResponse, "<prop name=\"ASPECT_RATIO\">"))
+            checkBatteryLevel(getPropertyValue(eventResponse, "<prop name=\"BATTERY_LEVEL\">"))
+            checkMeteringMode(getPropertyValue(eventResponse, "<prop name=\"AE\">"))
         }
         catch (e: Exception)
         {
@@ -142,6 +144,26 @@ class OpcEventStatusWatch(
         }
     }
 
+    private fun checkBatteryLevel(batteryLevel: String)
+    {
+        val currentValue = this.currentStatuses[ICameraStatus.CameraProperty.BatteryRemain] ?: ""
+        if (batteryLevel != currentValue)
+        {
+            currentStatuses[ICameraStatus.CameraProperty.BatteryRemain] = batteryLevel
+            statusProvider.updateRemainBattery(batteryLevel)
+        }
+    }
+
+    private fun checkMeteringMode(meteringMode: String)
+    {
+        val currentValue = this.currentStatuses[ICameraStatus.CameraProperty.MeteringMode] ?: ""
+        if (meteringMode != currentValue)
+        {
+            currentStatuses[ICameraStatus.CameraProperty.MeteringMode] = meteringMode
+            statusProvider.updatedMeteringMode(meteringMode)
+        }
+    }
+
     private fun getPropertyValue(responseString: String, propertyString: String) : String
     {
         try
@@ -193,6 +215,6 @@ class OpcEventStatusWatch(
         private val TAG = OpcEventStatusWatch::class.java.simpleName
 
         private const val TIMEOUT_MS = 2500
-        private const val DUMP_LOG = true
+        private const val DUMP_LOG = false
     }
 }
