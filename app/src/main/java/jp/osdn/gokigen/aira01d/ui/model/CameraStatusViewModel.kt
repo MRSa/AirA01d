@@ -72,6 +72,9 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     private val _exposureWarning : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val exposureWarning : LiveData<String> = _exposureWarning
 
+    private val _exposureWarningLevel : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val exposureWarningLevel : LiveData<Int> = _exposureWarningLevel
+
     private val _rawMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val rawMode : LiveData<String> = _rawMode
 
@@ -110,6 +113,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             _isConnectError.postValue(false)
             _cameraInformation.postValue("")
             _cameraInformationLevel.postValue(10)
+            _exposureWarningLevel.postValue(10)
             _liveviewMagnifySize.postValue(1)
             _takeMode.postValue("")
             _tv.postValue("")

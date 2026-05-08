@@ -14,12 +14,20 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 
-
 @Composable
 fun InformationArea1(viewModel: CameraStatusViewModel, modifier: Modifier = Modifier)
 {
     // ----- ステータスを監視する
     val exposureWarning = viewModel.exposureWarning.observeAsState()
+    val exposureWarningLevel = viewModel.exposureWarningLevel.observeAsState()
+
+    // ----- 表示文字の装飾
+    val exposureWarningLevelValue = exposureWarningLevel.value ?: 10
+    val fontWeight = if (exposureWarningLevelValue > 2) { FontWeight.Normal } else { FontWeight.Bold }
+    val textColor =
+        if (exposureWarningLevelValue > 5 ) { MaterialTheme.colorScheme.primary }
+        else if (exposureWarningLevelValue > 3 ) { MaterialTheme.colorScheme.tertiary }
+        else { MaterialTheme.colorScheme.error }
 
     // ----- ボタンの表示
     TextButton(
@@ -32,8 +40,8 @@ fun InformationArea1(viewModel: CameraStatusViewModel, modifier: Modifier = Modi
             text = exposureWarning.value ?: "",
             style = TextStyle(
                 textDecoration = TextDecoration.None,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.tertiary
+                fontWeight = fontWeight,
+                color = textColor
             )
         )
     }
