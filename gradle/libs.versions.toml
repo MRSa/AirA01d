@@ -13,6 +13,8 @@ navigationRuntimeKtx = "2.9.8"
 navigationCompose = "2.9.8"
 roomKtx = "2.8.4"
 uiGraphics = "1.11.0"
+animation = "1.11.1"
+toolsCore = "1.0.0-alpha14"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,6 +34,8 @@ androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navig
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
+androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
+androidx-tools-core = { group = "androidx.privacysandbox.tools", name = "tools-core", version.ref = "toolsCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

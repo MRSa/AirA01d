@@ -5,6 +5,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -41,11 +43,29 @@ class MainActivity : ComponentActivity()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
-        // ----- Splash Screenは super.onCreate() の前に呼ぶ
+        // ----- Splash Screenの表示
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
+
+        // --- ステータスバーを非表示にする処理 ---
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.let { controller ->
+                // ステータスバー（および必要ならナビゲーションバー）を隠す
+                controller.hide(WindowInsets.Type.statusBars())
+                // 画面端をスワイプした時に一時的に表示される設定（没入モード）
+                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else {
+            // API 29以前の古いデバイス向けで画面を広げる
+            @Suppress("DEPRECATION")
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+            )
+        }
+        // ------------------------------------------
 
         // ----- 画面の常時点灯設定
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

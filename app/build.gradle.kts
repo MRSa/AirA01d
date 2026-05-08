@@ -40,6 +40,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
@@ -55,5 +56,6 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.tools.core)
     implementation(libs.androidx.ui.graphics)
 }

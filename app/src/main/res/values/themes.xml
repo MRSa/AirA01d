@@ -10,5 +10,8 @@
         <item name="postSplashScreenTheme">@style/Theme.AirA01d</item>
     </style>
     <!-- 本来のアプリテーマの定義 -->
-    <style name="Theme.AirA01d" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.AirA01d" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- 全バージョン共通でフルスクリーンにする -->
+        <item name="android:windowFullscreen">true</item>
+    </style>
 </resources>

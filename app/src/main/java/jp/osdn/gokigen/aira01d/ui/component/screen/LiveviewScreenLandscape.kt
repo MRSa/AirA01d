@@ -1,24 +1,48 @@
 package jp.osdn.gokigen.aira01d.ui.component.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset.Companion.Zero
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import jp.osdn.gokigen.aira01d.ui.component.widget.AELockStateButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.AEModeButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.AFLockUnlockButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.ApertureButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.ApplicationPreferencesButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.AspectRatioButton
@@ -50,54 +74,6 @@ import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
 
-/*
-@Composable
-fun LiveviewScreenLandscape(
-    navController: NavHostController,
-    liveviewModel: LiveviewViewModel,
-    cameraStatusViewModel: CameraStatusViewModel,
-    selfTimerViewModel: SelfTimerViewModel
-)
-{
-    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        // 上部：ステータス/設定ボタン群
-        Row(modifier = Modifier.fillMaxWidth().height(50.dp)) {
-            TakeModeButton(liveviewModel, cameraStatusViewModel)
-            ShutterSpeedButton(liveviewModel, cameraStatusViewModel)
-            ApertureButton(liveviewModel, cameraStatusViewModel)
-            IsoSensitivityButton(liveviewModel, cameraStatusViewModel)
-            PictureEffectButton(liveviewModel, cameraStatusViewModel)
-            WhiteBalanceButton(liveviewModel, cameraStatusViewModel)
-        }
-
-        Row(modifier = Modifier.fillMaxSize()) {
-            // 左側：ドライブモード・電池など
-            Column(modifier = Modifier.width(110.dp).fillMaxHeight()) {
-                PowerOffButton(cameraStatusViewModel)
-                ConnectButton(cameraStatusViewModel)
-                WifiConfigButton(liveviewModel)
-            }
-
-            // 中央：メインライブビュー
-            Box(modifier = Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
-                LiveviewWidget(liveviewModel, selfTimerViewModel, Modifier.fillMaxWidth())
-            }
-
-            // 右側：シャッター・アイコン群
-            Column(modifier = Modifier.width(110.dp).fillMaxHeight()) {
-                AFLockUnlockButton(liveviewModel)
-                SelfTimerButton(selfTimerViewModel, liveviewModel)
-                MirrorImageButton(liveviewModel)
-                ShowGridButton(liveviewModel)
-                ShutterButton(liveviewModel, cameraStatusViewModel, selfTimerViewModel)
-                FocusModeButton(cameraStatusViewModel)
-                ExposureCompensationButton(liveviewModel, cameraStatusViewModel)
-                InformationArea1(cameraStatusViewModel)
-            }
-        }
-    }
-}
-*/
 @Composable
 fun LiveviewScreenLandscape(
     navController: NavHostController,
@@ -105,6 +81,9 @@ fun LiveviewScreenLandscape(
     cameraStatusViewModel: CameraStatusViewModel,
     selfTimerViewModel: SelfTimerViewModel
 ) {
+    // 上部バーの表示状態を管理（初期状態は表示する）
+    var isTopBarVisible by remember { mutableStateOf(true) }
+
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -116,56 +95,77 @@ fun LiveviewScreenLandscape(
                 .width(150.dp)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Start))
         ) {
-            // 上部ボタン群の混成レイアウト
             Row {
-                PowerOffButton(cameraStatusViewModel, Modifier.weight(1f))
+                ConnectButton(cameraStatusViewModel, Modifier.weight(1f))
                 TakeModeButton(liveviewModel, cameraStatusViewModel, Modifier.weight(2f))
             }
+
             Row {
                 Column(Modifier.weight(1f))
                 {
-                    ConnectButton(cameraStatusViewModel)
                     WifiConfigButton(liveviewModel)
+                    CameraPropertyListButton(navController, cameraStatusViewModel)
                 }
                 RecordImageButton(navController, cameraStatusViewModel, Modifier.weight(2f).height(80.dp))
             }
-            // アイコンボタン群の配置
+
             Row {
-                FocusModeButton(cameraStatusViewModel, Modifier.weight(1f))
-                AspectRatioButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
-                RawModeButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
-            }
-            Row {
+                ApplicationPreferencesButton(navController, cameraStatusViewModel, Modifier.weight(1f))
                 AELockStateButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
                 AEModeButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
-                DriveModeButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
             }
             Row {
                 ShowGridButton(liveviewModel, Modifier.weight(1f))
-                CameraTuningButton(cameraStatusViewModel, Modifier.weight(1f))
-                CameraPropertyListButton(navController, cameraStatusViewModel, Modifier.weight(1f))
+                DriveModeButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                FocusModeButton(cameraStatusViewModel, Modifier.weight(1f))
             }
-
+            Row {
+                PowerOffButton(cameraStatusViewModel, Modifier.weight(1f))
+                AspectRatioButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                RawModeButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+            }
             Spacer(Modifier.weight(1f))
             InformationArea1(cameraStatusViewModel, Modifier.fillMaxWidth().height(80.dp))
         }
 
-        // --- 中央エリア (メインプレビュー + 上部バー) ---
-        Column(
+        // --- 中央エリア (ライブビュー画面 + 重なる上部バー) ---
+        Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(horizontal = 4.dp)
+                .pointerInput(Unit) {
+                    detectVerticalDragGestures(
+                        onVerticalDrag = { change, dragAmount ->
+                            // ----- スワイプアクションでパネル表示・非表示を切り替える
+                            //         (dragAmount が負なら上方向（消す）、正なら下方向（出す）)
+
+                            if (dragAmount < -10f) {   // 感度調整のための閾値
+                                isTopBarVisible = false
+                            } else if (dragAmount > 10f) {
+                                isTopBarVisible = true
+                            }
+                            // イベントを消費して、ドラッグ中に他の要素が反応しないようにする
+                            if (change.positionChange() != Zero) change.consume()
+                        }
+                    )
+                }
         ) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                val mod = Modifier.weight(1f)
-                ShutterSpeedButton(liveviewModel, cameraStatusViewModel, mod)
-                ApertureButton(liveviewModel, cameraStatusViewModel, mod)
-                ExposureCompensationButton(liveviewModel, cameraStatusViewModel,mod)
-                IsoSensitivityButton(liveviewModel, cameraStatusViewModel, mod)
-            }
-            LiveviewWidget(liveviewModel, selfTimerViewModel, Modifier.fillMaxSize().padding(top = 4.dp))
+            // 背面：ライブビュー画面 (fillMaxSize でBoxの全領域を使用)
+            LiveviewWidget(
+                liveviewModel,
+                selfTimerViewModel,
+                Modifier.fillMaxSize()
+            )
+
+            // 前面：半透明の上部バー (AnimatedVisibility でアニメーションし、表示・非表示を切り替える)
+            TopOverlayBar(
+                isTopBarVisible,
+                liveviewModel,
+                cameraStatusViewModel,
+                Modifier.align(Alignment.TopCenter)
+            )
         }
 
         // --- 右サイドパネル (スクロール可能) ---
@@ -173,34 +173,73 @@ fun LiveviewScreenLandscape(
             modifier = Modifier
                 .width(150.dp)
                 .fillMaxHeight()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.End))
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             PictureEffectButton(liveviewModel, cameraStatusViewModel, Modifier.fillMaxWidth())
-            WhiteBalanceButton(liveviewModel, cameraStatusViewModel, Modifier.fillMaxWidth())
 
-            Spacer(Modifier.height(8.dp))
-
-            // シャッターボタンを強調
-            ShutterButton(liveviewModel, cameraStatusViewModel, selfTimerViewModel, Modifier.fillMaxWidth().height(100.dp))
-
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(1.dp))
 
             Row(Modifier.fillMaxWidth()) {
                 MirrorImageButton(liveviewModel, Modifier.weight(1f))
                 LiveviewMagnifyButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
             }
+            Spacer(Modifier.height(1.dp))
+
+            // シャッターボタンは大きい
+            ShutterButton(liveviewModel, cameraStatusViewModel, selfTimerViewModel, Modifier.fillMaxWidth().height(100.dp))
+
+            Spacer(Modifier.height(1.dp))
+
             Row(Modifier.fillMaxWidth()) {
-                ApplicationPreferencesButton(navController, cameraStatusViewModel, Modifier.weight(1f))
-                SelfTimerButton(selfTimerViewModel, liveviewModel, Modifier.weight(1f))
-            }
-            Row(Modifier.fillMaxWidth()) {
-                RemainBatteryArea(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
-                Spacer(Modifier.weight(1f))
+                AFLockUnlockButton(liveviewModel,Modifier.weight(1f))
+                CameraTuningButton(cameraStatusViewModel, Modifier.weight(1f))
             }
 
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(1.dp))
+
+            Row(Modifier.fillMaxWidth()) {
+                SelfTimerButton(selfTimerViewModel, liveviewModel, Modifier.weight(1f))
+                RemainBatteryArea(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+            }
             InformationArea2(cameraStatusViewModel, Modifier.fillMaxWidth().height(80.dp))
+        }
+    }
+}
+
+@Composable
+fun TopOverlayBar(visible: Boolean, liveviewModel: LiveviewViewModel, cameraStatusViewModel: CameraStatusViewModel, modifier: Modifier = Modifier)
+{
+    // --- 半透明の上部バー部分 (AnimatedVisibility でアニメーションし、表示・非表示を切り替える)
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically(),
+        modifier = modifier
+    ) {
+        // --- MaterialThemeについて、一時的に「ダークモード」設定で上書きする
+        MaterialTheme(
+            colorScheme = darkColorScheme(
+                primary = Color.White,      // ボタンが primary を使っているなら白に
+                onPrimary = Color.Black,    // ボタン内の文字が onPrimary なら黒に
+                surface = Color.Transparent // 背景などは透明にする
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black.copy(alpha = 0.4f)) // 半透明の背景
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                val mod = Modifier.weight(1f)
+                ShutterSpeedButton(liveviewModel, cameraStatusViewModel, mod)
+                ApertureButton(liveviewModel, cameraStatusViewModel, mod)
+                ExposureCompensationButton(liveviewModel, cameraStatusViewModel, mod)
+                IsoSensitivityButton(liveviewModel, cameraStatusViewModel, mod)
+                WhiteBalanceButton(liveviewModel, cameraStatusViewModel, mod)
+            }
         }
     }
 }
