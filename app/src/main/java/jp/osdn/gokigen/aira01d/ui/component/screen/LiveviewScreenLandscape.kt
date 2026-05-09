@@ -87,7 +87,7 @@ fun LiveviewScreenLandscape(
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(4.dp)
+            .padding(1.dp)
     ) {
         // --- 左サイドパネル (スクロール可能) ---
         Column(

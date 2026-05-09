@@ -62,7 +62,7 @@ fun LiveviewScreenPortrait(
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding()
-            .padding(4.dp)
+            .padding(1.dp)
     ) {
         // --- 上部固定エリア(アイコンを6つ横に並べる)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -91,7 +91,7 @@ fun LiveviewScreenPortrait(
             Modifier
                 .fillMaxWidth()
                 .weight(1f) // 空きスペースをすべて使う
-                .padding(vertical = 4.dp)
+                .padding(vertical = 1.dp)
         )
 
         // --- 下部操作パネル (ここはスクロール可能にする) ---

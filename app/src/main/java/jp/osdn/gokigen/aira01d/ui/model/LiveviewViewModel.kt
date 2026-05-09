@@ -67,7 +67,7 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
                 // リソースからビットマップデータを生成する
                 val dummyBitmap = BitmapFactory.decodeResource(
                     context.resources,
-                    jp.osdn.gokigen.aira01d.R.drawable.dummy,
+                    jp.osdn.gokigen.aira01d.R.drawable.screen_background,
                     options
                 )
 
