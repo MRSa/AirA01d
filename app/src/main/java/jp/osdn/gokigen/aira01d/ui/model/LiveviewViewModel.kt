@@ -103,6 +103,12 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
         }
     }
 
+    // ----- ライブビューが動作中かどうか
+    fun isLiveViewActivated() : Boolean
+    {
+        return (_isLvActivated.value ?: false)
+    }
+
     // ----- ライブビューの画像を受信した
     override fun onUpdateLiveView(data: ByteArray, metadata: Map<String, Any>?, degrees: Int)
     {

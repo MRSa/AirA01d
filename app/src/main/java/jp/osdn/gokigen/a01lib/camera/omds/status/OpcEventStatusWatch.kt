@@ -51,6 +51,7 @@ class OpcEventStatusWatch(
             checkTakeMode(getPropertyValue(eventResponse, "<prop name=\"TAKEMODE\">"))
             checkWhiteBalance(getPropertyValue(eventResponse, "<prop name=\"WB\">"))
             checkPictureEffect(getPropertyValue(eventResponse, "<prop name=\"COLORTONE\">"))
+            checkArtFilter(getPropertyValue(eventResponse, "<prop name=\"RECENTLY_ART_FILTER\">"))
             checkDriveMode(getPropertyValue(eventResponse, "<prop name=\"TAKE_DRIVE\">"))
             checkAeLockState(getPropertyValue(eventResponse, "<prop name=\"AE_LOCK_STATE\">"))
             checkAfLockState(getPropertyValue(eventResponse, "<prop name=\"AF_LOCK_STATE\">"))
@@ -82,6 +83,16 @@ class OpcEventStatusWatch(
         {
             currentStatuses[ICameraStatus.CameraProperty.WhiteBalance] = wb
             statusProvider.updatedWhiteBalance(wb)
+        }
+    }
+
+    private fun checkArtFilter(artFilter: String)
+    {
+        val currentValue = this.currentStatuses[ICameraStatus.CameraProperty.ArtFilter] ?: ""
+        if (artFilter != currentValue)
+        {
+            currentStatuses[ICameraStatus.CameraProperty.ArtFilter] = artFilter
+            statusProvider.updateArtFilter(artFilter)
         }
     }
 

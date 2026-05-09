@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
@@ -110,6 +111,31 @@ class MainActivity : ComponentActivity()
                 ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
             }
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean
+    {
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP,
+            KeyEvent.KEYCODE_CAMERA -> {
+                // ----- リモートシャッター用のキーダウン情報を拾う
+                try
+                {
+                    if (myLiveviewViewModel.isLiveViewActivated())
+                    {
+                        // ----- ライブビューが動作中のときのみ、シャッター動作を指示する
+                        myCameraStatusViewModel.tryCapture()
+                        return true
+                    }
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
+            else -> { }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     companion object

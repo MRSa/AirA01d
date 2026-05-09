@@ -15,13 +15,22 @@ fun PictureEffectButton(
     modifier: Modifier = Modifier
 ) {
     // ----- ステータスを監視する
+    val takeMode = controlModel.takeMode.observeAsState()
     val isLvActivated = viewModel.isLvActivated.observeAsState()
     val pictureEffect = controlModel.pictureEffect.observeAsState()
+    val artFilter = controlModel.artFilter.observeAsState()
+
+    val isArtFilter = (isLvActivated.value == true)&&(when (takeMode.value) {
+        "ART" -> { true }
+        else -> { false }
+    })
+    val targetProperty = if (isArtFilter) { ICameraStatus.CameraProperty.ArtFilter } else { ICameraStatus.CameraProperty.PictureEffect }
+    val currentValue = if (isArtFilter) { artFilter.value ?: "" } else { pictureEffect.value ?: "" }
 
     PropertyTextButton(
         controlModel = controlModel,
-        targetProperty = ICameraStatus.CameraProperty.PictureEffect,
-        currentValue = pictureEffect.value ?: "",
+        targetProperty = targetProperty,
+        currentValue = currentValue,
         isEditable = (isLvActivated.value == true),
         modifier = modifier
     )

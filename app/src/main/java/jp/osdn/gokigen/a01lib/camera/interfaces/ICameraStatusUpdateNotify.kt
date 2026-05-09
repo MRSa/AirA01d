@@ -11,6 +11,7 @@ interface ICameraStatusUpdateNotify
     fun updateExposureWarning(exposureWarning: String)
     fun updateDriveMode(driveMode: String)
     fun updatePictureEffect(pictureEffect: String)
+    fun updateArtFilter(artFilter: String)
     fun updatedWhiteBalance(whiteBalance: String)
     fun updatedRawMode(rawMode: String)
     fun updatedAspectRatio(aspectRatio: String)

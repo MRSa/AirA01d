@@ -22,6 +22,8 @@ interface ICameraStatus
         AspectRatio,     // アスペクト比
         BatteryRemain,   // バッテリ残量
         MeteringMode,    // 測光モード
+        ArtFilter,       // アートフィルター
+
         CaptureMode,     // キャプチャーモード
         TorchMode,       // トーチモード
         FocalLength,     // 焦点距離

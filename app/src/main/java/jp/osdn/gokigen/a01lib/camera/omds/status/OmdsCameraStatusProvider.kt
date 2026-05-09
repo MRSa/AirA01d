@@ -76,6 +76,12 @@ class OmdsCameraStatusProvider : ICameraStatusUpdateNotify
         currentPictureEffect = notifyIfChanged(currentPictureEffect, pictureEffect) { it.updatePictureEffect(pictureEffect) }
     }
 
+    // ----- アートフィルター
+    private var currentArtFilter = ""
+    override fun updateArtFilter(artFilter: String) {
+        currentArtFilter = notifyIfChanged(currentArtFilter, artFilter) { it.updateArtFilter(artFilter) }
+    }
+
     // ----- ホワイトバランス
     private var currentWhiteBalance = ""
     override fun updatedWhiteBalance(whiteBalance: String) {

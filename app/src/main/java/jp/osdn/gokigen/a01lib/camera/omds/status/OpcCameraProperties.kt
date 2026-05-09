@@ -34,6 +34,7 @@ class OpcCameraProperties(
                 CameraProperty.AfLockState -> sendSetPropertyRequest("AF_LOCK_STATE", value)
                 CameraProperty.AeLockState -> sendSetPropertyRequest("AE_LOCK_STATE", value)
                 CameraProperty.BatteryRemain -> sendSetPropertyRequest("BATTERY_LEVEL", value)
+                CameraProperty.ArtFilter -> sendSetPropertyRequest("RECENTLY_ART_FILTER", value)
                 else -> { Log.v(TAG, " Not support Property key(SET) : $key") }
             }
         }
@@ -64,6 +65,7 @@ class OpcCameraProperties(
                 CameraProperty.AfLockState -> "AF_LOCK_STATE"
                 CameraProperty.AeLockState -> "AE_LOCK_STATE"
                 CameraProperty.BatteryRemain -> "BATTERY_LEVEL"
+                CameraProperty.ArtFilter -> "RECENTLY_ART_FILTER"
                 else -> ""
             }
             if (propertyKey.isNotEmpty())

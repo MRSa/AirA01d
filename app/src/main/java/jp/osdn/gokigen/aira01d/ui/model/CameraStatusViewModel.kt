@@ -2,7 +2,6 @@ package jp.osdn.gokigen.aira01d.ui.model
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,6 +31,9 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
 
     private val _isConnectError : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
     val isConnectError : LiveData<Boolean> = _isConnectError
+
+    private val _isCaptureActivated : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
+    val isCaptureActivated : LiveData<Boolean> = _isCaptureActivated
 
     private val _cameraInformation : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val cameraInformation : LiveData<String> = _cameraInformation
@@ -68,6 +70,9 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
 
     private val _pictureEffect : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val pictureEffect : LiveData<String> = _pictureEffect
+
+    private val _artFilter : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val artFilter : LiveData<String> = _artFilter
 
     private val _exposureWarning : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val exposureWarning : LiveData<String> = _exposureWarning
@@ -111,6 +116,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
 
             // ----- 保持状態を初期化
             _isConnectError.postValue(false)
+            _isCaptureActivated.postValue(false)
             _cameraInformation.postValue("")
             _cameraInformationLevel.postValue(10)
             _exposureWarningLevel.postValue(10)
@@ -233,6 +239,13 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         if ((pictureEffect.isNotEmpty())&&(_pictureEffect.value != pictureEffect))
         {
             _pictureEffect.postValue(pictureEffect)
+        }
+    }
+
+    override fun updateArtFilter(artFilter: String) {
+        if ((artFilter.isNotEmpty())&&(_artFilter.value != artFilter))
+        {
+            _artFilter.postValue(artFilter)
         }
     }
 
@@ -411,6 +424,20 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             {
                 e.printStackTrace()
             }
+        }
+    }
+
+    // ----- 撮影を行う。（カメラの撮影状態によって、 ON/OFF を切り替える)
+    fun tryCapture()
+    {
+        try
+        {
+            val captureAction = if (_isCaptureActivated.value == false) { ICaptureControl.CaptureAction.ON } else { ICaptureControl.CaptureAction.OFF }
+            doCapture(captureAction)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
     }
 
