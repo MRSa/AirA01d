@@ -20,7 +20,7 @@ class OmdsSingleShotControl(userAgent: String = "OlympusCameraKit", private val 
                 {
                     val sendUrl = if (useOpcProtocol) { executeUrl + CAPTURE_COMMAND_OPC } else { executeUrl + CAPTURE_COMMAND }
                     val reply: String = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
-                    if (!reply.contains("ok"))
+                    if ((!reply.contains("ok"))&&(!reply.contains("OK")))
                     {
                         Log.v(TAG, "Capture Failure... : $reply ($sendUrl)")
                     }

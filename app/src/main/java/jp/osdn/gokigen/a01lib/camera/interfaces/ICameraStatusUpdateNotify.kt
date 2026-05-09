@@ -8,7 +8,7 @@ interface ICameraStatusUpdateNotify
     fun updatedExposureCompensation(xv: String)
     fun updateIsoSensitivity(sv: String)
     fun updateFocusMode(focusMode: String)
-    fun updateExposureWarning(exposureWarning: String)
+    fun updateExposureWarning(exposureWarning: Int)
     fun updateDriveMode(driveMode: String)
     fun updatePictureEffect(pictureEffect: String)
     fun updateArtFilter(artFilter: String)
@@ -18,11 +18,13 @@ interface ICameraStatusUpdateNotify
     fun updatedAeLockState(aeLockState: String)
     fun updateRemainBattery(batteryLevel: String)
     fun updatedMeteringMode(meteringMode: String)
-
+    fun updatedMediaStatus(mediaStatus: Int)
+    fun updatedOrientation(orientation: Int)
+    fun updatedAvailableShots(numOfImages: Int)
+    fun updatedZoomInfo(wide: Int, current: Int, tele: Int)
+    fun updatedLevelGauge(accuracy: Int, orientation: Int, roll: Int, pitch: Int)
     // fun updatedAfLockState(afLockState: String)
-
     //fun updateRemainBattery(percentage: Int)
-
     //fun updateStorageStatus(status: String?)
     //fun updateShootMode(shootMode: String?)
 }

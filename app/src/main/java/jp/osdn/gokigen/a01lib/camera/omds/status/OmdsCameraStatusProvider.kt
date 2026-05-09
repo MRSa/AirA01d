@@ -59,8 +59,8 @@ class OmdsCameraStatusProvider : ICameraStatusUpdateNotify
     }
 
     // ----- 露出警告
-    private var currentExposureWarning = " "
-    override fun updateExposureWarning(exposureWarning: String) {
+    private var currentExposureWarning = 0
+    override fun updateExposureWarning(exposureWarning: Int) {
         currentExposureWarning = notifyIfChanged(currentExposureWarning, exposureWarning) { it.updateExposureWarning(exposureWarning) }
     }
 
@@ -116,5 +116,69 @@ class OmdsCameraStatusProvider : ICameraStatusUpdateNotify
     private var currentMeteringMode = ""
     override fun updatedMeteringMode(meteringMode: String) {
         currentMeteringMode = notifyIfChanged(currentMeteringMode, meteringMode) { it.updatedMeteringMode(meteringMode) }
+    }
+
+    private var currentMediaStatus = 0
+    override fun updatedMediaStatus(mediaStatus: Int) {
+        currentMediaStatus = notifyIfChanged(currentMediaStatus, mediaStatus) { it.updatedMediaStatus(mediaStatus) }
+    }
+
+    private var currentOrientation = 0
+    override fun updatedOrientation(orientation: Int) {
+        currentOrientation = notifyIfChanged(currentOrientation, orientation) { it.updatedOrientation(orientation) }
+    }
+
+    private var currentNumOfImages = 0
+    override fun updatedAvailableShots(numOfImages: Int) {
+        currentNumOfImages = notifyIfChanged(currentNumOfImages, numOfImages) { it.updatedOrientation(numOfImages) }
+    }
+
+    private var currentWideLength = 0
+    private var currentLength = 0
+    private var currentTeleLength = 0
+    override fun updatedZoomInfo(wide: Int, current: Int, tele: Int) {
+        if ((wide != currentWideLength)||(current != currentLength)||(tele != currentTeleLength))
+        {
+            subscriberList.forEach {
+                try {
+                    it.updatedZoomInfo(wide, current, tele)
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
+            currentWideLength = wide
+            currentLength = current
+            currentTeleLength = tele
+        }
+    }
+
+    private var currentAccuracy = 0
+    private var currentLevelOrientation = 0
+    private var currentRoll = 0
+    private var currentPitch = 0
+    override fun updatedLevelGauge(
+        accuracy: Int,
+        orientation: Int,
+        roll: Int,
+        pitch: Int
+    ) {
+        if ((accuracy != currentAccuracy)||(orientation != currentLevelOrientation)||(roll != currentRoll)||(pitch != currentPitch))
+        {
+            subscriberList.forEach {
+                try {
+                    it.updatedLevelGauge(accuracy, orientation, roll, pitch)
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
+            currentAccuracy = accuracy
+            currentLevelOrientation = orientation
+            currentRoll = roll
+            currentPitch = pitch
+        }
     }
 }

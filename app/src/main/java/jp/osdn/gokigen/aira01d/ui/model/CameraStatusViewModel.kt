@@ -16,6 +16,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
 import jp.osdn.gokigen.aira01d.AppSingleton
+import jp.osdn.gokigen.aira01d.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,6 +32,9 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
 
     private val _isConnectError : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
     val isConnectError : LiveData<Boolean> = _isConnectError
+
+    private val _isMediaBusy : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
+    val isMediaBusy : LiveData<Boolean> = _isMediaBusy
 
     private val _isCaptureActivated : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
     val isCaptureActivated : LiveData<Boolean> = _isCaptureActivated
@@ -74,8 +78,8 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     private val _artFilter : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val artFilter : LiveData<String> = _artFilter
 
-    private val _exposureWarning : MutableLiveData<String> by lazy { MutableLiveData<String>() }
-    val exposureWarning : LiveData<String> = _exposureWarning
+    private val _exposureWarningResId : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val exposureWarningResId : LiveData<Int> = _exposureWarningResId
 
     private val _exposureWarningLevel : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
     val exposureWarningLevel : LiveData<Int> = _exposureWarningLevel
@@ -117,6 +121,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             // ----- 保持状態を初期化
             _isConnectError.postValue(false)
             _isCaptureActivated.postValue(false)
+            _isMediaBusy.postValue(false)
             _cameraInformation.postValue("")
             _cameraInformationLevel.postValue(10)
             _exposureWarningLevel.postValue(10)
@@ -128,7 +133,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             _xv.postValue("")
             _wb.postValue("")
             _focusMode.postValue("")
-            _exposureWarning.postValue("")
+            _exposureWarningResId.postValue(R.string.blank)
             _driveMode.postValue("")
             _batteryLevel.postValue("")
             _meteringMode.postValue("")
@@ -220,10 +225,17 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         }
     }
 
-    override fun updateExposureWarning(exposureWarning: String) {
-        if (_exposureWarning.value != exposureWarning)
+    override fun updateExposureWarning(exposureWarning: Int)
+    {
+        if (exposureWarning > 0)
         {
-            _exposureWarning.postValue(exposureWarning)
+            _exposureWarningResId.postValue(R.string.exposure_warning)
+            _exposureWarningLevel.postValue(4)
+        }
+        else
+        {
+            _exposureWarningResId.postValue(R.string.blank)
+            _exposureWarningLevel.postValue(10)
         }
     }
 
@@ -291,6 +303,40 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         {
             _meteringMode.postValue(meteringMode)
         }
+    }
+
+    override fun updatedMediaStatus(mediaStatus: Int)
+    {
+        // --- 現物合わせ...
+        //Log.v(TAG, "MEDIA STATUS: $mediaStatus (0x${mediaStatus.toString(16)})")
+        val mask = 0b11110000
+        _isMediaBusy.postValue((mediaStatus and mask) != 0)
+    }
+
+    override fun updatedOrientation(orientation: Int) {
+        // ----- カメラの向きの変化をつかむ
+        // Log.v(TAG, "ORIENTATION: $orientation")
+    }
+
+    override fun updatedAvailableShots(numOfImages: Int) {
+        //  ----- 受信されていない様子...
+        //Log.v(TAG, "NUM OF SHOTS: $numOfImages")
+    }
+
+    override fun updatedZoomInfo(wide: Int, current: Int, tele: Int)
+    {
+        // ----- レンズの焦点距離の変化をつかむ
+        //  Log.v(TAG, "ZOOM: wide:$wide current:$current  tele:$tele")
+    }
+
+    override fun updatedLevelGauge(
+        accuracy: Int,
+        orientation: Int,
+        roll: Int,
+        pitch: Int
+    ) {
+        // ----- 水準器の情報をつかむ
+        //  Log.v(TAG, "accuracy: $accuracy (0x${accuracy.toString(16)})  orientation: $orientation roll: $roll  pitch:$pitch ")
     }
 
     fun getPropertyValueList(key: ICameraStatus.CameraProperty) : List<String>

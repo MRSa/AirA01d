@@ -63,24 +63,24 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
                 {
                     ID_AF_FRAME_INFO -> {  }  // { checkFocused(buffer, position, length) }
                     ID_FRAME_SIZE -> { }
-                    ID_MEDIA_INFO -> { }
-                    ID_ROTATION_INFO -> { }
-                    ID_AVAILABLE_SHOTS -> { }
+                    ID_MEDIA_INFO -> { checkMediaInfo(buffer, position, length) }  // メディア情報 (カード撮影可否など)
+                    ID_ROTATION_INFO -> { checkRotationInfo(buffer, position, length) }  // 回転情報
+                    ID_AVAILABLE_SHOTS -> { checkAvailableShots(buffer, position, length) }  // 撮影可能枚数
                     ID_OMDS_UNKNOWN_01 -> { }
                     ID_OMDS_UNKNOWN_02 -> { }
                     ID_SHUTTER_SPEED -> { checkShutterSpeed(buffer, position, length)  }  // シャッタースピード
                     ID_APERTURE -> { checkAperture(buffer, position, length) }            // 絞り値
                     ID_EXPOSURE_COMPENSATION -> { checkExposureCompensation(buffer, position, length) }  // 露出補正値
                     ID_OMDS_UNKNOWN_03 -> { }
-                    ID_ISO_SENSITIVITY -> { checkIsoSensitivity(buffer, position, length) }  // ISO感度
+                    ID_ISO_SENSITIVITY -> { checkIsoSensitivity(buffer, position, length) }    // ISO感度
                     ID_OMDS_UNKNOWN_04 -> { }
                     ID_OMDS_UNKNOWN_05 -> { }
                     ID_OMDS_UNKNOWN_06 -> { }
                     ID_EXPOSURE_WARNING -> { checkExposureWarning(buffer, position, length) }  // 露出警告
                     ID_FOCUS_TYPE -> { checkFocusType(buffer, position, length) }              // フォーカスモード (AF/MFなど)
-                    ID_ZOOM_LENS_INFO -> { }
+                    ID_ZOOM_LENS_INFO -> { checkZoomInfo(buffer, position, length) }           // ズーム情報
                     ID_REMAIN_VIDEO_TIME -> { }
-                    ID_POSITION_LEVEL_INFO -> { }
+                    ID_POSITION_LEVEL_INFO -> { checkLevelvial(buffer, position, length) }     // 水準器
                     ID_FACE_DETECT_1 -> { }
                     ID_FACE_DETECT_2 -> { }
                     ID_FACE_DETECT_3 -> { }
@@ -90,7 +90,7 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
                     ID_FACE_DETECT_7 -> { }
                     ID_FACE_DETECT_8 -> { }
                     ID_CONTINUOUS_SHOT_PICTURE_INFO -> { }
-                    else -> { Log.v(TAG, "RTP HEADER INFO UNKNOWN(cmd: $commandId len: $length)") }
+                    else -> { Log.v(TAG, "RTP HEADER INFO UNKNOWN(cmd: $commandId (0x${commandId.toString(16)}) len: $length)") }
                 }
                 position += 4 + length * 4  // header : 4bytes , data : length * 4 bytes
             }
@@ -192,9 +192,8 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
             // データがそろっていないので何もしない
             return
         }
-        val exposureWarningValue = ((((buffer[position + 4].toUInt()).toInt() and 0xff) * 16777216)) + (((buffer[position + 5].toUInt()).toInt() and 0xff) * 65536) + (((buffer[position + 6].toUInt()).toInt() and 0xff) * 256) + ((buffer[position + 7].toUInt()).toInt() and 0x00ff)
-        val exposureWarning = if (exposureWarningValue != 0) { "Exp.WARN" } else { " " }
-        statusProvider.updateExposureWarning(exposureWarning)
+        val exposureWarningValue = getUInt32(buffer, position + 4)
+         statusProvider.updateExposureWarning(exposureWarningValue)
     }
 
     private fun checkFocusType(buffer: ByteArray?, position: Int, length: Int)
@@ -213,6 +212,78 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
             else -> ""
         }
         statusProvider.updateFocusMode(focusMode)
+    }
+
+    private fun checkMediaInfo(buffer: ByteArray?, position: Int, length: Int)
+    {
+        if ((length != 1)||(buffer == null))
+        {
+            // データがそろっていないので何もしない
+            return
+        }
+        val mediaStatusValue = buffer[position + 7].toUByte().toInt()
+        statusProvider.updatedMediaStatus(mediaStatusValue)
+    }
+
+    private fun checkRotationInfo(buffer: ByteArray?, position: Int, length: Int)
+    {
+        if ((length != 1)||(buffer == null))
+        {
+            // データがそろっていないので何もしない
+            return
+        }
+        val orientationValue = getUInt32(buffer, position + 4)
+        statusProvider.updatedOrientation(orientationValue)
+    }
+
+    private fun checkAvailableShots(buffer: ByteArray?, position: Int, length: Int)
+    {
+        if ((length != 1)||(buffer == null))
+        {
+            // データがそろっていないので何もしない
+            return
+        }
+        val remainValue = getUInt32(buffer, position + 4)
+        statusProvider.updatedAvailableShots(remainValue)
+    }
+
+    private fun checkZoomInfo(buffer: ByteArray?, position: Int, length: Int)
+    {
+        if ((length != 3)||(buffer == null))
+        {
+            // データがそろっていないので何もしない
+            return
+        }
+        val wide    = getUInt16(buffer, position + 6)
+        val current = getUInt16(buffer, position + 8)
+        val tele    = getUInt16(buffer, position + 10)
+        statusProvider.updatedZoomInfo(wide, current, tele)
+    }
+
+    private fun checkLevelvial(buffer: ByteArray?, position: Int, length: Int)
+    {
+        if ((length != 3)||(buffer == null))
+        {
+            // データがそろっていないので何もしない
+            return
+        }
+        val accuracy    = getUInt16(buffer, position + 4)
+        val orientation = getUInt16(buffer, position + 6)
+        val roll = getUInt16(buffer, position + 8)
+        val pitch = getUInt16(buffer, position + 12)
+        statusProvider.updatedLevelGauge(accuracy, orientation, roll, pitch)
+    }
+
+    private fun getUInt32(buffer: ByteArray, pos: Int): Int {
+        return (buffer[pos].toUByte().toInt()     shl 24) or
+                (buffer[pos + 1].toUByte().toInt() shl 16) or
+                (buffer[pos + 2].toUByte().toInt() shl 8) or
+                (buffer[pos + 3].toUByte().toInt())
+    }
+
+    private fun getUInt16(buffer: ByteArray, pos: Int): Int {
+        return (buffer[pos].toUByte().toInt() shl 8) or
+                (buffer[pos + 1].toUByte().toInt())
     }
 
     companion object {

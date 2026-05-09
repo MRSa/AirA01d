@@ -14,7 +14,7 @@ class OmdsFocusControl : IFocusingControl
 
     override fun driveAutoFocus(posX: Float, posY: Float): Boolean
     {
-        Log.v(TAG, "driveAutoFocus()")
+        //Log.v(TAG, "driveAutoFocus()")
         try
         {
             afControl.lockAutoFocus(PointF(posX, posY))
@@ -28,7 +28,7 @@ class OmdsFocusControl : IFocusingControl
 
     override fun unlockAutoFocus()
     {
-        Log.v(TAG, "unlockAutoFocus()")
+        //Log.v(TAG, "unlockAutoFocus()")
         try
         {
             afControl.unlockAutoFocus()

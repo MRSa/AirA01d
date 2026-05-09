@@ -65,7 +65,7 @@ class OpcPushEventWatcher(
                     if (dataBytes > 0)
                     {
                         // データがあった...受信する
-                        Log.v(TAG, " RECEIVE OPC EVENT : $dataBytes bytes")
+                        // Log.v(TAG, " RECEIVE OPC EVENT : $dataBytes bytes")
                         val byteStream = ByteArrayOutputStream()
                         var readIndex = 0
                         while (readIndex < dataBytes)
@@ -143,7 +143,6 @@ class OpcPushEventWatcher(
         private const val TIMEOUT_MS = 2500
 
         private const val RECEIVE_BUFFER_SIZE = 16384
-
 
         private const val DUMP_LOG = false
     }
