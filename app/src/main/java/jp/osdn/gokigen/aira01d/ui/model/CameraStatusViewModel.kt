@@ -48,6 +48,15 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     private val _liveviewMagnifySize : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
     val liveViewMagnifySize : LiveData<Int> = _liveviewMagnifySize
 
+    private val _focalLengthNow : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val focalLengthNow : LiveData<Int> = _focalLengthNow
+
+    private val _focalLengthWide : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val focalLengthWide : LiveData<Int> = _focalLengthWide
+
+    private val _focalLengthTele : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val focalLengthTele : LiveData<Int> = _focalLengthTele
+
     private val _takeMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val takeMode : LiveData<String> = _takeMode
 
@@ -126,6 +135,9 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             _cameraInformationLevel.postValue(10)
             _exposureWarningLevel.postValue(10)
             _liveviewMagnifySize.postValue(1)
+            _focalLengthNow.postValue(0)
+            _focalLengthWide.postValue(0)
+            _focalLengthTele.postValue(0)
             _takeMode.postValue("")
             _tv.postValue("")
             _av.postValue("")
@@ -325,8 +337,10 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
 
     override fun updatedZoomInfo(wide: Int, current: Int, tele: Int)
     {
-        // ----- レンズの焦点距離の変化をつかむ
-        //  Log.v(TAG, "ZOOM: wide:$wide current:$current  tele:$tele")
+        // ----- レンズの焦点距離
+        _focalLengthNow.postValue(current)
+        _focalLengthWide.postValue(wide)
+        _focalLengthTele.postValue(tele)
     }
 
     override fun updatedLevelGauge(

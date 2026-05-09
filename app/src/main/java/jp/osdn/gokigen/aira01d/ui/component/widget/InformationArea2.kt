@@ -20,6 +20,16 @@ fun InformationArea2(viewModel: CameraStatusViewModel, modifier: Modifier = Modi
     // ----- ステータスを監視する
     val cameraInformation = viewModel.cameraInformation.observeAsState()
     val informationLevel = viewModel.cameraInformationLevel.observeAsState()
+    val focalLengthNow = viewModel.focalLengthNow.observeAsState()
+    val focalLengthWide = viewModel.focalLengthWide.observeAsState()
+    val focalLengthTele = viewModel.focalLengthTele.observeAsState()
+
+    val focalLengthNowInt = focalLengthNow.value ?: 0
+    val focalLengthWideInt = focalLengthWide.value ?: 0
+    val focalLengthTeleInt = focalLengthTele.value ?: 0
+
+    val focalLength = if (focalLengthWideInt == focalLengthTeleInt) { "${focalLengthNowInt}mm" } else { "${focalLengthNowInt}mm (${focalLengthWideInt}mm - ${focalLengthTeleInt}mm)" }
+    val message = "${cameraInformation.value ?: ""} $focalLength"
 
     // ----- 表示文字の装飾
     val informationLevelValue = informationLevel.value ?: 10
@@ -31,13 +41,15 @@ fun InformationArea2(viewModel: CameraStatusViewModel, modifier: Modifier = Modi
 
     // ----- ボタンの表示
     TextButton(
-        onClick = { },
+        onClick = {
+            // ---- ズームレンズの場合、ズーム操作を行う
+        },
         modifier = modifier
             .height(48.dp)
             .widthIn(min = 48.dp, max = 106.dp)
     ) {
         Text(
-            text = cameraInformation.value ?: "",
+            text = message,
             style = TextStyle(
                 textDecoration = TextDecoration.None,
                 fontWeight = fontWeight,
