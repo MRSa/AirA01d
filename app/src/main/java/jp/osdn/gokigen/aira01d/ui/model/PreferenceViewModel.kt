@@ -36,9 +36,6 @@ class PreferenceViewModel(private val repository: PreferenceRepository) : ViewMo
     suspend fun getConnectCameraAutomaticallySync(): Boolean {
         return repository.connectCameraAutomaticallyFlow.first()
     }
-    fun isConnectCameraAutomatically(): Boolean {
-        return connectCameraAutomatically.value
-    }
 
     companion object {
         private val TAG = PreferenceViewModel::class.java.simpleName

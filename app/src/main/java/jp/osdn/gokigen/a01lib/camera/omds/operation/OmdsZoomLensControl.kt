@@ -6,12 +6,11 @@ import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.lang.Exception
 import java.util.HashMap
 
-class OmdsZoomLensControl(userAgent: String = "OlympusCameraKit", private val executeUrl : String = "http://192.168.0.10") : IZoomLensControl
+class OmdsZoomLensControl(userAgent: String = "OlympusCameraKit", private val executeUrl : String = "http://192.168.0.10", private val useOpcProtocol: Boolean = true) : IZoomLensControl
 {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
     private var isZooming = false
-    private var useOpcProtocol = true
 
     override fun canZoom(): Boolean
     {
@@ -44,7 +43,39 @@ class OmdsZoomLensControl(userAgent: String = "OlympusCameraKit", private val ex
 
     override fun driveZoomLens(targetLength: Float)
     {
-        Log.v(TAG, "driveZoomLens() : $targetLength")
+        // ----- 焦点距離を指定してズームを動かす
+        val targetLengthInt = targetLength.toInt()
+        Log.v(TAG, "driveZoomLens() : ${targetLengthInt}mm")
+        try {
+            val thread = Thread {
+                try
+                {
+                    val command: String = if (useOpcProtocol)
+                    {
+                        "/exec_takemisc.cgi?com=newctrlzoom&ctrl=start&dir=fix&focallen=$targetLengthInt"
+                    }
+                    else
+                    {
+                        "/exec_takemisc.cgi?com=ctrlzoom&move=start&dir=fix&focallen=$targetLengthInt"
+                    }
+                    http.httpGetWithHeader(
+                        executeUrl + command,
+                        headerMap,
+                        null,
+                        TIMEOUT_MS
+                    ) ?: ""
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
+            thread.start()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     override fun moveInitialZoomPosition()

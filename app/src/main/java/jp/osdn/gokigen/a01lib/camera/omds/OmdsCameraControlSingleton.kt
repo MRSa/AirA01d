@@ -28,6 +28,7 @@ import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsOpcLiveviewMagnifyContro
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsPostCommand
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsRunModeControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsTimeSync
+import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsZoomLensControl
 import jp.osdn.gokigen.a01lib.camera.omds.status.OmdsCameraStatusWatcher
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsCaptureControl
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsFocusControl
@@ -54,6 +55,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     private lateinit var captureControl: OmdsCaptureControl
     private lateinit var getRecordImage: OmdsGetRecordImage
     private lateinit var liveviewMagnify: OmdsOpcLiveviewMagnifyControl
+    private lateinit var zoomLensControl: OmdsZoomLensControl
 
     private var isInitialized  = false
 
@@ -77,6 +79,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
                 this.captureControl = OmdsCaptureControl(statusWatcher)
                 this.getRecordImage = OmdsGetRecordImage()
                 this.liveviewMagnify = OmdsOpcLiveviewMagnifyControl()
+                this.zoomLensControl = OmdsZoomLensControl()
                 this.subscriberList.clear()
                 this.connectionStatusReceiverList.clear()
 
@@ -198,10 +201,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
 
     override fun getFocusingControl(): IFocusingControl { return focusControl }
 
-    override fun getZoomControl(): IZoomLensControl?
-    {
-        TODO("Not yet implemented")
-    }
+    override fun getZoomControl(): IZoomLensControl { return zoomLensControl }
 
     override fun getCaptureControl(): ICaptureControl { return captureControl }
 

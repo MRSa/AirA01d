@@ -141,7 +141,7 @@ class OmdsCameraConnection(
                 try
                 {
                     cameraStatusReceiver.onStatusNotify(ICameraConnectionStatus.CameraConnectionStatus.CONNECTING)
-                    val result = OmdsCameraConnectSequence(
+                    OmdsCameraConnectSequence(
                         cameraStatusReceiver,
                         communicationInfo,
                         liveViewQuality,

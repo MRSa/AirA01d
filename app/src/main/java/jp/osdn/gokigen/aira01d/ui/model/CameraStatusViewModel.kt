@@ -558,6 +558,14 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         _liveviewMagnifySize.postValue(nextSize)
     }
 
+    fun driveZoomLens(focalLength: Int)
+    {
+        CoroutineScope(Dispatchers.IO).launch {
+            // ズームレンズを駆動させる
+            AppSingleton.cameraControl.getZoomControl().driveZoomLens(focalLength.toFloat())
+        }
+    }
+
     companion object
     {
         private val TAG = CameraStatusViewModel::class.java.simpleName
