@@ -168,6 +168,10 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             {
                 _isConnectError.postValue(true)
             }
+            else if ((status == CameraConnectionStatus.ERROR)||(status == CameraConnectionStatus.EXCEPTION))
+            {
+                _isConnectError.postValue(true)
+            }
             else
             {
                 _isConnectError.postValue(false)

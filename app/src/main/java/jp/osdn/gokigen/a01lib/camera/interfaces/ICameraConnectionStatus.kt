@@ -4,7 +4,7 @@ interface ICameraConnectionStatus
 {
     enum class CameraConnectionStatus
     {
-        START, CONNECTING, CHECK_WIFI, CONNECTED, DISCONNECTED, NOT_FOUND, ERROR
+        START, CONNECTING, CHECK_WIFI, CONNECTED, DISCONNECTED, NOT_FOUND, ERROR, EXCEPTION
     }
 
     fun onStatusNotify(status: CameraConnectionStatus)

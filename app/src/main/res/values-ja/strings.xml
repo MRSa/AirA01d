@@ -17,4 +17,18 @@
 
     <string name="exposure_warning">露出</string>
     <string name="media_busy">書き込み中</string>
+
+    <string name="label_return_to_liveview_screen">戻る</string>
+    <string name="label_switch_connect_camera_automatically">カメラに自動接続</string>
+    <string name="description_switch_connect_camera_automatically">Wi-Fi接続を確立後、自動的にカメラと接続し撮影状態へ移行します。</string>
+
+    <string name="pref_cat_gokigen">GOKIGEN</string>
+    <string name="pref_instruction_manual">操作説明</string>
+    <string name="pref_instruction_manual_url">https://github.com/MRSa/GokigenOSDN_documents/blob/main/Applications/AirA01d/ReadmeJa.md</string>
+    <string name="pref_privacy_policy">プライバシーポリシー</string>
+    <string name="pref_label_privacy_policy_url">https://github.com/MRSa/GokigenOSDN_documents/blob/main/PrivacyPolicy.md</string>
+    <string name="pref_privacy_policy_url">https://github.com/MRSa/GokigenOSDN_documents/blob/main/PrivacyPolicy.md</string>
+
+    <!-- for navigation -->
+    <string name="label_application_preferences">Preference Screen</string>
 </resources>

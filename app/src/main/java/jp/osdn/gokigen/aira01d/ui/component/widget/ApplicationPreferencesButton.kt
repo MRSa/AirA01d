@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -35,15 +36,21 @@ fun ApplicationPreferencesButton(navController: NavHostController, viewModel: Ca
     // ----- ボタンの表示
     IconButton(
         onClick = {
+            // 触覚フィードバックの実行
             haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+
+            // 設定画面への遷移
+            navController.navigate("PreferenceScreen") {
+                // ボタン連打による画面の重複スタックを防止
+                launchSingleTop = true
+            }
         },
         modifier = modifier.size(48.dp)
     ) {
         Icon(
             painter = painterResource(iconId),
-            contentDescription = "application preferences",
+            contentDescription = stringResource(R.string.label_application_preferences), // 文字列リソース推奨
             tint = iconColor
         )
     }
-
 }

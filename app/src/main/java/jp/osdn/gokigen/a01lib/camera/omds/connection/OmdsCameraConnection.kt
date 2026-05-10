@@ -2,6 +2,7 @@ package jp.osdn.gokigen.a01lib.camera.omds.connection
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
@@ -10,17 +11,25 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.omds.status.IOmdsCommunicationInfo
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * カメラとの接続管理クラス
  *   (ConnectivityManager.NetworkCallback を使用した実装)
  */
-class OmdsCameraConnection(private val communicationInfo: IOmdsCommunicationInfo, private val cameraStatusReceiver: ICameraConnectionStatus, private val liveViewQuality : String = "0640x0480", private val userAgent: String = "OlympusCameraKit", private val executeUrl: String = "http://192.168.0.10")
+class OmdsCameraConnection(
+    private val communicationInfo: IOmdsCommunicationInfo,
+    private val cameraStatusReceiver: ICameraConnectionStatus,
+    private val liveViewQuality : String = "0640x0480",
+    private val userAgent: String = "OlympusCameraKit",
+    private val executeUrl: String = "http://192.168.0.10"
+)
 {
     // 順序性を保証するため、シングルスレッドのExecutorを使用
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private var connectivityManager: ConnectivityManager? = null
     private var isStartWifiWatching = false
+    private val isConnecting = AtomicBoolean(false)
 
     // ネットワーク状態を監視するコールバック
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
@@ -28,16 +37,34 @@ class OmdsCameraConnection(private val communicationInfo: IOmdsCommunicationInfo
             super.onAvailable(network)
             Log.v(TAG, "Network Available: $network")
 
+            // プロセス全体をこのネットワーク（Wi-Fi）に縛り付ける
+            connectivityManager?.bindProcessToNetwork(network)
+
             // Wi-Fi接続が確認できたらカメラ接続処理へ
             cameraStatusReceiver.onStatusNotify(ICameraConnectionStatus.CameraConnectionStatus.CHECK_WIFI)
             connect()
         }
 
+        override fun onCapabilitiesChanged(
+            network: Network,
+            networkCapabilities: NetworkCapabilities
+        ) {
+            super.onCapabilitiesChanged(network, networkCapabilities)
+            Log.v(TAG, "onCapabilitiesChanged")
+        }
+
+        override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties)
+        {
+            super.onLinkPropertiesChanged(network, linkProperties)
+            Log.v(TAG, "onCapabilitiesChanged")
+        }
+
         override fun onLost(network: Network)
         {
             super.onLost(network)
+            connectivityManager?.bindProcessToNetwork(null)
             Log.v(TAG, "Network Lost")
-            // 必要に応じて切断通知などを送る
+            isConnecting.set(false)
         }
     }
 
@@ -103,16 +130,43 @@ class OmdsCameraConnection(private val communicationInfo: IOmdsCommunicationInfo
     // ----- カメラとの接続処理
     fun connect()
     {
-        Log.v(TAG, "connectToCamera()")
-        cameraStatusReceiver.onStatusNotify(ICameraConnectionStatus.CameraConnectionStatus.CONNECTING)
+        if (!isConnecting.compareAndSet(false, true)) {
+            Log.d(TAG, "connectToCamera(): Already connecting or connect task is queued. Skipping.")
+            return
+        }
+        Log.v(TAG, "connectToCamera() : Start connect sequence")
         try
         {
-            cameraExecutor.execute(OmdsCameraConnectSequence(cameraStatusReceiver, communicationInfo, liveViewQuality, userAgent, executeUrl))
+            cameraExecutor.execute {
+                try
+                {
+                    cameraStatusReceiver.onStatusNotify(ICameraConnectionStatus.CameraConnectionStatus.CONNECTING)
+                    val result = OmdsCameraConnectSequence(
+                        cameraStatusReceiver,
+                        communicationInfo,
+                        liveViewQuality,
+                        userAgent,
+                        executeUrl
+                    ).run()
+                }
+                catch (ee: Exception)
+                {
+                    Log.e(TAG, "Connect sequence failed", ee)
+                    cameraStatusReceiver.onStatusNotify(ICameraConnectionStatus.CameraConnectionStatus.ERROR)
+                }
+                finally
+                {
+                    // 成功・失敗に関わらず、処理が終わったらフラグを下ろす
+                    isConnecting.set(false)
+                    Log.v(TAG, "connectToCamera() : Sequence finished.")
+                }
+            }
         }
         catch (e: Exception)
         {
-            Log.e(TAG, "connectToCamera() EXCEPTION: ${e.message}", e)
-            cameraStatusReceiver.onStatusNotify(ICameraConnectionStatus.CameraConnectionStatus.ERROR)
+            Log.e(TAG, "connectToCamera() : EXCEPTION: ${e.message}", e)
+            cameraStatusReceiver.onStatusNotify(ICameraConnectionStatus.CameraConnectionStatus.EXCEPTION)
+            isConnecting.set(false)
         }
     }
 

@@ -17,10 +17,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import jp.osdn.gokigen.aira01d.preference.PreferenceValueInitializer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import jp.osdn.gokigen.aira01d.preference.PreferenceRepository
 import jp.osdn.gokigen.aira01d.ui.component.ViewRootComponent
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
+import jp.osdn.gokigen.aira01d.ui.model.PreferenceViewModel
 import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
 import jp.osdn.gokigen.aira01d.ui.theme.AirA01dTheme
 
@@ -29,6 +32,16 @@ class MainActivity : ComponentActivity()
     private val myLiveviewViewModel: LiveviewViewModel by viewModels()
     private val myCameraStatusViewModel: CameraStatusViewModel by viewModels()
     private val mySelfTimerViewModel: SelfTimerViewModel by viewModels()
+    private val myPreferenceViewModel: PreferenceViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                // Repository を作成して ViewModel に渡す
+                val repository = PreferenceRepository(applicationContext)
+                return PreferenceViewModel(repository) as T
+            }
+        }
+    }
 
     // 権限リクエストのランチャーは、onCreateの直下（またはプロパティ初期化時）で登録する
     private val requestPermissionLauncher = registerForActivityResult(
@@ -73,18 +86,17 @@ class MainActivity : ComponentActivity()
 
         // 初期化処理
         if (savedInstanceState == null) {
-            PreferenceValueInitializer().initializePreferences(this)
-
             // ViewModelの初期化 (イベント登録の関係から、CameraControl の方を先に初期化する必要あり...）
             AppSingleton.cameraControl.initialize(myLiveviewViewModel)
             myLiveviewViewModel.initializeViewModel(applicationContext)
             myCameraStatusViewModel.initializeViewModel()
             mySelfTimerViewModel.initializeViewModel()
+            myPreferenceViewModel.initializeViewModel()
         }
 
         // Composeのセットアップ
         val rootComponent = ViewRootComponent(applicationContext)
-        rootComponent.setViewModels(myLiveviewViewModel, myCameraStatusViewModel, mySelfTimerViewModel)
+        rootComponent.setViewModels(myLiveviewViewModel, myCameraStatusViewModel, mySelfTimerViewModel, myPreferenceViewModel)
 
         setContent {
             AirA01dTheme {
@@ -94,6 +106,21 @@ class MainActivity : ComponentActivity()
 
         // 権限チェックとリクエスト
         checkAndRequestPermissions()
+
+/*
+        // --- カメラと接続されていない場合には、カメラとの接続処理を呼ぶ
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // DataStoreからの読み込みが完了するまで待って、最初の値を取得する
+                val isCheck = myPreferenceViewModel.connectCameraAutomatically.first()
+                if (isCheck) {
+                    if (AppSingleton.cameraControl.getCameraConnectionStatus() != ICameraConnectionStatus.CameraConnectionStatus.CONNECTED) {
+                        AppSingleton.cameraControl.startCamera(applicationContext)
+                    }
+                }
+            }
+        }
+*/
     }
 
     private fun checkAndRequestPermissions() {

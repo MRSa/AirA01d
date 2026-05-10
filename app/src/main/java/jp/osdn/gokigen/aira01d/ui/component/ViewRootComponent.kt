@@ -14,8 +14,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import jp.osdn.gokigen.aira01d.ui.component.screen.LiveviewScreen
+import jp.osdn.gokigen.aira01d.ui.component.screen.PreferenceScreen
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
+import jp.osdn.gokigen.aira01d.ui.model.PreferenceViewModel
 import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
 
 class ViewRootComponent @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : AbstractComposeView(context, attrs, defStyleAttr)
@@ -23,15 +25,18 @@ class ViewRootComponent @JvmOverloads constructor(context: Context, attrs: Attri
     private lateinit var myLiveviewViewModel : LiveviewViewModel
     private lateinit var myCameraStatusViewModel: CameraStatusViewModel
     private lateinit var mySelfTimerViewModel: SelfTimerViewModel
+    private lateinit var myPreferenceViewModel: PreferenceViewModel
 
     fun setViewModels(
         liveViewModel : LiveviewViewModel,
         cameraStatusViewModel: CameraStatusViewModel,
-        selfTimerViewModel: SelfTimerViewModel
+        selfTimerViewModel: SelfTimerViewModel,
+        preferenceViewModel: PreferenceViewModel
     ) {
         this.myLiveviewViewModel = liveViewModel
         this.myCameraStatusViewModel = cameraStatusViewModel
         this.mySelfTimerViewModel = selfTimerViewModel
+        this.myPreferenceViewModel = preferenceViewModel
         Log.v(TAG, " ...setViewModels...")
     }
 
@@ -44,7 +49,8 @@ class ViewRootComponent @JvmOverloads constructor(context: Context, attrs: Attri
                 navController = navController,
                 liveViewModel = this.myLiveviewViewModel,
                 cameraStatusViewModel = this.myCameraStatusViewModel,
-                selfTimerViewModel = mySelfTimerViewModel
+                selfTimerViewModel = mySelfTimerViewModel,
+                preferenceViewModel = myPreferenceViewModel
             )
         }
         Log.v(TAG, " ...NavigationRootComponent...")
@@ -61,7 +67,8 @@ fun NavigationMain(
     navController: NavHostController,
     liveViewModel : LiveviewViewModel,
     cameraStatusViewModel: CameraStatusViewModel,
-    selfTimerViewModel: SelfTimerViewModel
+    selfTimerViewModel: SelfTimerViewModel,
+    preferenceViewModel: PreferenceViewModel
 )
 {
     MaterialTheme {
@@ -75,7 +82,14 @@ fun NavigationMain(
                     navController = navController,
                     liveviewModel = liveViewModel,
                     cameraStatusViewModel = cameraStatusViewModel,
-                    selfTimerViewModel = selfTimerViewModel
+                    selfTimerViewModel = selfTimerViewModel,
+                    preferenceViewModel = preferenceViewModel
+                )
+            }
+            composable("PreferenceScreen") {
+                PreferenceScreen(
+                    navController = navController,
+                    prefsModel = preferenceViewModel
                 )
             }
         }

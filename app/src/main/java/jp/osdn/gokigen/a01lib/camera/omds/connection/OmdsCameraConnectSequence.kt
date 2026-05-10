@@ -16,6 +16,7 @@ class OmdsCameraConnectSequence(private val cameraStatusReceiver: ICameraConnect
     {
         try
         {
+            // --- TODO: OPC専用のカメラ接続シーケンスになっている。 (他OMDS機に対応するためには変更が必要。)
             val getCommandListUrl = "$executeUrl/get_commandlist.cgi"
             val getConnectModeUrl = "$executeUrl/get_connectmode.cgi"
             val switchOpcCameraModeUrl = "$executeUrl/switch_cameramode.cgi"
@@ -25,16 +26,16 @@ class OmdsCameraConnectSequence(private val cameraStatusReceiver: ICameraConnect
             Log.v(TAG, " $getConnectModeUrl $response")
             if (response.isNotEmpty())
             {
-                // コマンドリストを取得する
+                // --- カメラが受け付けるコマンドリストを取得する
                 val response1: String = http.httpGetWithHeader(getCommandListUrl, headerMap, null, TIMEOUT_MS) ?: ""
                 Log.v(TAG, " $getCommandListUrl (${response1.length})")
                 communicationInfo.setOmdsCommandList(response1)
 
-                // --------- 通信経路をWiFiに(強制)変更する
+                // --- 通信経路をWiFiに(強制)変更する
                 val response2: String = http.httpGetWithHeader("$switchCommPathUrl?path=wifi", headerMap, null, TIMEOUT_MS) ?: ""
                 Log.v(TAG, " $switchCommPathUrl?path=wifi ($response2)")
 
-                // OPCのコマンドを発行する
+                // --- OPCのコマンドを発行する (standaloneモードに切り替える)
                 val response3: String = http.httpGetWithHeader("$switchOpcCameraModeUrl?mode=standalone", headerMap, null, TIMEOUT_MS) ?: ""
                 Log.v(TAG, " $switchOpcCameraModeUrl?mode=standalone ($response3)")
                 if (response3.length > 5)
@@ -43,11 +44,9 @@ class OmdsCameraConnectSequence(private val cameraStatusReceiver: ICameraConnect
                     communicationInfo.startReceiveOpcEvent()
                 }
 
-                // 撮影モードに切り替える
+                // --- 撮影モードに切り替える
                 val response4: String = http.httpGetWithHeader("$switchOpcCameraModeUrl?mode=rec&lvqty=$liveViewQuality", headerMap, null, TIMEOUT_MS) ?: ""
                 Log.v(TAG, " $switchOpcCameraModeUrl?mode=rec $response4")
-
-
 
                 ////////////////  for TEST   ////////////////
                 if (DUMP_STATUS)
@@ -75,7 +74,7 @@ class OmdsCameraConnectSequence(private val cameraStatusReceiver: ICameraConnect
         catch (e: Exception)
         {
             e.printStackTrace()
-            cameraStatusReceiver.onStatusNotify(ICameraConnectionStatus.CameraConnectionStatus.ERROR)
+            cameraStatusReceiver.onStatusNotify(ICameraConnectionStatus.CameraConnectionStatus.EXCEPTION)
         }
     }
 
@@ -104,7 +103,7 @@ class OmdsCameraConnectSequence(private val cameraStatusReceiver: ICameraConnect
     companion object
     {
         private val TAG = OmdsCameraConnectSequence::class.java.simpleName
-        private const val TIMEOUT_MS = 5000
+        private const val TIMEOUT_MS = 3000
         private const val DUMP_STATUS = false
     }
 }

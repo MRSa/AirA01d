@@ -43,8 +43,11 @@ fun ConnectButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifie
         ICameraConnectionStatus.CameraConnectionStatus.ERROR ->
             R.drawable.outline_cloud_alert_24 to MaterialTheme.colorScheme.error // 異常：警告の赤
 
+        ICameraConnectionStatus.CameraConnectionStatus.EXCEPTION ->
+            R.drawable.outline_cloud_alert_24 to MaterialTheme.colorScheme.error // 異常：警告の赤
+
         ICameraConnectionStatus.CameraConnectionStatus.NOT_FOUND ->
-            R.drawable.cloud_unknown to MaterialTheme.colorScheme.error // 異常：警告の赤
+            R.drawable.cloud_unknown to MaterialTheme.colorScheme.error           // 異常：警告の赤
 
         ICameraConnectionStatus.CameraConnectionStatus.START ->
             R.drawable.outline_cloud_sync_24 to MaterialTheme.colorScheme.tertiary // 進行中2：第3色（少し目立つ色）
@@ -62,21 +65,26 @@ fun ConnectButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifie
     // ----- ボタンの表示
     IconButton(
         onClick = {
-            if (cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.CONNECTED)
-            {
-                viewModel.disconnectFromCamera()
+            val feedback = when (cameraConnectionStatus.value) {
+                ICameraConnectionStatus.CameraConnectionStatus.CONNECTED -> {
+                    viewModel.disconnectFromCamera()
+                    true
+                }
+                ICameraConnectionStatus.CameraConnectionStatus.DISCONNECTED -> {
+                    viewModel.connectToCamera()
+                    true
+                }
+                ICameraConnectionStatus.CameraConnectionStatus.ERROR, ICameraConnectionStatus.CameraConnectionStatus.NOT_FOUND -> {
+                    viewModel.startCamera(context)
+                    true
+                }
+                else -> { false } // ----- そのほかのタイミングでは何もしない
             }
-            else if (cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.DISCONNECTED)
+            if (feedback)
             {
-                viewModel.connectToCamera()
+                // ----haptic feedback を実行する
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
             }
-            else if ((cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.DISCONNECTED) ||
-                (cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.ERROR) ||
-                (cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.NOT_FOUND))
-            {
-                viewModel.startCamera(context)
-            }
-            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
         },
         modifier = modifier.size(48.dp)
     ) {
