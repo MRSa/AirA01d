@@ -1,6 +1,5 @@
 package jp.osdn.gokigen.aira01d.ui.component.widget
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

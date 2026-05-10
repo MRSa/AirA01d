@@ -106,21 +106,6 @@ class MainActivity : ComponentActivity()
 
         // 権限チェックとリクエスト
         checkAndRequestPermissions()
-
-/*
-        // --- カメラと接続されていない場合には、カメラとの接続処理を呼ぶ
-        lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // DataStoreからの読み込みが完了するまで待って、最初の値を取得する
-                val isCheck = myPreferenceViewModel.connectCameraAutomatically.first()
-                if (isCheck) {
-                    if (AppSingleton.cameraControl.getCameraConnectionStatus() != ICameraConnectionStatus.CameraConnectionStatus.CONNECTED) {
-                        AppSingleton.cameraControl.startCamera(applicationContext)
-                    }
-                }
-            }
-        }
-*/
     }
 
     private fun checkAndRequestPermissions() {
