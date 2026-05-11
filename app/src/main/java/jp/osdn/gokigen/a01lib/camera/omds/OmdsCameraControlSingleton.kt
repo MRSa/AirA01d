@@ -9,6 +9,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus.CameraCo
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.IFocusingControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraHardwareInformation
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraLiveviewMagnify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
@@ -19,7 +20,7 @@ import jp.osdn.gokigen.a01lib.camera.omds.connection.OmdsCameraConnection
 import jp.osdn.gokigen.a01lib.camera.omds.liveview.OmdsLiveViewControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCamIndStatus
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCameraGetProperty
-import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCameraStatus
+import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCameraHardwareInformation
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCommPathControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCommPathStatus
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsGetCommand
@@ -45,7 +46,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     private lateinit var runModeControl : OmdsRunModeControl
     private lateinit var commPathControl : OmdsCommPathControl
     private lateinit var timeSync: OmdsTimeSync
-    private lateinit var cameraStatus: OmdsCameraStatus
+    private lateinit var cameraHardwareInformation: OmdsCameraHardwareInformation
     private lateinit var getCameraProperty: OmdsCameraGetProperty
     private lateinit var getCommand: OmdsGetCommand
     private lateinit var postCommand: OmdsPostCommand
@@ -69,7 +70,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
                 this.runModeControl = OmdsRunModeControl()
                 this.commPathControl = OmdsCommPathControl()
                 this.timeSync = OmdsTimeSync()
-                this.cameraStatus = OmdsCameraStatus()
+                this.cameraHardwareInformation = OmdsCameraHardwareInformation()
                 this.getCameraProperty = OmdsCameraGetProperty()
                 this.getCommand = OmdsGetCommand()
                 this.postCommand = OmdsPostCommand()
@@ -206,7 +207,10 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     override fun getCaptureControl(): ICaptureControl { return captureControl }
 
     override fun getGetRecordImage(): IGetRecordImage { return getRecordImage }
+
     override fun getLiveviewMagnify(): ICameraLiveviewMagnify { return liveviewMagnify }
+
+    override fun getCameraHardwareInformation(): ICameraHardwareInformation { return cameraHardwareInformation }
 
     override fun onStatusNotify(status: CameraConnectionStatus)
     {

@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity()
     {
         // ----- Splash Screenの表示
         installSplashScreen()
+
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()

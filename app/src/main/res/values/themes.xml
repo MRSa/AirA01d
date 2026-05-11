@@ -8,6 +8,9 @@
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <!-- スプラッシュ終了後に切り替わる本来のアプリテーマ -->
         <item name="postSplashScreenTheme">@style/Theme.AirA01d</item>
+
+        <!-- API 31 未満用の互換性設定 -->
+        <item name="android:windowBackground">@drawable/compat_splash_background</item>
     </style>
     <!-- 本来のアプリテーマの定義 -->
     <style name="Theme.AirA01d" parent="android:Theme.Material.Light.NoActionBar">

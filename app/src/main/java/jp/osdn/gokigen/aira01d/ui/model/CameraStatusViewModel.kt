@@ -6,12 +6,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus.CameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraHardwareInformation
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraHardwareInformation.Hardware
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
@@ -21,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 import kotlin.text.isNotEmpty
 
 // ----- カメラ状態を保持し、画面表示のためにデータを提供する
@@ -57,7 +61,13 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     private val _focalLengthTele : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
     val focalLengthTele : LiveData<Int> = _focalLengthTele
 
+    val focalLengthList = MediatorLiveData<List<Int>>().apply {
+        addSource(focalLengthWide) { updateFocalList() }
+        addSource(focalLengthTele) { updateFocalList() }
+        addSource(focalLengthNow) { updateFocalList() }
+    }
     private val _takeMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+
     val takeMode : LiveData<String> = _takeMode
 
     private val _tv : MutableLiveData<String> by lazy { MutableLiveData<String>() }
@@ -108,6 +118,12 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     private val _meteringMode : MutableLiveData<String> by lazy { MutableLiveData<String>() }
     val meteringMode : LiveData<String> = _meteringMode
 
+    private val _electricZoom : MutableLiveData<String> by lazy { MutableLiveData<String>() }
+    val electricZoom : LiveData<String> = _electricZoom
+
+    private val _checkingCameraHardware : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
+    val checkingCameraHardware : LiveData<Boolean> = _checkingCameraHardware
+
     var propertyList by mutableStateOf<List<String>>(emptyList())
         private set
 
@@ -149,6 +165,8 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             _driveMode.postValue("")
             _batteryLevel.postValue("")
             _meteringMode.postValue("")
+            _electricZoom.postValue("")
+            _checkingCameraHardware.postValue(false)
         }
         catch (e: Exception)
         {
@@ -566,6 +584,44 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         }
     }
 
+    fun checkElectricZoom()
+    {
+        _checkingCameraHardware.postValue(true)
+        _electricZoom.postValue("")
+        CoroutineScope(Dispatchers.IO).launch {
+            // ズームレンズを制御可能かチェックする
+            AppSingleton.cameraControl.getCameraHardwareInformation().getCameraStatus(object : ICameraHardwareInformation.Callback {
+                override fun operationResult(result: Map<String, String?>) {
+                    val zoom = result[Hardware.ELECTRICZOOM] ?: ""
+                    Log.v(TAG, "ELECTRIC ZOOM: $zoom  ${_focalLengthWide.value}mm - ${_focalLengthTele.value}mm  (${_focalLengthNow.value}mm)")
+                    _electricZoom.postValue(zoom.ifEmpty { "NG" })
+                    _checkingCameraHardware.postValue(false)
+                }
+            })
+        }
+    }
+
+    fun clearElectricZoomInfo()
+    {
+        _electricZoom.postValue("")
+    }
+
+    private fun updateFocalList() {
+        val wide = focalLengthWide.value ?: 0
+        val tele = focalLengthTele.value ?: 0
+        val now = focalLengthNow.value ?: 0
+        if (wide >= tele) {
+            focalLengthList.value = emptyList()
+            return
+        }
+
+        val targetSize = 10
+        val step = (tele - wide).toDouble() / (targetSize - 1)
+        val list = (0 until targetSize).map { (wide + it * step).roundToInt() }.toMutableList()
+
+        if (now !in list) list.add(now)
+        focalLengthList.value = list.sorted()
+    }
     companion object
     {
         private val TAG = CameraStatusViewModel::class.java.simpleName
