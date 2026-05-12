@@ -82,10 +82,10 @@ class SelfTimerViewModel : ViewModel()
     private fun onTimerFinished()
     {
         // ----- 撮影処理の実行
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try
             {
-                AppSingleton.cameraControl.getCaptureControl().doCapture(ICaptureControl.CaptureAction.ON)
+                AppSingleton.cameraControl.getCaptureControl().doCapture(ICaptureControl.CaptureAction.TOGGLE)
             }
             catch (e: Exception)
             {

@@ -17,6 +17,7 @@
 
     <string name="exposure_warning">Exposure warning</string>
     <string name="media_busy">Media Busy</string>
+    <string name="capturing">Capturing…</string>
 
     <string name="label_return_to_liveview_screen">Back</string>
     <string name="label_switch_connect_camera_automatically">Auto-connect to Camera</string>

@@ -4,7 +4,8 @@ interface ICaptureControl
 {
     enum class CaptureAction
     {
-        ON, HALF, OFF
+        ON, OFF, TOGGLE
     }
     fun doCapture(captureAction: CaptureAction)
+    fun doMovie(captureAction: CaptureAction)
 }

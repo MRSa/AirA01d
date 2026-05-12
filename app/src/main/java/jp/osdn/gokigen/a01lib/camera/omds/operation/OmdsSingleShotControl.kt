@@ -15,22 +15,15 @@ class OmdsSingleShotControl(userAgent: String = "OlympusCameraKit", private val 
         Log.v(TAG, "singleShot()")
         try
         {
-            val thread = Thread {
-                try
-                {
-                    val sendUrl = if (useOpcProtocol) { executeUrl + CAPTURE_COMMAND_OPC } else { executeUrl + CAPTURE_COMMAND }
-                    val reply: String = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
-                    if ((!reply.contains("ok"))&&(!reply.contains("OK")))
-                    {
-                        Log.v(TAG, "Capture Failure... : $reply ($sendUrl)")
-                    }
-                }
-                catch (e: Exception)
-                {
-                    e.printStackTrace()
-                }
+            val sendUrl = if (useOpcProtocol) {
+                executeUrl + CAPTURE_COMMAND_OPC
+            } else {
+                executeUrl + CAPTURE_COMMAND
             }
-            thread.start()
+            val reply: String = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
+            if ((!reply.contains("ok")) && (!reply.contains("OK"))) {
+                Log.v(TAG, "Capture Failure... : $reply ($sendUrl)")
+            }
         }
         catch (e: Exception)
         {

@@ -17,6 +17,7 @@
 
     <string name="exposure_warning">露出</string>
     <string name="media_busy">書き込み中</string>
+    <string name="capturing">撮影中</string>
 
     <string name="label_return_to_liveview_screen">戻る</string>
     <string name="label_switch_connect_camera_automatically">カメラに自動接続</string>

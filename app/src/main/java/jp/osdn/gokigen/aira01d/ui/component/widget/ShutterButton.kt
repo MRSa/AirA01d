@@ -31,12 +31,13 @@ fun ShutterButton(
 
     // ----- ステータスを監視する
     val isLvActivated = viewModel.isLvActivated.observeAsState()
+    val isCaptureActivated = controlModel.isCaptureActivated.observeAsState()
 
     val isTimerOn by selfTimerModel.isTimerOn.collectAsStateWithLifecycle()
     val isTimerActivated by selfTimerModel.isTimerActivated.collectAsStateWithLifecycle()
 
     // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId = if (isTimerOn == SelfTimerViewModel.SelfTimerProperty.TimerOff) { R.drawable.baseline_camera_24  } else { R.drawable.outline_timer_24 }
+    val iconId = if (isTimerOn == SelfTimerViewModel.SelfTimerProperty.TimerOff) { if (isCaptureActivated.value == true) { R.drawable.baseline_stop_24 } else  { R.drawable.baseline_camera_24 } } else { R.drawable.outline_timer_24 }
     val iconColor = if (isTimerOn == SelfTimerViewModel.SelfTimerProperty.TimerOff) { MaterialTheme.colorScheme.primary } else { MaterialTheme.colorScheme.onSurfaceVariant }
 
     // ----- ボタンの表示
@@ -44,7 +45,8 @@ fun ShutterButton(
         onClick = {
             if (isTimerOn == SelfTimerViewModel.SelfTimerProperty.TimerOff)
             {
-                controlModel.doCapture(ICaptureControl.CaptureAction.ON)
+                // ----- シャッターボタン押下
+                controlModel.tryCapture()
             }
             else
             {

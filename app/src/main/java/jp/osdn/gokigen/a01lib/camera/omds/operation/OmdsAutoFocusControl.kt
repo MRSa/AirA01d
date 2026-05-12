@@ -74,7 +74,7 @@ class OmdsAutoFocusControl(
             Log.v(TAG, "AF ($posX, $posY)")
             val sendUrl = String.format(Locale.US, "%s%s&point=%04dx%04d", executeUrl, AF_FRAME_COMMAND, posX, posY)
             val reply: String = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
-            if (!reply.contains("ok"))
+            if ((!reply.contains("ok"))&&(!reply.contains("OK")))
             {
                 Log.v(TAG, "OMDS: setTouchAFPosition() reply is illegal. : $reply ($sendUrl)")
             }
@@ -156,7 +156,7 @@ class OmdsAutoFocusControl(
         {
             val sendUrl = executeUrl + AF_RELEASE_COMMAND
             val reply: String = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
-            if (!reply.contains("ok"))
+            if ((!reply.contains("ok"))&&(!reply.contains("OK")))
             {
                 Log.v(TAG, "unlockAutoFocus() reply is null.")
             }
@@ -178,7 +178,7 @@ class OmdsAutoFocusControl(
 
             val sendUrl = executeUrl + AF_RELEASE_COMMAND_OPC
             val reply: String = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
-            if (!reply.contains("ok"))
+            if ((!reply.contains("ok"))&&(!reply.contains("OK")))
             {
                 Log.v(TAG, "unlockAutoFocus() reply is null.")
             }
@@ -189,20 +189,6 @@ class OmdsAutoFocusControl(
             e.printStackTrace()
         }
     }
-
-/*
-    private fun showFocusFrame(rect: RectF, status: IAutoFocusFrameDisplay.FocusFrameStatus, duration: Double)
-    {
-        frameDisplayer.showFocusFrame(rect, status, duration.toFloat())
-        indicator.onAfLockUpdate(status)
-    }
-
-    private fun hideFocusFrame()
-    {
-        frameDisplayer.hideFocusFrame()
-        indicator.onAfLockUpdate(IAutoFocusFrameDisplay.FocusFrameStatus.None)
-    }
- */
 
     private fun getPreFocusFrameRect(point: PointF): RectF
     {
@@ -221,7 +207,7 @@ class OmdsAutoFocusControl(
         try
         {
             Log.v(TAG, " REPLY : $replyXml $position")
-            if (replyXml.contains("ok"))
+            if ((!replyXml.contains("ok"))&&(!replyXml.contains("OK")))
             {
                 return true
             }

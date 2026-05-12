@@ -41,7 +41,9 @@
       <w>newreleaseaelock</w>
       <w>newreleaseafframe</w>
       <w>newreleaseaflock</w>
+      <w>newstartmovietake</w>
       <w>newstarttake</w>
+      <w>newstopmovietake</w>
       <w>newstoptake</w>
       <w>proplist</w>
       <w>propname</w>
@@ -51,8 +53,10 @@
       <w>releaseafframe</w>
       <w>shutspeedvalue</w>
       <w>startliveview</w>
+      <w>startmovietake</w>
       <w>starttake</w>
       <w>stopliveview</w>
+      <w>stopmovietake</w>
       <w>stoptake</w>
       <w>takemisc</w>
       <w>takemode</w>

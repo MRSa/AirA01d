@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -213,6 +215,16 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         val event = (eventMessage[1].toInt() and 0xFF).toByte() // eventMessage[1]
         val length = ((eventMessage[2].toInt() and 0xFF) shl 8) or (eventMessage[3].toInt() and 0xFF)
         val dataBody = String(eventMessage, 4, eventMessage.size - 4, Charsets.UTF_8)
+        //if ((event == 102.toByte())||(event == 103.toByte()))
+        //{
+        //    // --- 撮影準備完了通知(102) or 撮影開始通知(103)
+        //    //    開始のイベントは来ない様子
+        //    _isCaptureActivated.postValue(true)
+        //} else if ((event == 106.toByte())||(event == 107.toByte())||(event == 110.toByte()))
+        //{
+        //    // --- 撮影完了通知(106) or 撮影終了処理完了通知(107) or 動画撮影停止通知(110)
+        //    _isCaptureActivated.postValue(false)
+        //}
         Log.v(TAG, " - - - - - - - - - receivedCameraEvent(CameraStatusViewModel) : $appId [evt:$event] len:$length   '$dataBody'")
     }
 
@@ -494,28 +506,41 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         }
     }
 
-    // ----- 撮影を行う
-    fun doCapture(captureAction: ICaptureControl.CaptureAction)
-    {
-        CoroutineScope(Dispatchers.Main).launch {
-            try
-            {
-                AppSingleton.cameraControl.getCaptureControl().doCapture(captureAction)
-            }
-            catch (e: Exception)
-            {
-                e.printStackTrace()
-            }
-        }
-    }
-
     // ----- 撮影を行う。（カメラの撮影状態によって、 ON/OFF を切り替える)
     fun tryCapture()
     {
         try
         {
-            val captureAction = if (_isCaptureActivated.value == false) { ICaptureControl.CaptureAction.ON } else { ICaptureControl.CaptureAction.OFF }
-            doCapture(captureAction)
+            val captureAction = ICaptureControl.CaptureAction.TOGGLE
+            val isMovie = (_takeMode.value == "movie")
+            val isContinuous = !(_driveMode.value?:"").contains("NORMAL")
+            CoroutineScope(Dispatchers.IO).launch {
+                try
+                {
+                    // ----- Log.v(TAG, "${_takeMode.value} : ${_driveMode.value} $isMovie $isContinuous ${_isCaptureActivated.value}")
+                    if ((isMovie)||(isContinuous))
+                    {
+                        val captureStatus = _isCaptureActivated.value ?: true
+                        _isCaptureActivated.postValue(!captureStatus)
+                    }
+                    else
+                    {
+                        _isCaptureActivated.postValue(false)
+                    }
+                    if (isMovie)
+                    {
+                        AppSingleton.cameraControl.getCaptureControl().doMovie(captureAction)
+                    }
+                    else
+                    {
+                        AppSingleton.cameraControl.getCaptureControl().doCapture(captureAction)
+                    }
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
         }
         catch (e: Exception)
         {
