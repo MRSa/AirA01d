@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
