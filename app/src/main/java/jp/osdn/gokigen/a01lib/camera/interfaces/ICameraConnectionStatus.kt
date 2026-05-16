@@ -7,5 +7,12 @@ interface ICameraConnectionStatus
         START, CONNECTING, CHECK_WIFI, CONNECTED, DISCONNECTED, NOT_FOUND, ERROR, EXCEPTION
     }
 
+    enum class CameraProtocol
+    {
+        OPC, OMDS
+    }
+
     fun onStatusNotify(status: CameraConnectionStatus)
+
+    fun detectCameraProtocol(protocol: CameraProtocol)
 }

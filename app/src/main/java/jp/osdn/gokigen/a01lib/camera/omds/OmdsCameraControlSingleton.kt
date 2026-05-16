@@ -59,6 +59,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     private lateinit var zoomLensControl: OmdsZoomLensControl
 
     private var isInitialized  = false
+    private var cameraProtocol: ICameraConnectionStatus.CameraProtocol = ICameraConnectionStatus.CameraProtocol.OPC
 
     override fun initialize(imageReceiver: IImageDataReceiver)
     {
@@ -245,6 +246,31 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         }
         // ----- 現在のステータスを保管する
         cameraConnectionStatus = status
+    }
+
+    override fun detectCameraProtocol(protocol: ICameraConnectionStatus.CameraProtocol)
+    {
+        // --- カメラと接続した時に検出したプロトコルが違ったら、変更を行う
+        if (cameraProtocol != protocol)
+        {
+            cameraProtocol = protocol
+
+            // ----- プロトコルが変わった場合は、プロトコル変更を通知する (以下のクラスに通知が必要になるはず)
+            //runModeControl : OmdsRunModeControl
+            //commPathControl : OmdsCommPathControl
+            //timeSync: OmdsTimeSync
+            //cameraHardwareInformation: OmdsCameraHardwareInformation
+            //getCameraProperty: OmdsCameraGetProperty
+            //postCommand: OmdsPostCommand
+            //camInState: OmdsCamIndStatus
+            //camCommPathStatus: OmdsCommPathStatus
+            //focusControl: OmdsFocusControl
+            //captureControl: OmdsCaptureControl
+            //getRecordImage: OmdsGetRecordImage
+            //liveviewMagnify: OmdsOpcLiveviewMagnifyControl
+            //zoomLensControl: OmdsZoomLensControl
+            //statusWatcher: OmdsCameraStatusWatcher
+        }
     }
 
     override fun subscribeEventReceiver(subscriber: ICameraEventNotify)

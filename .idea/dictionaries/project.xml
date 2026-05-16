@@ -5,6 +5,7 @@
       <w>assignafframe</w>
       <w>cameramode</w>
       <w>camindstate</w>
+      <w>caminfo</w>
       <w>cammode</w>
       <w>camprop</w>
       <w>cardremainbyte</w>
@@ -31,6 +32,7 @@
       <w>imagingstate</w>
       <w>isospeedvalue</w>
       <w>lensmountstatus</w>
+      <w>locationinfo</w>
       <w>lvqty</w>
       <w>lvscale</w>
       <w>macrosetting</w>

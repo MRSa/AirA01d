@@ -203,6 +203,11 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         }
     }
 
+    override fun detectCameraProtocol(protocol: ICameraConnectionStatus.CameraProtocol)
+    {
+        Log.v(TAG, "CAMERA PROTOCOL: $protocol")
+    }
+
     override fun getSubscribeId(): String { return ("CameraStatusViewModel") }
 
     override fun receivedCameraEvent(eventMessage: ByteArray)
