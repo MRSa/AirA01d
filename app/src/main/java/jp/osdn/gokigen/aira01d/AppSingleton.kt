@@ -17,5 +17,6 @@ class AppSingleton : Application()
     {
         private val TAG = AppSingleton::class.java.simpleName
         lateinit var cameraControl: OmdsCameraControlSingleton
+        val resourceConverter = StringResourceConverter()
     }
 }

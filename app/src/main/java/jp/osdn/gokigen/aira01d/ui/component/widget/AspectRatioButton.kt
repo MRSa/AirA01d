@@ -39,6 +39,7 @@ fun AspectRatioButton(
         iconId = iconId,
         iconColor = iconColor,
         isEditable = (isLvActivated.value == true),
+        keyNameHeader = "aspect_",
         modifier = modifier
     )
 }

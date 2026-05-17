@@ -1,0 +1,53 @@
+<resources>
+    <!-- アスペクト比 -->
+    <string name="aspect_04_03">4:3</string>
+    <string name="aspect_16_09">16:9</string>
+    <string name="aspect_03_02">3:2</string>
+    <string name="aspect_06_06">1:1</string>
+    <string name="aspect_03_04">3:4</string>
+
+    <!-- ドライブモード -->
+    <string name="DRIVE_NORMAL">1コマ撮影</string>
+    <string name="DRIVE_CONTINUE">連続撮影</string>k
+
+    <!-- 測光方式 -->
+    <string name="AE_ESP">デジタルESP測光</string>
+    <string name="AE_CENTER">中央重点平均測光</string>
+    <string name="AE_PINPOINT">画面中央測光</string>
+
+    <!-- ホワイトバランス -->
+    <string name="WB_AUTO">WB Auto</string>
+    <string name="MWB_FINE">WB晴天</string>
+    <string name="MWB_SHADE">WB日陰</string>
+    <string name="MWB_CLOUD">WB雲天</string>
+    <string name="MWB_LAMP">WB電球</string>
+    <string name="MWB_FLUORESCENCE1">WB蛍光灯</string>
+    <string name="MWB_WATER_1">WB水中</string>
+    <string name="WB_CUSTOM1">WBカスタム</string>
+
+    <!-- 仕上がり・ピクチャーモード -->
+    <string name="I_FINISH">i-Finish</string>
+    <string name="VIVID">Vivid</string>
+    <string name="NATURAL">Natural</string>
+    <string name="FLAT">FLAT</string>
+    <string name="Portrait">Portrait</string>
+    <string name="Monotone">Monotone</string>
+    <string name="ePortrait">ePortrait</string>
+    <string name="COLOR_CREATOR">カラークリエーター</string>
+    <string name="POPART">ポップアート</string>
+    <string name="FANTASIC_FOCUS">ファンタジックフォーカス</string>
+    <string name="DAYDREAM">デイドリーム</string>
+    <string name="LIGHT_TONE">ライトトーン</string>
+    <string name="ROUGH_MONOCHROME">ラフモノクローム</string>
+    <string name="TOY_PHOTO">トイフォト</string>
+    <string name="MINIATURE">ジオラマ</string>
+    <string name="CROSS_PROCESS">クロスプロセス</string>
+    <string name="GENTLE_SEPIA">ジェントルセピア</string>
+    <string name="DRAMATIC_TONE">ドラマチックトーン</string>
+    <string name="LIGNE_CLAIR">リーニュークレール</string>
+    <string name="PASTEL">ウォーターカラー</string>
+    <string name="VINTAGE">ヴィンテージ</string>
+    <string name="PARTCOLOR">パートカラー</string>
+    <string name="ART_BKT">アートフィルターブラケット</string>
+
+</resources>

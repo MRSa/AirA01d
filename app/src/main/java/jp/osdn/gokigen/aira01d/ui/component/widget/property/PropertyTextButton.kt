@@ -12,11 +12,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
+import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 
 @Composable
@@ -25,13 +27,18 @@ fun PropertyTextButton(
     targetProperty: ICameraStatus.CameraProperty,
     currentValue: String,
     isEditable: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    keyNameHeader: String = "",
 )
 {
     // ----- ステータスを監視する
     val textDecoration = if (isEditable) { TextDecoration.Underline } else { TextDecoration.None }
     val textFontWeight = FontWeight.Bold
     val textColor = MaterialTheme.colorScheme.primary
+
+    // ----- リソースの文字列を変換する
+    val currentRscId = AppSingleton.resourceConverter.getStringResourceId("$keyNameHeader$currentValue")
+    val currentString = if (currentRscId == 0) { currentValue } else { stringResource(currentRscId) }
 
     // ----- ダイアログの表示状態を管理
     var showDialog by remember { mutableStateOf(false) }
@@ -56,7 +63,7 @@ fun PropertyTextButton(
             .widthIn(min = 48.dp, max = 106.dp)
     ) {
         Text(
-            text = currentValue,
+            text = currentString,
             style = TextStyle(
                 textDecoration = textDecoration,
                 fontWeight = textFontWeight,
@@ -71,6 +78,7 @@ fun PropertyTextButton(
             controlModel = controlModel,
             targetProperty = targetProperty,
             current = currentValue,
+            keyNameHeader = keyNameHeader,
             onClose = {
                 showDialog = false
                 controlModel.onSelectPropertyDialogDismissed()

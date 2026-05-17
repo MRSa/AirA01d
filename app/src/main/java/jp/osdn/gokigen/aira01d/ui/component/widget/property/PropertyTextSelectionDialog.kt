@@ -19,15 +19,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
+import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
-
 
 @Composable
 fun PropertyTextSelectionDialog(
     controlModel: CameraStatusViewModel,
     targetProperty: ICameraStatus.CameraProperty,
     current: String,
+    keyNameHeader: String = "",
     onClose: () -> Unit,
 )
 {
@@ -37,13 +38,17 @@ fun PropertyTextSelectionDialog(
     // ----- 振動フィードバック
     haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
 
+    // ----- リソースの文字列を変換する
+    val currentRscId = AppSingleton.resourceConverter.getStringResourceId("$keyNameHeader$current")
+    val currentString = if (currentRscId == 0) { current } else { stringResource(currentRscId) }
+
     AlertDialog(
         onDismissRequest = {
             onClose()
         },
-        title = { Text(text = "${stringResource(R.string.dialog_title_selection)} : $current") },
+        title = { Text(text = "${stringResource(R.string.dialog_title_selection)} : $currentString") },
         text = {
-            // スクロール可能なリストを表示
+            // ----- スクロール可能なリストを表示
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -52,14 +57,16 @@ fun PropertyTextSelectionDialog(
                 controlModel.propertyList.forEach { mode ->
                     OutlinedButton(
                         onClick = {
-                            // 選択したアイテムで Propertyを更新
+                            // ----- 選択したアイテムで Propertyを更新
                             controlModel.setProperty(targetProperty, mode)
                             onClose()
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        val rscId = AppSingleton.resourceConverter.getStringResourceId("$keyNameHeader$mode")
+                        val modeString = if (rscId == 0) { mode } else { stringResource(rscId) }
                         Text(
-                            text = mode,
+                            text = modeString,
                             modifier = Modifier.padding(vertical = 2.dp),
                             style =  TextStyle(
                                 textDecoration = if (mode == current) { TextDecoration.Underline } else { TextDecoration.None },

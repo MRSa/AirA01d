@@ -17,18 +17,21 @@
       <w>commpath</w>
       <w>connectmode</w>
       <w>ctrlzoom</w>
+      <w>denkyu</w>
       <w>desclist</w>
       <w>drivemode</w>
       <w>electriczoom</w>
       <w>execaelock</w>
       <w>expcomp</w>
       <w>exprev</w>
+      <w>fantasic</w>
       <w>focallen</w>
       <w>focallength</w>
       <w>focalvalue</w>
       <w>getlastjpg</w>
       <w>getlist</w>
       <w>getrecview</w>
+      <w>imagesize</w>
       <w>imagingstate</w>
       <w>isospeedvalue</w>
       <w>lensmountstatus</w>
@@ -36,6 +39,8 @@
       <w>lvqty</w>
       <w>lvscale</w>
       <w>macrosetting</w>
+      <w>monotonecolor</w>
+      <w>monotonefilter</w>
       <w>newassignafframe</w>
       <w>newctrlzoom</w>
       <w>newexecaelock</w>
@@ -47,10 +52,13 @@
       <w>newstarttake</w>
       <w>newstopmovietake</w>
       <w>newstoptake</w>
+      <w>partcolor</w>
+      <w>popart</w>
       <w>proplist</w>
       <w>propname</w>
       <w>pushevent</w>
       <w>pwoff</w>
+      <w>recview</w>
       <w>releaseaelock</w>
       <w>releaseafframe</w>
       <w>shutspeedvalue</w>
