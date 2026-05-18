@@ -16,9 +16,11 @@
       <w>commandlist</w>
       <w>commpath</w>
       <w>connectmode</w>
+      <w>ctrldigizoom</w>
       <w>ctrlzoom</w>
       <w>denkyu</w>
       <w>desclist</w>
+      <w>digizoomscope</w>
       <w>drivemode</w>
       <w>electriczoom</w>
       <w>execaelock</w>
@@ -42,7 +44,9 @@
       <w>monotonecolor</w>
       <w>monotonefilter</w>
       <w>newassignafframe</w>
+      <w>newctrldigizoom</w>
       <w>newctrlzoom</w>
+      <w>newdigizoomscope</w>
       <w>newexecaelock</w>
       <w>newexecaflock</w>
       <w>newreleaseaelock</w>

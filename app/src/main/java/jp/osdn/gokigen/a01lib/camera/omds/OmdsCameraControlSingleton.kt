@@ -12,6 +12,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraHardwareInformation
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraLiveviewMagnify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
+import jp.osdn.gokigen.a01lib.camera.interfaces.IDigitalZoomControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.interfaces.IOperationCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.IZoomLensControl
@@ -23,6 +24,7 @@ import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCameraGetProperty
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCameraHardwareInformation
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCommPathControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCommPathStatus
+import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsDigitalZoomControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsGetCommand
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsOpcLiveviewMagnifyControl
@@ -57,6 +59,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     private lateinit var getRecordImage: OmdsGetRecordImage
     private lateinit var liveviewMagnify: OmdsOpcLiveviewMagnifyControl
     private lateinit var zoomLensControl: OmdsZoomLensControl
+    private lateinit var digitalZoomControl: OmdsDigitalZoomControl
 
     private var isInitialized  = false
     private var cameraProtocol: ICameraConnectionStatus.CameraProtocol = ICameraConnectionStatus.CameraProtocol.OPC
@@ -82,6 +85,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
                 this.getRecordImage = OmdsGetRecordImage()
                 this.liveviewMagnify = OmdsOpcLiveviewMagnifyControl()
                 this.zoomLensControl = OmdsZoomLensControl()
+                this.digitalZoomControl = OmdsDigitalZoomControl()
                 this.subscriberList.clear()
                 this.connectionStatusReceiverList.clear()
 
@@ -210,6 +214,8 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     override fun getGetRecordImage(): IGetRecordImage { return getRecordImage }
 
     override fun getLiveviewMagnify(): ICameraLiveviewMagnify { return liveviewMagnify }
+
+    override fun getDigitalZoomControl(): IDigitalZoomControl { return digitalZoomControl }
 
     override fun getCameraHardwareInformation(): ICameraHardwareInformation { return cameraHardwareInformation }
 

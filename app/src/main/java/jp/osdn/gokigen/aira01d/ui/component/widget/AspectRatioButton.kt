@@ -22,11 +22,18 @@ fun AspectRatioButton(
 
     // ----- ステータスに合わせてアイコンをと色を決める
     val iconId = when (aspectRatio.value) {
-        "04_03" -> R.drawable.outline_aspect_ratio_24
-        "03_02" -> R.drawable.outline_crop_3_2_24
-        "16_09" -> R.drawable.outline_crop_16_9_24
-        "03_04" -> R.drawable.outline_crop_portrait_24
-        "06_06" -> R.drawable.outline_crop_square_24
+        //"04_03" -> R.drawable.outline_aspect_ratio_24
+        //"03_02" -> R.drawable.outline_crop_3_2_24
+        //"16_09" -> R.drawable.outline_crop_16_9_24
+        //"03_04" -> R.drawable.outline_crop_portrait_24
+        //"06_06" -> R.drawable.outline_crop_square_24
+        //else -> R.drawable.outline_aspect_ratio_24
+
+        "04_03" -> R.drawable.letter_4_3
+        "03_02" -> R.drawable.letter_3_2
+        "16_09" -> R.drawable.letter_16_9
+        "03_04" -> R.drawable.letter_3_4
+        "06_06" -> R.drawable.letter_1_1
         else -> R.drawable.outline_aspect_ratio_24
     }
     val iconColor = MaterialTheme.colorScheme.primary

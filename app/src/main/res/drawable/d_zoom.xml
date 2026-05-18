@@ -1,0 +1,22 @@
+<!--
+  ~ Copyright (C) 2026 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:viewportHeight="85" android:viewportWidth="85" android:width="24dp">
+      
+    <path android:fillColor="#1f1f1f" android:pathData="m56.985,75.225 l-21.53,-21.525c-1.71,1.367 -3.67,2.449 -5.89,3.246 -2.22,0.797 -4.59,1.196 -7.09,1.196 -6.21,0 -11.46,-2.15 -15.76,-6.449 -4.3,-4.3 -6.45,-9.553 -6.45,-15.76 0,-6.207 2.15,-11.46 6.45,-15.759 4.3,-4.299 9.55,-6.449 15.76,-6.449 6.21,0 11.46,2.15 15.76,6.449 4.3,4.299 6.45,9.552 6.45,15.759 0,2.506 -0.4,4.869 -1.2,7.09 -0.8,2.221 -1.88,4.185 -3.25,5.894l21.53,21.525zM22.475,51.308c4.27,0 7.9,-1.494 10.89,-4.484 2.99,-2.99 4.48,-6.62 4.48,-10.891 0,-4.27 -1.49,-7.901 -4.48,-10.89 -2.99,-2.99 -6.62,-4.485 -10.89,-4.485 -4.27,0 -7.9,1.495 -10.89,4.485 -2.99,2.989 -4.49,6.62 -4.49,10.89 0,4.271 1.5,7.901 4.49,10.891 2.99,2.99 6.62,4.484 10.89,4.484zM19.055,46.183v-6.833h-6.83v-6.833h6.83v-6.834h6.83v6.834h6.84v6.833h-6.84v6.833z"/>
+      
+    <path android:fillColor="#FF000000" android:pathData="m57.871,60.475v-34.086h9.338q5.244,0 8.97,1.84 3.772,1.84 5.796,5.566 2.07,3.726 2.07,9.476 0,5.75 -2.024,9.568 -2.024,3.818 -5.704,5.75 -3.68,1.886 -8.74,1.886zM64.679,54.955h2.07q3.22,0 5.52,-1.15 2.346,-1.196 3.588,-3.772 1.242,-2.622 1.242,-6.762 0,-4.14 -1.242,-6.624 -1.242,-2.53 -3.588,-3.634 -2.3,-1.15 -5.52,-1.15h-2.07z"/>
+    
+</vector>
