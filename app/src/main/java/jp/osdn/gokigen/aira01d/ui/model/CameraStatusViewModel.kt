@@ -18,6 +18,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraHardwareInformation.Hardw
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
+import jp.osdn.gokigen.a01lib.camera.interfaces.IDigitalZoomControl
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 import kotlinx.coroutines.CoroutineScope
@@ -60,6 +61,18 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
 
     private val _focalLengthTele : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
     val focalLengthTele : LiveData<Int> = _focalLengthTele
+
+    private val _digitalZoomScaleMin : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val digitalZoomScaleMin : LiveData<Int> = _digitalZoomScaleMin
+
+    private val _digitalZoomScaleMax : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val digitalZoomScaleMax : LiveData<Int> = _digitalZoomScaleMax
+
+    private val _digitalZoomScaleCurrent : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
+    val digitalZoomScaleCurrent : LiveData<Int> = _digitalZoomScaleCurrent
+
+    private val _canUseDigitalZoom : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
+    val canUseDigitalZoom : LiveData<Boolean> = _canUseDigitalZoom
 
     val focalLengthList = MediatorLiveData<List<Int>>().apply {
         addSource(focalLengthWide) { updateFocalList() }
@@ -130,6 +143,9 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     var activeProperty by mutableStateOf<ICameraStatus.CameraProperty?>(null)
         private set
 
+    var queryDigitalZoom by mutableStateOf<Boolean>(false)
+        private set
+
     fun initializeViewModel()
     {
         try
@@ -167,6 +183,10 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             _meteringMode.postValue("")
             _electricZoom.postValue("")
             _checkingCameraHardware.postValue(false)
+            _canUseDigitalZoom.postValue(false)
+            _digitalZoomScaleMin.postValue(100)
+            _digitalZoomScaleMax.postValue(100)
+            _digitalZoomScaleCurrent.postValue(100)
         }
         catch (e: Exception)
         {
@@ -632,6 +652,39 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     fun clearElectricZoomInfo()
     {
         _electricZoom.postValue("")
+    }
+
+    fun checkDigitalZoomScale()
+    {
+        if (queryDigitalZoom) return  // 既に問い合わせ中...
+        queryDigitalZoom = true
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try
+            {
+                AppSingleton.cameraControl.getDigitalZoomControl().getDigitalScopeScale(object: IDigitalZoomControl.DigitalZoomScaleCallback {
+                    override fun zoomScale(lowerScale: Int, upperScale: Int) {
+                        _digitalZoomScaleMin.postValue(lowerScale)
+                        _digitalZoomScaleMax.postValue(upperScale)
+                        if (lowerScale < upperScale)
+                        {
+                            // ----- デジタルズームが実行可能
+                            _canUseDigitalZoom.postValue(true)
+                        }
+                        else
+                        {
+                            // ----- デジタルズームは実行不可
+                            _canUseDigitalZoom.postValue(false)
+                        }
+                        queryDigitalZoom = false
+                    }
+                })
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun updateFocalList() {

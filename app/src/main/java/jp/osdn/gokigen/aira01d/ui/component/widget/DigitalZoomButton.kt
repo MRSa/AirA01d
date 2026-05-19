@@ -28,6 +28,11 @@ fun DigitalZoomButton(
     val isLvActivated = viewModel.isLvActivated.observeAsState()
     val lvMagnifySize = controlModel.liveViewMagnifySize.observeAsState()
 
+    val digitalZoomCurrent = controlModel.digitalZoomScaleCurrent.observeAsState()
+    val digitalZoomMax = controlModel.digitalZoomScaleMax.observeAsState()
+    val digitalZoomMin = controlModel.digitalZoomScaleMin.observeAsState()
+    val digitalZoomInterval = ((digitalZoomMax.value ?: 100) - ( digitalZoomMin.value ?: 100)) / 8
+
     // ----- ステータスに合わせてアイコンをと色を決める
     val iconId = when (lvMagnifySize.value)
     {
@@ -35,7 +40,7 @@ fun DigitalZoomButton(
         7 -> R.drawable.times_7
         10 -> R.drawable.times_10
         14 -> R.drawable.times_14
-        else -> R.drawable.outline_loupe_24
+        else -> R.drawable.d_zoom
     }
     val iconColor = when (lvMagnifySize.value)
     {
@@ -60,7 +65,7 @@ fun DigitalZoomButton(
     ) {
         Icon(
             painter = painterResource(iconId),
-            contentDescription = "liveview zoom",
+            contentDescription = "digital zoom",
             tint = iconColor
         )
     }

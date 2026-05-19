@@ -31,7 +31,7 @@ fun AspectRatioButton(
 
         "04_03" -> R.drawable.letter_4_3
         "03_02" -> R.drawable.letter_3_2
-        "16_09" -> R.drawable.letter_16_9
+        "16_09" -> R.drawable.letter_16_9_alt
         "03_04" -> R.drawable.letter_3_4
         "06_06" -> R.drawable.letter_1_1
         else -> R.drawable.outline_aspect_ratio_24

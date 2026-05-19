@@ -45,7 +45,7 @@ fun InformationArea2(
     val displayInfo by remember {
         derivedStateOf {
             val isZoom = focalLengthWide != focalLengthTele
-            val focalText = if (isZoom) "$focalLengthNow mm ($focalLengthWide mm - $focalLengthTele mm)" else "$focalLengthNow mm"
+            val focalText = if (isZoom) "${focalLengthNow}mm ($focalLengthWide-${focalLengthTele}mm)" else "${focalLengthNow}mm"
             val color = when {
                 informationLevel > 5 -> { colorScheme.primary }
                 informationLevel > 3 -> colorScheme.tertiary

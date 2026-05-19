@@ -48,7 +48,9 @@ import jp.osdn.gokigen.aira01d.ui.component.widget.ApplicationPreferencesButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.AspectRatioButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.CameraPropertyListButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.CameraTuningButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.DigitalZoomButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.DriveModeButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.DummyButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.ExposureCompensationButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.InformationArea1
 import jp.osdn.gokigen.aira01d.ui.component.widget.FocusModeButton
@@ -182,8 +184,8 @@ fun LiveviewScreenLandscape(
             Spacer(Modifier.height(1.dp))
 
             Row(Modifier.fillMaxWidth()) {
-                MirrorImageButton(liveviewModel, Modifier.weight(1f))
-                LiveviewMagnifyButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                SelfTimerButton(selfTimerViewModel, liveviewModel, Modifier.weight(1f))
+                RemainBatteryArea(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
             }
             Spacer(Modifier.height(1.dp))
 
@@ -200,10 +202,14 @@ fun LiveviewScreenLandscape(
             Spacer(Modifier.height(1.dp))
 
             Row(Modifier.fillMaxWidth()) {
-                SelfTimerButton(selfTimerViewModel, liveviewModel, Modifier.weight(1f))
-                RemainBatteryArea(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                MirrorImageButton(liveviewModel, Modifier.weight(1f))
+                LiveviewMagnifyButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
             }
-            InformationArea2(cameraStatusViewModel, Modifier.fillMaxWidth().height(80.dp))
+            Row(Modifier.fillMaxWidth()) {
+                DummyButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                DigitalZoomButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+            }
+            InformationArea2(cameraStatusViewModel, Modifier.fillMaxWidth().height(50.dp))
         }
     }
 }

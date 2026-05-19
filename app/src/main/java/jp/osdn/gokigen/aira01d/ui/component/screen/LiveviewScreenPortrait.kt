@@ -25,6 +25,7 @@ import jp.osdn.gokigen.aira01d.ui.component.widget.ApplicationPreferencesButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.AspectRatioButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.CameraPropertyListButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.CameraTuningButton
+import jp.osdn.gokigen.aira01d.ui.component.widget.DigitalZoomButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.DriveModeButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.ExposureCompensationButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.InformationArea1
@@ -109,12 +110,12 @@ fun LiveviewScreenPortrait(
 
             Spacer(Modifier.height(4.dp))
 
-            // --- 撮影画像、シャッター、そして露出補正、鏡像表示、セルフタイマー
+            // --- 撮影画像、シャッター、そしてピクチャーエフェクト、鏡像表示、セルフタイマー
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 RecordImageButton(navController, liveviewModel, cameraStatusViewModel, Modifier.weight(1f).height(80.dp))
                 ShutterButton(liveviewModel, cameraStatusViewModel, selfTimerViewModel, Modifier.weight(1f).height(80.dp).padding(horizontal = 4.dp))
                 Column(Modifier.weight(1f)) {
-                    ExposureCompensationButton(liveviewModel, cameraStatusViewModel, Modifier.fillMaxWidth())
+                    PictureEffectButton(liveviewModel, cameraStatusViewModel, Modifier.fillMaxWidth())
                     Row(Modifier.fillMaxWidth()) {
                         MirrorImageButton(liveviewModel, Modifier.weight(1f))
                         LiveviewMagnifyButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
@@ -124,11 +125,14 @@ fun LiveviewScreenPortrait(
 
             Spacer(Modifier.height(4.dp))
 
-            // ISO, WB, Picture Effect
+            // ISO, WB, 露出補正、デジタルズーム
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 IsoSensitivityButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
                 WhiteBalanceButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
-                PictureEffectButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    ExposureCompensationButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                    DigitalZoomButton(liveviewModel, cameraStatusViewModel, Modifier.weight(1f))
+                }
             }
 
             Spacer(Modifier.height(4.dp))
