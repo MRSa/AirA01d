@@ -14,7 +14,7 @@
     <string name="camera_not_connected">カメラと接続できませんでした&#8230;</string>
 
     <string name="dialog_title_selection">変更</string>
-    <string name="dialog_title_digital_zoom_selection">デジタル倍率変更</string>
+    <string name="dialog_title_digital_zoom_selection">デジタル倍率</string>
 
     <string name="exposure_warning">露出</string>
     <string name="media_busy">書き込み中</string>

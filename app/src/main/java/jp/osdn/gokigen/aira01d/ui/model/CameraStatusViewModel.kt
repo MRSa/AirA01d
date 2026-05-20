@@ -705,7 +705,8 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         }
     }
 
-    private fun updateFocalList() {
+    private fun updateFocalList()
+    {
         val wide = focalLengthWide.value ?: 0
         val tele = focalLengthTele.value ?: 0
         val now = focalLengthNow.value ?: 0
@@ -722,7 +723,8 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         focalLengthList.value = list.sorted()
     }
 
-    private fun updateDigitalZoomScaleList() {
+    private fun updateDigitalZoomScaleList()
+    {
         val scaleMin = digitalZoomScaleMin.value ?: 0
         val scaleMax = digitalZoomScaleMax.value ?: 0
         val now = digitalZoomScaleCurrent.value ?: 0
@@ -731,7 +733,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             return
         }
 
-        val targetSize = 8
+        val targetSize = 9
         val step = (scaleMax - scaleMin).toDouble() / (targetSize - 1)
         val list = (0 until targetSize).map { (scaleMin + it * step).roundToInt() }.toMutableList()
 

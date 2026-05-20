@@ -21,6 +21,7 @@ import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.component.widget.dialog.DigitalZoomScaleSelectionDialog
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
+import jp.osdn.gokigen.aira01d.ui.theme.AirA01dTheme
 
 @Composable
 fun DigitalZoomButton(
@@ -40,10 +41,10 @@ fun DigitalZoomButton(
     val digitalZoomScaleList by controlModel.digitalZoomScaleList.observeAsState(emptyList())
 
     // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId = R.drawable.d_zoom
-    val iconColor = MaterialTheme.colorScheme.primary
+    val iconId = if ((digitalZoomScaleCurrent.value ?: 100) > 100) { R.drawable.digital_zooming } else { R.drawable.d_zoom }
+    val iconColor = if ((digitalZoomScaleCurrent.value ?: 100) > 100) { AirA01dTheme.customColors.warning } else { MaterialTheme.colorScheme.primary }
 
-    // ----- ボタンの表示
+    // ----- デジタルズームボタンの表示
     IconButton(
         onClick = {
             if (isLvActivated.value == true)
