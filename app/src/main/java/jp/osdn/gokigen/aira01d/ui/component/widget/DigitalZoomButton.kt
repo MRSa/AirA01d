@@ -6,17 +6,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import jp.osdn.gokigen.a01lib.camera.interfaces.IDigitalZoomControl
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.component.widget.dialog.DigitalZoomScaleSelectionDialog
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
@@ -28,33 +26,26 @@ fun DigitalZoomButton(
     viewModel: LiveviewViewModel,
     controlModel: CameraStatusViewModel,
     modifier: Modifier = Modifier
-)
-{
+) {
     val haptic = LocalHapticFeedback.current
 
-    // ----- ダイアログの表示状態を管理
-    var showDialog by remember { mutableStateOf(false) }
-
-    // ----- ステータスを監視する
-    val isLvActivated = viewModel.isLvActivated.observeAsState()
-    val digitalZoomScaleCurrent = controlModel.digitalZoomScaleCurrent.observeAsState()
+    // すべての状態を by で監視
+    val isLvActivated by viewModel.isLvActivated.observeAsState(initial = false)
+    val digitalZoomScaleCurrent by controlModel.digitalZoomScaleCurrent.observeAsState(initial = 100)
     val digitalZoomScaleList by controlModel.digitalZoomScaleList.observeAsState(emptyList())
 
-    // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId = if ((digitalZoomScaleCurrent.value ?: 100) > 100) { R.drawable.digital_zooming } else { R.drawable.d_zoom }
-    val iconColor = if ((digitalZoomScaleCurrent.value ?: 100) > 100) { AirA01dTheme.customColors.warning } else { MaterialTheme.colorScheme.primary }
+    // ダイアログの表示状態も ViewModel から受け取る
+    val showDialog by controlModel.showDigitalZoomScaleDialog.observeAsState(initial = false)
 
-    // ----- デジタルズームボタンの表示
+    val isZoomed by remember { derivedStateOf { digitalZoomScaleCurrent > 100 } }
+    val iconId = if (isZoomed) R.drawable.digital_zooming else R.drawable.d_zoom
+    val iconColor = if (isZoomed) AirA01dTheme.customColors.warning else MaterialTheme.colorScheme.primary
+
     IconButton(
         onClick = {
-            if (isLvActivated.value == true)
-            {
-                // ----- ライブビュー表示時、デジタルズームの拡大表示を行うかどうか
-                controlModel.checkDigitalZoomScale(object: IDigitalZoomControl.DigitalZoomScaleCallback {
-                    override fun zoomScale(lowerScale: Int, upperScale: Int) {
-                        showDialog = true
-                    }
-                })
+            if (isLvActivated) {
+                // デジタルズーム可否のチェックを確認する （デジタルズーム可能な場合には、ダイアログを表示する）
+                controlModel.checkDigitalZoomScale()
             }
         },
         modifier = modifier.size(48.dp)
@@ -66,20 +57,22 @@ fun DigitalZoomButton(
         )
     }
 
-    if (showDialog)
-    {
+    if (showDialog) {
+        // ----- ダイアログが表示されたトリガーでバイブレーションを1回実行
         LaunchedEffect(Unit) {
             haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
         }
+
         DigitalZoomScaleSelectionDialog(
-            currentFocal = digitalZoomScaleCurrent.value ?: 100,
+            currentFocal = digitalZoomScaleCurrent,
             focalList = digitalZoomScaleList,
-            onSelect = {
-                // ----- デジタルズームの実行
-                controlModel.changeDigitalZoomScale(it)
-                showDialog = false
+            onSelect = { scale ->
+                controlModel.changeDigitalZoomScale(scale)
+                controlModel.dismissDigitalZoomScaleDialog() // Dialog Close処理をViewModelに通知
             },
-            onDismiss = { showDialog = false }
+            onDismiss = {
+                controlModel.dismissDigitalZoomScaleDialog() // Dialog Close処理をViewModelに通知
+            }
         )
     }
 }
