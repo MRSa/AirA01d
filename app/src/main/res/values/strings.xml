@@ -14,6 +14,7 @@
     <string name="camera_not_connected">Unable to connect to the camera&#8230;</string>
 
     <string name="dialog_title_selection">Change</string>
+    <string name="dialog_title_digital_zoom_selection">Change Scale</string>
 
     <string name="exposure_warning">Exposure warning</string>
     <string name="media_busy">Media Busy</string>

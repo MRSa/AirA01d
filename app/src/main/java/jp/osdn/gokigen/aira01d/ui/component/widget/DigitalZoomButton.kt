@@ -5,13 +5,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import jp.osdn.gokigen.a01lib.camera.interfaces.IDigitalZoomControl
 import jp.osdn.gokigen.aira01d.R
+import jp.osdn.gokigen.aira01d.ui.component.widget.dialog.DigitalZoomScaleSelectionDialog
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 
@@ -24,41 +31,29 @@ fun DigitalZoomButton(
 {
     val haptic = LocalHapticFeedback.current
 
+    // ----- ダイアログの表示状態を管理
+    var showDialog by remember { mutableStateOf(false) }
+
     // ----- ステータスを監視する
     val isLvActivated = viewModel.isLvActivated.observeAsState()
-    val lvMagnifySize = controlModel.liveViewMagnifySize.observeAsState()
-
-    val digitalZoomCurrent = controlModel.digitalZoomScaleCurrent.observeAsState()
-    val digitalZoomMax = controlModel.digitalZoomScaleMax.observeAsState()
-    val digitalZoomMin = controlModel.digitalZoomScaleMin.observeAsState()
-    val digitalZoomInterval = ((digitalZoomMax.value ?: 100) - ( digitalZoomMin.value ?: 100)) / 8
+    val digitalZoomScaleCurrent = controlModel.digitalZoomScaleCurrent.observeAsState()
+    val digitalZoomScaleList by controlModel.digitalZoomScaleList.observeAsState(emptyList())
 
     // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId = when (lvMagnifySize.value)
-    {
-        5 -> R.drawable.times_5
-        7 -> R.drawable.times_7
-        10 -> R.drawable.times_10
-        14 -> R.drawable.times_14
-        else -> R.drawable.d_zoom
-    }
-    val iconColor = when (lvMagnifySize.value)
-    {
-        5 -> MaterialTheme.colorScheme.tertiary
-        7 -> MaterialTheme.colorScheme.tertiary
-        10 -> MaterialTheme.colorScheme.tertiary
-        14 -> MaterialTheme.colorScheme.tertiary
-        else -> MaterialTheme.colorScheme.primary
-    }
+    val iconId = R.drawable.d_zoom
+    val iconColor = MaterialTheme.colorScheme.primary
 
     // ----- ボタンの表示
     IconButton(
         onClick = {
             if (isLvActivated.value == true)
             {
-                // ----- ライブビュー表示時、ライブビューの拡大を実行
-                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                controlModel.changeLiveviewScale()
+                // ----- ライブビュー表示時、デジタルズームの拡大表示を行うかどうか
+                controlModel.checkDigitalZoomScale(object: IDigitalZoomControl.DigitalZoomScaleCallback {
+                    override fun zoomScale(lowerScale: Int, upperScale: Int) {
+                        showDialog = true
+                    }
+                })
             }
         },
         modifier = modifier.size(48.dp)
@@ -70,4 +65,20 @@ fun DigitalZoomButton(
         )
     }
 
+    if (showDialog)
+    {
+        LaunchedEffect(Unit) {
+            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+        }
+        DigitalZoomScaleSelectionDialog(
+            currentFocal = digitalZoomScaleCurrent.value ?: 100,
+            focalList = digitalZoomScaleList,
+            onSelect = {
+                // ----- デジタルズームの実行
+                controlModel.changeDigitalZoomScale(it)
+                showDialog = false
+            },
+            onDismiss = { showDialog = false }
+        )
+    }
 }

@@ -71,8 +71,11 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     private val _digitalZoomScaleCurrent : MutableLiveData<Int> by lazy { MutableLiveData<Int>() }
     val digitalZoomScaleCurrent : LiveData<Int> = _digitalZoomScaleCurrent
 
-    private val _canUseDigitalZoom : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
-    val canUseDigitalZoom : LiveData<Boolean> = _canUseDigitalZoom
+    val digitalZoomScaleList = MediatorLiveData<List<Int>>().apply {
+        addSource(digitalZoomScaleMin) { updateDigitalZoomScaleList() }
+        addSource(digitalZoomScaleMax) { updateDigitalZoomScaleList() }
+        addSource(digitalZoomScaleCurrent) { updateDigitalZoomScaleList() }
+    }
 
     val focalLengthList = MediatorLiveData<List<Int>>().apply {
         addSource(focalLengthWide) { updateFocalList() }
@@ -143,7 +146,10 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
     var activeProperty by mutableStateOf<ICameraStatus.CameraProperty?>(null)
         private set
 
-    var queryDigitalZoom by mutableStateOf<Boolean>(false)
+    var queryDigitalZoom by mutableStateOf(false)
+        private set
+
+    var canUseDigitalZoom by mutableStateOf(false)
         private set
 
     fun initializeViewModel()
@@ -183,7 +189,6 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             _meteringMode.postValue("")
             _electricZoom.postValue("")
             _checkingCameraHardware.postValue(false)
-            _canUseDigitalZoom.postValue(false)
             _digitalZoomScaleMin.postValue(100)
             _digitalZoomScaleMax.postValue(100)
             _digitalZoomScaleCurrent.postValue(100)
@@ -654,7 +659,7 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         _electricZoom.postValue("")
     }
 
-    fun checkDigitalZoomScale()
+    fun checkDigitalZoomScale(callback: IDigitalZoomControl.DigitalZoomScaleCallback)
     {
         if (queryDigitalZoom) return  // 既に問い合わせ中...
         queryDigitalZoom = true
@@ -669,14 +674,18 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
                         if (lowerScale < upperScale)
                         {
                             // ----- デジタルズームが実行可能
-                            _canUseDigitalZoom.postValue(true)
+                            canUseDigitalZoom = true
                         }
                         else
                         {
                             // ----- デジタルズームは実行不可
-                            _canUseDigitalZoom.postValue(false)
+                            canUseDigitalZoom = false
                         }
                         queryDigitalZoom = false
+                        viewModelScope.launch(Dispatchers.Main) {
+                            // --- デジタルズームの情報を送り返す
+                            callback.zoomScale(lowerScale, upperScale)
+                        }
                     }
                 })
             }
@@ -684,6 +693,15 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
             {
                 e.printStackTrace()
             }
+        }
+    }
+
+    fun changeDigitalZoomScale(focalLength: Int)
+    {
+        CoroutineScope(Dispatchers.IO).launch {
+            // --- デジタルズームの倍率を変更する
+            AppSingleton.cameraControl.getDigitalZoomControl().changeDigitalZoomScale(focalLength)
+            _digitalZoomScaleCurrent.postValue(focalLength)
         }
     }
 
@@ -703,6 +721,24 @@ class CameraStatusViewModel: ViewModel(), ICameraConnectionStatus, ICameraEventN
         if (now !in list) list.add(now)
         focalLengthList.value = list.sorted()
     }
+
+    private fun updateDigitalZoomScaleList() {
+        val scaleMin = digitalZoomScaleMin.value ?: 0
+        val scaleMax = digitalZoomScaleMax.value ?: 0
+        val now = digitalZoomScaleCurrent.value ?: 0
+        if (scaleMin >= scaleMax) {
+            digitalZoomScaleList.value = emptyList()
+            return
+        }
+
+        val targetSize = 8
+        val step = (scaleMax - scaleMin).toDouble() / (targetSize - 1)
+        val list = (0 until targetSize).map { (scaleMin + it * step).roundToInt() }.toMutableList()
+
+        if (now !in list) list.add(now)
+        digitalZoomScaleList.value = list.sorted()
+    }
+
     companion object
     {
         private val TAG = CameraStatusViewModel::class.java.simpleName
