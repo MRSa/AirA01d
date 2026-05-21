@@ -26,10 +26,15 @@ fun CameraPropertyListButton(navController: NavHostController, viewModel: Camera
     // ----- ボタンの表示
     IconButton(
         onClick = {
-            // 現在、操作は未サポート (無効化する)
+            // 画面を開いたことを通知する
             haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+
+            // 設定画面への遷移
+            navController.navigate("CameraPreferenceScreen") {
+                // ボタン連打による画面の重複スタックを防止
+                launchSingleTop = true
+            }
         },
-        enabled = false,
         modifier = modifier.size(48.dp)
     ) {
         Icon(

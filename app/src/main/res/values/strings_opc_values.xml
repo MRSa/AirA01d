@@ -1,4 +1,11 @@
 <resources>
+    <!-- カメラプロパティカテゴリ定義 -->
+    <string name="cameraProp_BASIC">Basic</string>
+    <string name="cameraProp_DEVICE">Device</string>
+    <string name="cameraProp_WB">White Balance</string>
+    <string name="cameraProp_COLORTONE">Color Tone</string>
+    <string name="cameraProp_ART">Art Filter</string>
+
     <!-- アスペクト比 -->
     <string name="aspect_04_03">4:3</string>
     <string name="aspect_16_09">16:9</string>
