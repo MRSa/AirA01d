@@ -177,6 +177,23 @@ class OmdsCameraStatusWatcher(
         }
     }
 
+    override fun getDescriptor(propertyName: String): ICameraStatus.CameraPropertyDescriptor
+    {
+        return (if (useOpcProtocol) { opcProperties.getDescriptor(propertyName) } else { omdsProperties.getDescriptor(propertyName) })
+    }
+
+    override fun setStatusString(propertyName: String, value: String)
+    {
+        if (useOpcProtocol)
+        {
+            opcProperties.setStatusString(propertyName, value)
+        }
+        else
+        {
+            omdsProperties.setStatusString(propertyName, value)
+        }
+    }
+
     init
     {
         headerMap["User-Agent"] = userAgent // "OlympusCameraKit" // "OI.Share"

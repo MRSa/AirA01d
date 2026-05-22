@@ -7,6 +7,7 @@
     <string name="dialog_message_power_off">カメラの電源を切り、アプリケーションを終了します。</string>
     <string name="button_power_off_confirm">OK(終了)</string>
     <string name="button_cancel">キャンセル</string>
+    <string name="button_detail">詳細…</string>
 
     <string name="dialog_title_connect_failed">接続失敗</string>
     <string name="dialog_button_retry">再試行</string>

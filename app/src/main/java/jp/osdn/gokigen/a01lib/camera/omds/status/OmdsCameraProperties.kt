@@ -1,6 +1,7 @@
 package jp.osdn.gokigen.a01lib.camera.omds.status
 
 import android.util.Log
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus.CameraProperty
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.util.HashMap
@@ -20,14 +21,14 @@ class OmdsCameraProperties(
         {
             when (key)
             {
-                CameraProperty.TakeMode ->  sendStatusRequest("takemode", value)
-                CameraProperty.ShutterSpeed ->  sendStatusRequest("shutspeedvalue", value)
-                CameraProperty.Aperture ->  sendStatusRequest("focalvalue", value)
-                CameraProperty.ExposureCompensation ->  sendStatusRequest("expcomp", value)
-                CameraProperty.IsoSensitivity ->  sendStatusRequest("isospeedvalue", value)
-                CameraProperty.DriveMode ->  sendStatusRequest("drivemode", value)
-                CameraProperty.WhiteBalance ->  sendStatusRequest("wbvalue", decideWhiteBalanceValue(value))
-                CameraProperty.PictureEffect ->  sendStatusRequest("colortone", value)
+                CameraProperty.TakeMode ->  sendSetPropertyRequest("takemode", value)
+                CameraProperty.ShutterSpeed ->  sendSetPropertyRequest("shutspeedvalue", value)
+                CameraProperty.Aperture ->  sendSetPropertyRequest("focalvalue", value)
+                CameraProperty.ExposureCompensation ->  sendSetPropertyRequest("expcomp", value)
+                CameraProperty.IsoSensitivity ->  sendSetPropertyRequest("isospeedvalue", value)
+                CameraProperty.DriveMode ->  sendSetPropertyRequest("drivemode", value)
+                CameraProperty.WhiteBalance ->  sendSetPropertyRequest("wbvalue", decideWhiteBalanceValue(value))
+                CameraProperty.PictureEffect ->  sendSetPropertyRequest("colortone", value)
                 else -> { }
             }
         }
@@ -37,6 +38,17 @@ class OmdsCameraProperties(
         }
     }
 
+    fun setStatusString(propertyName: String, value: String)
+    {
+        try
+        {
+            sendSetPropertyRequest(propertyName, value)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
 
     fun getStatusList(key: CameraProperty): List<String>
     {
@@ -60,6 +72,83 @@ class OmdsCameraProperties(
             e.printStackTrace()
         }
         return (ArrayList())
+    }
+
+    fun getDescriptor(propertyName: String): ICameraStatus.CameraPropertyDescriptor
+    {
+        // ----- デフォルトの返却値（失敗時用）
+        val defaultDescriptor = ICameraStatus.CameraPropertyDescriptor(
+            propertyName = propertyName,
+            attribute = "get",
+            current = "",
+            values = emptyList()
+        )
+        if (propertyName.isEmpty()) return defaultDescriptor // プロパティ名がなければエラー
+
+        try
+        {
+            val response = sendGetPropertyDescriptionRequest(propertyName)  // 通信でディスクリプタを取得
+            if (response.isEmpty()) return defaultDescriptor
+
+            val propertyString = "<propname>$propertyName</propname>"
+            val propertyIndex = response.indexOf(propertyString)
+
+            // --- プロパティ名が応答に含まれているか（0以上）
+            if (propertyIndex >= 0)
+            {
+                // --- 各タグの定義
+                val attrStart = "<attribute>"
+                val attrEnd = "</attribute>"
+                val valStart = "<value>"
+                val valEnd = "</value>"
+                val enumStart = "<enum>"
+                val enumEnd = "</enum>"
+
+                // --- 「propertyIndex」以降からタグを探す
+                val attrStartIndex = response.indexOf(attrStart, propertyIndex)
+                val attrEndIndex = response.indexOf(attrEnd, propertyIndex)
+
+                val valStartIndex = response.indexOf(valStart, propertyIndex)
+                val valEndIndex = response.indexOf(valEnd, propertyIndex)
+
+                val enumStartIndex = response.indexOf(enumStart, propertyIndex)
+                val enumEndIndex = response.indexOf(enumEnd, propertyIndex)
+
+                // --- すべての必須タグが正しく見つかったかチェック
+                if (attrStartIndex in 0..<attrEndIndex &&
+                    valStartIndex >= 0 && valEndIndex > valStartIndex &&
+                    enumStartIndex >= 0 && enumEndIndex > enumStartIndex)
+                {
+                    // --- 文字列の切り出し
+                    val attribute = response.substring(attrStartIndex + attrStart.length, attrEndIndex)
+                    val currentValue = response.substring(valStartIndex + valStart.length, valEndIndex)
+
+                    val propertyListString = response.substring(enumStartIndex + enumStart.length, enumEndIndex)
+                    val selectionList = if (propertyListString.isNotEmpty())
+                    {
+                        propertyListString.split(" ")
+                    }
+                    else
+                    {
+                        emptyList()
+                    }
+                    // --- インスタンスを生成して返却
+                    return ICameraStatus.CameraPropertyDescriptor(
+                        propertyName = propertyName,
+                        attribute = attribute,
+                        current = currentValue,
+                        values = selectionList
+                    )
+                }
+            }
+            // --- タグのパースに失敗した場合のログ
+            Log.v(TAG, "getDescriptor(OMDS): Failed to parse XML tags for $propertyName. Response: $response")
+        }
+        catch (e: Exception)
+        {
+            Log.e(TAG, "Error in getDescriptor(OMDS) for property: $propertyName", e)
+        }
+        return defaultDescriptor
     }
 
     private fun getAvailableWhiteBalance(eventResponse: String) : List<String>
@@ -182,7 +271,7 @@ class OmdsCameraProperties(
         return response
     }
 
-    private fun sendStatusRequest(property: String, value: String)
+    private fun sendSetPropertyRequest(property: String, value: String)
     {
         val requestUrl = "$executeUrl/set_camprop.cgi?com=set&propname=$property"
         val postData = "<?xml version=\"1.0\"?><set><value>$value</value></set>"
@@ -219,7 +308,7 @@ class OmdsCameraProperties(
 
     companion object
     {
-        private val TAG = OmdsCameraStatusWatcher::class.java.simpleName
+        private val TAG = OmdsCameraProperties::class.java.simpleName
 
         // TIMEOUT VALUES
         private const val TIMEOUT_MS = 2500

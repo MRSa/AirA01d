@@ -155,6 +155,18 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     var canUseDigitalZoom by mutableStateOf(false)
         private set
 
+    var propertyDescriptor by mutableStateOf(
+        ICameraStatus.CameraPropertyDescriptor(
+            propertyName = "",
+            attribute = "",
+            current = "",
+            values = emptyList()
+        ))
+        private set
+
+    var queryPropertyName by mutableStateOf<String?>(null)
+        private set
+
     // ----- デジタルズームの倍率変更ダイアログの表示制御
     private val _showDigitalZoomScaleDialog = MutableLiveData(false)
     val showDigitalZoomScaleDialog: LiveData<Boolean> = _showDigitalZoomScaleDialog
@@ -197,7 +209,9 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             _digitalZoomScaleMax.value = 100
             _digitalZoomScaleCurrent.value = 100
             _showDigitalZoomScaleDialog.value = false
-        } catch (e: Exception) {
+        }
+        catch (e: Exception)
+        {
             e.printStackTrace()
         }
     }
@@ -367,13 +381,70 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
 
     override fun updatedLevelGauge(accuracy: Int, orientation: Int, roll: Int, pitch: Int) {}
 
-    fun getPropertyValueList(key: ICameraStatus.CameraProperty): List<String> {
+    private fun getPropertyValueList(key: ICameraStatus.CameraProperty): List<String> {
         try {
             return AppSingleton.cameraControl.getCameraStatus().getStatusList(key)
         } catch (e: Exception) {
             e.printStackTrace()
         }
         return ArrayList()
+    }
+
+    fun getPropertyDescriptor(propertyName: String)
+    {
+        // ディスクリプタの問い合わせ
+        if (queryPropertyName != null) return // 既に問い合わせ中の時は、何もしない
+
+        Log.v(TAG, "--- getPropertyDescriptor($propertyName)")
+
+        queryPropertyName = propertyName
+        propertyDescriptor = ICameraStatus.CameraPropertyDescriptor(
+                propertyName = "",
+                attribute = "",
+                current = "",
+                values = emptyList()
+        )
+
+        viewModelScope.launch {
+            try
+            {
+                val descriptor = withContext(Dispatchers.IO) {
+                    AppSingleton.cameraControl.getCameraStatus().getDescriptor(propertyName)
+                }
+                if (queryPropertyName == propertyName) {
+                    propertyDescriptor = descriptor
+                    Log.v(TAG, " --- RECEIVED PROPERTY DESCRIPTOR : $queryPropertyName (${propertyDescriptor.current})")
+                }
+            }
+            catch (e: Exception)
+            {
+                Log.e("CameraViewModel", "Failed to get descriptor", e)
+                queryPropertyName = null
+            }
+        }
+    }
+
+    fun onDismissedPropertyDescriptor()
+    {
+        queryPropertyName = null
+        propertyDescriptor = ICameraStatus.CameraPropertyDescriptor(
+            propertyName = "",
+            attribute = "",
+            current = "",
+            values = emptyList()
+        )
+    }
+
+    fun setPropertyString(propertyName: String, value: String) {
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    AppSingleton.cameraControl.getCameraStatus().setStatusString(propertyName, value)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun loadPropertyList(key: ICameraStatus.CameraProperty) {
@@ -392,7 +463,9 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 if (activeProperty == key) {
                     propertyList = result
                 }
-            } catch (e: Exception) {
+            }
+            catch (e: Exception)
+            {
                 activeProperty = null
                 e.printStackTrace()
             }

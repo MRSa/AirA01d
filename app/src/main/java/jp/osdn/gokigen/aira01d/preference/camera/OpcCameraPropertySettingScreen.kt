@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import jp.osdn.gokigen.aira01d.StringResourceConverter
+import jp.osdn.gokigen.aira01d.ui.component.widget.property.CameraPropertyDetailButton
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 
 @Composable
@@ -111,7 +112,7 @@ fun OpcCameraPropertySettingScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             propertiesInGroup.forEach { property ->
-                                XmlPropertyRowItem(property = property)
+                                XmlPropertyRowItem(viewModel = viewModel, property = property)
                             }
                         }
                     }
@@ -123,7 +124,7 @@ fun OpcCameraPropertySettingScreen(
 }
 
 @Composable
-fun XmlPropertyRowItem(property: OpcProperty)
+fun XmlPropertyRowItem(viewModel: CameraStatusViewModel, property: OpcProperty)
 {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = stringResource(property.labelId), fontSize = 15.sp, fontWeight = FontWeight.Medium)
@@ -134,18 +135,10 @@ fun XmlPropertyRowItem(property: OpcProperty)
         Spacer(modifier = Modifier.height(6.dp))
 
         // 設定値の選択ボタン
-        OutlinedButton(
-            onClick = { /* 設定変更ダイアログなどの処理 */ },
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Text(text = property.currentValues, color = MaterialTheme.colorScheme.onSurface)
-                Icon(imageVector = Icons.Default.ExpandMore, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
-            }
-        }
+        CameraPropertyDetailButton(
+            controlModel = viewModel,
+            titleRscId = property.labelId,
+            targetPropertyString = property.key
+        )
     }
 }
