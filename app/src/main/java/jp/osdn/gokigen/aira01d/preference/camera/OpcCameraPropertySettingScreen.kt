@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -112,7 +111,7 @@ fun OpcCameraPropertySettingScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             propertiesInGroup.forEach { property ->
-                                XmlPropertyRowItem(viewModel = viewModel, property = property)
+                                XmlPropertyRowItem(viewModel = viewModel, property = property, modifier)
                             }
                         }
                     }
@@ -124,7 +123,7 @@ fun OpcCameraPropertySettingScreen(
 }
 
 @Composable
-fun XmlPropertyRowItem(viewModel: CameraStatusViewModel, property: OpcProperty)
+fun XmlPropertyRowItem(viewModel: CameraStatusViewModel, property: OpcProperty, modifier: Modifier)
 {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = stringResource(property.labelId), fontSize = 15.sp, fontWeight = FontWeight.Medium)
