@@ -1,10 +1,20 @@
 <resources>
     <!-- カメラプロパティカテゴリ定義 -->
-    <string name="cameraProp_BASIC">基本</string>
+    <string name="cameraProp_BASIC">基本設定</string>
+    <string name="cameraProp_BASIC_FOCUS">フォーカス</string>
+    <string name="cameraProp_BASIC_IMAGE">画質・画像</string>
     <string name="cameraProp_DEVICE">カメラ端末</string>
+    <string name="cameraProp_SHOOTING">撮影補助</string>
     <string name="cameraProp_WB">ホワイトバランス</string>
     <string name="cameraProp_COLORTONE">ピクチャーモード</string>
+    <string name="cameraProp_CT_CONTRAST">仕上がり(コントラスト)</string>
+    <string name="cameraProp_CT_SHARP">仕上がり(シャープネス)</string>
+    <string name="cameraProp_CT_STRT">仕上がり(彩度)</string>
+    <string name="cameraProp_CT_TONE">仕上がり(階調)</string>
+    <string name="cameraProp_CT_MONO">仕上がり(モノクロ)</string>
     <string name="cameraProp_ART">アートフィルター</string>
+    <string name="cameraProp_ART_BRACKET">アートフィルターブラケット</string>
+    <string name="cameraProp_ART_EFFECT">アートエフェクト</string>
 
     <!-- アスペクト比 -->
     <string name="aspect_04_03">4:3</string>

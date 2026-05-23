@@ -8,12 +8,22 @@ class StringResourceConverter
     private val convertStringIdTable = mutableMapOf<String, Int>()
     private val convertIconIdTable = mutableMapOf<String, Int>()
     init {
-        //
+        // ----- カメラプロパティグループ
         convertStringIdTable["cameraProp_BASIC"] = R.string.cameraProp_BASIC
+        convertStringIdTable["cameraProp_BASIC_FOCUS"] = R.string.cameraProp_BASIC_FOCUS
+        convertStringIdTable["cameraProp_BASIC_IMAGE"] = R.string.cameraProp_BASIC_IMAGE
         convertStringIdTable["cameraProp_DEVICE"] = R.string.cameraProp_DEVICE
+        convertStringIdTable["cameraProp_SHOOTING"] = R.string.cameraProp_SHOOTING
         convertStringIdTable["cameraProp_WB"] = R.string.cameraProp_WB
         convertStringIdTable["cameraProp_ART"] = R.string.cameraProp_ART
         convertStringIdTable["cameraProp_COLORTONE"] = R.string.cameraProp_COLORTONE
+        convertStringIdTable["cameraProp_CT_CONTRAST"] = R.string.cameraProp_CT_CONTRAST
+        convertStringIdTable["cameraProp_CT_SHARP"] = R.string.cameraProp_CT_SHARP
+        convertStringIdTable["cameraProp_CT_STRT"] = R.string.cameraProp_CT_STRT
+        convertStringIdTable["cameraProp_CT_TONE"] = R.string.cameraProp_CT_TONE
+        convertStringIdTable["cameraProp_CT_MONO"] = R.string.cameraProp_CT_MONO
+        convertStringIdTable["cameraProp_ART_BRACKET"] = R.string.cameraProp_ART_BRACKET
+        convertStringIdTable["cameraProp_ART_EFFECT"] = R.string.cameraProp_ART_EFFECT
 
         // ----- アスペクト比
         convertStringIdTable["aspect_04_03"] = R.string.aspect_04_03
@@ -80,6 +90,7 @@ class StringResourceConverter
         }
     }
 
+    // ----- カメラプロパティの定義を読み取って展開する
     fun loadOpcPropertiesFromXml(context: Context): List<OpcProperty> {
         val rawArray = context.resources.getStringArray(R.array.opc_properties_definition)
 

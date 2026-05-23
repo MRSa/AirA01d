@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.preference.camera
+package jp.osdn.gokigen.aira01d.ui.component.widget.property
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import jp.osdn.gokigen.aira01d.StringResourceConverter
-import jp.osdn.gokigen.aira01d.ui.component.widget.property.CameraPropertyDetailButton
+import jp.osdn.gokigen.aira01d.preference.camera.OpcProperty
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 
 @Composable
