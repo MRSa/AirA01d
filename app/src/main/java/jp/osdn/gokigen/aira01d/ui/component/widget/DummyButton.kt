@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -15,9 +14,8 @@ import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 
-
 @Composable
-fun LiveviewMagnifyButton(
+fun DummyButton(
     viewModel: LiveviewViewModel,
     controlModel: CameraStatusViewModel,
     modifier: Modifier = Modifier
@@ -30,40 +28,18 @@ fun LiveviewMagnifyButton(
     val lvMagnifySize = controlModel.liveViewMagnifySize.observeAsState()
 
     // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId = when (lvMagnifySize.value)
-    {
-        5 -> R.drawable.times_5
-        7 -> R.drawable.times_7
-        10 -> R.drawable.times_10
-        14 -> R.drawable.times_14
-        else -> R.drawable.outline_loupe_24
-    }
-    val iconColor = when (lvMagnifySize.value)
-    {
-        5 -> MaterialTheme.colorScheme.tertiary
-        7 -> MaterialTheme.colorScheme.tertiary
-        10 -> MaterialTheme.colorScheme.tertiary
-        14 -> MaterialTheme.colorScheme.tertiary
-        else -> MaterialTheme.colorScheme.primary
-    }
+    val iconId = R.drawable.outline_stop_24
+    val iconColor = MaterialTheme.colorScheme.background
 
-    // ----- ボタンの表示
+    // ----- ダミーボタンの表示
     IconButton(
-        onClick = {
-            if (isLvActivated.value == true)
-            {
-                // ----- ライブビュー表示時、ライブビューの拡大を実行
-                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                controlModel.changeLiveviewScale()
-            }
-        },
+        onClick = { },
         modifier = modifier.size(48.dp)
     ) {
         Icon(
             painter = painterResource(iconId),
-            contentDescription = "liveview zoom",
+            contentDescription = "dummy",
             tint = iconColor
         )
     }
-
 }

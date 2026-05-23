@@ -29,5 +29,6 @@ interface ICameraControl
     fun getCaptureControl() : ICaptureControl?
     fun getGetRecordImage() : IGetRecordImage?
     fun getLiveviewMagnify() : ICameraLiveviewMagnify?
+    fun getDigitalZoomControl() : IDigitalZoomControl?
     fun getCameraHardwareInformation() : ICameraHardwareInformation
 }

@@ -16,8 +16,8 @@ android {
         applicationId = "jp.osdn.gokigen.aira01d"
         minSdk = 24
         targetSdk = 37
-        versionCode = 100000
-        versionName = "1.0.0"
+        versionCode = 100001
+        versionName = "1.0.1"
     }
 
     buildTypes {
@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.preference.ktx)

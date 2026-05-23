@@ -5,6 +5,7 @@
       <w>assignafframe</w>
       <w>cameramode</w>
       <w>camindstate</w>
+      <w>caminfo</w>
       <w>cammode</w>
       <w>camprop</w>
       <w>cardremainbyte</w>
@@ -15,27 +16,39 @@
       <w>commandlist</w>
       <w>commpath</w>
       <w>connectmode</w>
+      <w>ctrldigizoom</w>
       <w>ctrlzoom</w>
+      <w>denkyu</w>
       <w>desclist</w>
+      <w>digizoomscope</w>
       <w>drivemode</w>
       <w>electriczoom</w>
       <w>execaelock</w>
       <w>expcomp</w>
       <w>exprev</w>
+      <w>fantasic</w>
       <w>focallen</w>
       <w>focallength</w>
       <w>focalvalue</w>
       <w>getlastjpg</w>
       <w>getlist</w>
       <w>getrecview</w>
+      <w>highkey</w>
+      <w>imagesize</w>
       <w>imagingstate</w>
       <w>isospeedvalue</w>
       <w>lensmountstatus</w>
+      <w>locationinfo</w>
+      <w>lowkey</w>
       <w>lvqty</w>
       <w>lvscale</w>
       <w>macrosetting</w>
+      <w>monotonecolor</w>
+      <w>monotonefilter</w>
       <w>newassignafframe</w>
+      <w>newctrldigizoom</w>
       <w>newctrlzoom</w>
+      <w>newdigizoomscope</w>
       <w>newexecaelock</w>
       <w>newexecaflock</w>
       <w>newreleaseaelock</w>
@@ -45,10 +58,13 @@
       <w>newstarttake</w>
       <w>newstopmovietake</w>
       <w>newstoptake</w>
+      <w>partcolor</w>
+      <w>popart</w>
       <w>proplist</w>
       <w>propname</w>
       <w>pushevent</w>
       <w>pwoff</w>
+      <w>recview</w>
       <w>releaseaelock</w>
       <w>releaseafframe</w>
       <w>shutspeedvalue</w>
@@ -58,6 +74,7 @@
       <w>stopliveview</w>
       <w>stopmovietake</w>
       <w>stoptake</w>
+      <w>strt</w>
       <w>takemisc</w>
       <w>takemode</w>
       <w>takemotion</w>

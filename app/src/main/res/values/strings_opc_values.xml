@@ -1,0 +1,129 @@
+<resources>
+    <!-- カメラプロパティカテゴリ定義 -->
+    <string name="cameraProp_BASIC">Basic</string>
+    <string name="cameraProp_BASIC_FOCUS">Focus</string>
+    <string name="cameraProp_BASIC_IMAGE">Image</string>
+    <string name="cameraProp_SHOOTING">Shooting</string>
+    <string name="cameraProp_DEVICE">Device</string>
+    <string name="cameraProp_WB">White Balance</string>
+    <string name="cameraProp_COLORTONE">Color Tone</string>
+    <string name="cameraProp_CT_CONTRAST">Contrast</string>
+    <string name="cameraProp_CT_SHARP">Sharpness</string>
+    <string name="cameraProp_CT_STRT">Saturation</string>
+    <string name="cameraProp_CT_TONE">Tone Control</string>
+    <string name="cameraProp_CT_MONO">Monochrome</string>
+    <string name="cameraProp_ART">Art Filter</string>
+    <string name="cameraProp_ART_BRACKET">Art Bracket</string>
+    <string name="cameraProp_ART_EFFECT">Art Effect</string>
+
+    <!-- アスペクト比 -->
+    <string name="aspect_04_03">4:3</string>
+    <string name="aspect_16_09">16:9</string>
+    <string name="aspect_03_02">3:2</string>
+    <string name="aspect_06_06">1:1</string>
+    <string name="aspect_03_04">3:4</string>
+
+    <!-- ドライブモード -->
+    <string name="DRIVE_NORMAL">Single Shot</string>
+    <string name="DRIVE_CONTINUE">Continuous Shot</string>
+
+    <!-- 測光方式 -->
+    <string name="AE_ESP">Digital ESP</string>
+    <string name="AE_CENTER">Center Weighted</string>
+    <string name="AE_PINPOINT">Pinpoint</string>
+
+    <!-- ホワイトバランス -->
+    <string name="WB_AUTO">WB Auto</string>
+    <string name="MWB_FINE">WB Fine</string>
+    <string name="MWB_SHADE">WB Shade</string>
+    <string name="MWB_CLOUD">WB Cloud</string>
+    <string name="MWB_LAMP">WB Lamp</string>
+    <string name="MWB_FLUORESCENCE1">WB FLUORESCENCE</string>
+    <string name="MWB_WATER_1">WB Water</string>
+    <string name="WB_CUSTOM1">WB Custom</string>
+
+    <!-- 画像圧縮率 -->
+    <string name="CMP_2_7">Super Fine</string>
+    <string name="CMP_4">Fine</string>
+    <string name="CMP_8">Normal</string>
+    <string name="CMP_12">Basic</string>
+
+    <!-- 動画画質モード -->
+    <string name="QUALITY_MOVIE_FULL_HD_FINE">FullHD(Fine)</string>
+    <string name="QUALITY_MOVIE_FULL_HD_NORMAL">FullHD(Normal)</string>
+    <string name="QUALITY_MOVIE_HD_FINE">HD(Fine)</string>
+    <string name="QUALITY_MOVIE_HD_NORMAL">HD(Normal)</string>
+    <string name="QUALITY_MOVIE_SHORT_MOVIE">FullHD(Short Time)</string>
+
+    <!-- フォーカスモード -->
+    <string name="FOCUS_MF">Manual Focus</string>
+    <string name="FOCUS_SAF">Auto Focus(Single)</string>
+    <string name="FOCUS_CAF">Auto Focus(Continuous)</string>
+
+    <!-- 顔検出 -->
+    <string name="FACE_SCAN_OFF">OFF</string>
+    <string name="FACE_SCAN_ON">Face Detect AF</string>
+    <string name="FACE_SCAN_NEAR">Near Eye AF</string>
+
+    <!-- バッテリーレベル -->
+    <string name="EMPTY_AC">EMPTY(SUPPLY)</string>
+    <string name="SUPPLY_WARNING">WARNING(SUPPLY)</string>
+    <string name="SUPPLY_LOW">LOW(SUPPLY)</string>
+    <string name="SUPPLY_FULL">FULL(SUPPLY)</string>
+
+    <!-- 撮影画像保存先 -->
+    <string name="DESTINATION_FILE_MEDIA">Memory Card</string>
+    <string name="DESTINATION_FILE_WIFI">Wi-Fi Transfer</string>
+
+    <!-- アートエフェクト -->
+    <string name="WHITE_EDGE">White Edge</string>
+    <string name="FRAME_JAGGY">Frame Jaggy</string>
+    <string name="STARLIGHT">Starlight</string>
+    <string name="MINIATURE_VERTICAL">Miniature(Vertical)</string>
+    <string name="MINIATURE_HORIZON">Miniature(Horizon)</string>
+    <string name="SHADING_VERTICAL">Shading(Vertical)</string>
+    <string name="SHADING_HORIZON">Shading(Horizon)</string>
+
+    <!-- 階調 -->
+    <string name="AUTO">Auto</string>
+    <string name="NORMAL">Normal</string>
+    <string name="HIGHKEY">Highkey</string>
+    <string name="LOWKEY">Lowkey</string>
+
+    <!-- モノクロフィルター -->
+    <string name="YELLOW">Yellow</string>
+    <string name="ORANGE">Orange</string>
+    <string name="RED">Red</string>
+    <string name="GREEN">Green</string>
+
+    <!-- 調色効果 -->
+    <string name="LIKE_SEPIA">Like Sepia</string>
+    <string name="LIKE_BLUE">Like Blue</string>
+    <string name="LIKE_PURPLE">Like Purple</string>
+    <string name="LIKE_GREEN">Like Green</string>
+
+    <!-- 仕上がり・ピクチャーモード -->
+    <string name="I_FINISH">i-Finish</string>
+    <string name="VIVID">Vivid</string>
+    <string name="NATURAL">Natural</string>
+    <string name="FLAT">FLAT</string>
+    <string name="Portrait">Portrait</string>
+    <string name="Monotone">Monotone</string>
+    <string name="ePortrait">ePortrait</string>
+    <string name="COLOR_CREATOR">Color Creator</string>
+    <string name="POPART">Pop Art</string>
+    <string name="FANTASIC_FOCUS">Fantasic Focus</string>
+    <string name="DAYDREAM">Daydream</string>
+    <string name="LIGHT_TONE">Light Tone</string>
+    <string name="ROUGH_MONOCHROME">Rough Monochrome</string>
+    <string name="TOY_PHOTO">Toy Photo</string>
+    <string name="MINIATURE">Miniature</string>
+    <string name="CROSS_PROCESS">Cross Process</string>
+    <string name="GENTLE_SEPIA">Gentle Sepia</string>
+    <string name="DRAMATIC_TONE">Dramatic Tone</string>
+    <string name="LIGNE_CLAIR">Ligne Clair</string>
+    <string name="PASTEL">Pastel</string>
+    <string name="VINTAGE">Vintage</string>
+    <string name="PARTCOLOR">Part Color</string>
+    <string name="ART_BKT">Art Bracket</string>
+</resources>

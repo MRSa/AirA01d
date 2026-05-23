@@ -2,6 +2,13 @@ package jp.osdn.gokigen.a01lib.camera.interfaces
 
 interface ICameraStatus
 {
+    data class CameraPropertyDescriptor(
+        val propertyName: String,
+        val attribute: String,
+        val current: String,
+        val values: List<String>
+    )
+
     enum class CameraProperty
     {
         TakeMode,      // プログラムモード(P/A/S/M/iAuto)
@@ -36,4 +43,6 @@ interface ICameraStatus
     fun getStatus(key: CameraProperty): String
     fun setStatus(key: CameraProperty, value: String)
 
+    fun getDescriptor(propertyName: String): CameraPropertyDescriptor
+    fun setStatusString(propertyName: String, value: String)
 }

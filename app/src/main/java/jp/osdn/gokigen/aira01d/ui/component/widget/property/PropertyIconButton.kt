@@ -25,7 +25,8 @@ fun PropertyIconButton(
     iconId : Int,
     iconColor: Color,
     isEditable: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    keyNameHeader: String = "",
 )
 {
     // ----- ダイアログの表示状態を管理
@@ -62,6 +63,7 @@ fun PropertyIconButton(
             controlModel = controlModel,
             targetProperty = targetProperty,
             current = currentValue,
+            keyNameHeader = keyNameHeader,
             onClose = {
                 showDialog = false
                 controlModel.onSelectPropertyDialogDismissed()

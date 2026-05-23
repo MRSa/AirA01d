@@ -1,9 +1,11 @@
 package jp.osdn.gokigen.a01lib.camera.omds.status
 
 import android.util.Log
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus.CameraProperty
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.util.HashMap
+import kotlin.String
 
 class OpcCameraProperties(
     userAgent: String = "OlympusCameraKit",
@@ -37,6 +39,18 @@ class OpcCameraProperties(
                 CameraProperty.ArtFilter -> sendSetPropertyRequest("RECENTLY_ART_FILTER", value)
                 else -> { Log.v(TAG, " Not support Property key(SET) : $key") }
             }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
+    fun setStatusString(propertyName: String, value: String)
+    {
+        try
+        {
+            sendSetPropertyRequest(propertyName, value)
         }
         catch (e: Exception)
         {
@@ -82,37 +96,117 @@ class OpcCameraProperties(
         return (ArrayList())
     }
 
-    private fun getPropertySelectionList(responseString: String, key: String) : List<String>
+    fun getDescriptor(propertyName: String): ICameraStatus.CameraPropertyDescriptor
     {
+        // ----- デフォルトの返却値（失敗時用）
+        val defaultDescriptor = ICameraStatus.CameraPropertyDescriptor(
+            propertyName = propertyName,
+            attribute = "get",
+            current = "",
+            values = emptyList()
+        )
+        if (propertyName.isEmpty()) return defaultDescriptor // プロパティ名がなければエラー
+
         try
         {
-            val propertyString = "<propname>$key</propname>"
-            if (responseString.isNotEmpty())
+            val response = sendGetPropertyDescriptionRequest(propertyName)  // 通信でディスクリプタを取得
+            if (response.isEmpty()) return defaultDescriptor
+
+            val propertyString = "<propname>$propertyName</propname>"
+            val propertyIndex = response.indexOf(propertyString)
+
+            // --- プロパティ名が応答に含まれているか（0以上）
+            if (propertyIndex >= 0)
             {
-                val propertyIndex = responseString.indexOf(propertyString)
-                if (propertyIndex > 0)
+                // --- 各タグの定義
+                val attrStart = "<attribute>"
+                val attrEnd = "</attribute>"
+                val valStart = "<value>"
+                val valEnd = "</value>"
+                val enumStart = "<enum>"
+                val enumEnd = "</enum>"
+
+                // --- 「propertyIndex」以降からタグを探す
+                val attrStartIndex = response.indexOf(attrStart, propertyIndex)
+                val attrEndIndex = response.indexOf(attrEnd, propertyIndex)
+
+                val valStartIndex = response.indexOf(valStart, propertyIndex)
+                val valEndIndex = response.indexOf(valEnd, propertyIndex)
+
+                val enumStartIndex = response.indexOf(enumStart, propertyIndex)
+                val enumEndIndex = response.indexOf(enumEnd, propertyIndex)
+
+                // --- すべての必須タグが正しく見つかったかチェック
+                if (attrStartIndex in 0..<attrEndIndex &&
+                    valStartIndex >= 0 && valEndIndex > valStartIndex &&
+                    enumStartIndex >= 0 && enumEndIndex > enumStartIndex)
                 {
-                    val propertyValueIndex =
-                        responseString.indexOf("<enum>", propertyIndex) + "<enum>".length
-                    val propertyValueLastIndex = responseString.indexOf("</enum>", propertyIndex)
-                    val propertyListString =
-                        responseString.substring(propertyValueIndex, propertyValueLastIndex)
-                    if (propertyListString.isNotEmpty())
+                    // --- 文字列の切り出し
+                    val attribute = response.substring(attrStartIndex + attrStart.length, attrEndIndex)
+                    val currentValue = response.substring(valStartIndex + valStart.length, valEndIndex)
+
+                    val propertyListString = response.substring(enumStartIndex + enumStart.length, enumEndIndex)
+                    val selectionList = if (propertyListString.isNotEmpty())
                     {
-                        val propertyList = propertyListString.split(" ")
-                        val selectionList: ArrayList<String> = ArrayList()
-                        selectionList.addAll(propertyList)
-                        return (selectionList)
+                        propertyListString.split(" ")
                     }
+                    else
+                    {
+                        emptyList()
+                    }
+                    // --- インスタンスを生成して返却
+                    return ICameraStatus.CameraPropertyDescriptor(
+                        propertyName = propertyName,
+                        attribute = attribute,
+                        current = currentValue,
+                        values = selectionList
+                    )
                 }
             }
-            Log.v(TAG, "getPropertySelectionList($propertyString) $responseString ..." )
+            // --- タグのパースに失敗した場合のログ
+            Log.v(TAG, "getPropertyDescriptor: Failed to parse XML tags for $propertyName. Response: $response")
         }
         catch (e: Exception)
         {
-            e.printStackTrace()
+            Log.e(TAG, "Error in getPropertyDescriptor for property: $propertyName", e)
         }
-        return (ArrayList())
+        return defaultDescriptor
+    }
+
+    private fun getPropertySelectionList(responseString: String, key: String): List<String>
+    {
+        val propertyString = "<propname>$key</propname>"
+        if (responseString.isEmpty()) return emptyList()  // 文字列が空なら即座に空リストを返す
+        try
+        {
+            val propertyIndex = responseString.indexOf(propertyString)
+            if (propertyIndex >= 0)
+            {
+                // --- タグのインデックスを検索
+                val enumStartTag = "<enum>"
+                val enumEndTag = "</enum>"
+                val startIndex = responseString.indexOf(enumStartTag, propertyIndex)
+                val endIndex = responseString.indexOf(enumEndTag, propertyIndex)
+
+                // 両方のタグが正しく見つかり、かつ位置関係が正常な場合のみ処理
+                if (startIndex in 0..<endIndex)
+                {
+                    val propertyValueIndex = startIndex + enumStartTag.length
+                    val propertyListString = responseString.substring(propertyValueIndex, endIndex)
+                    if (propertyListString.isNotEmpty())
+                    {
+                        return propertyListString.split(" ")
+                    }
+                }
+            }
+            // 処理が正常に完了しなかった場合...
+            Log.v(TAG, "getPropertySelectionList($propertyString) failed or empty. Response: $responseString")
+        }
+        catch (e: Exception)
+        {
+            Log.e(TAG, "Error in getPropertySelectionList for key: $key", e)
+        }
+        return emptyList()
     }
 
     private fun sendSetPropertyRequest(property: String, value: String)

@@ -1,0 +1,130 @@
+<resources>
+    <!-- カメラプロパティカテゴリ定義 -->
+    <string name="cameraProp_BASIC">基本設定</string>
+    <string name="cameraProp_BASIC_FOCUS">フォーカス</string>
+    <string name="cameraProp_BASIC_IMAGE">画質・画像</string>
+    <string name="cameraProp_DEVICE">カメラ端末</string>
+    <string name="cameraProp_SHOOTING">撮影補助</string>
+    <string name="cameraProp_WB">ホワイトバランス</string>
+    <string name="cameraProp_COLORTONE">ピクチャーモード</string>
+    <string name="cameraProp_CT_CONTRAST">仕上がり(コントラスト)</string>
+    <string name="cameraProp_CT_SHARP">仕上がり(シャープネス)</string>
+    <string name="cameraProp_CT_STRT">仕上がり(彩度)</string>
+    <string name="cameraProp_CT_TONE">仕上がり(階調)</string>
+    <string name="cameraProp_CT_MONO">仕上がり(モノクロ)</string>
+    <string name="cameraProp_ART">アートフィルター</string>
+    <string name="cameraProp_ART_BRACKET">アートフィルターブラケット</string>
+    <string name="cameraProp_ART_EFFECT">アートエフェクト</string>
+
+    <!-- アスペクト比 -->
+    <string name="aspect_04_03">4:3</string>
+    <string name="aspect_16_09">16:9</string>
+    <string name="aspect_03_02">3:2</string>
+    <string name="aspect_06_06">1:1</string>
+    <string name="aspect_03_04">3:4</string>
+
+    <!-- ドライブモード -->
+    <string name="DRIVE_NORMAL">1コマ撮影</string>
+    <string name="DRIVE_CONTINUE">連続撮影</string>k
+
+    <!-- 測光方式 -->
+    <string name="AE_ESP">デジタルESP測光</string>
+    <string name="AE_CENTER">中央重点平均測光</string>
+    <string name="AE_PINPOINT">画面中央測光</string>
+
+    <!-- ホワイトバランス -->
+    <string name="WB_AUTO">WB Auto</string>
+    <string name="MWB_FINE">WB晴天</string>
+    <string name="MWB_SHADE">WB日陰</string>
+    <string name="MWB_CLOUD">WB雲天</string>
+    <string name="MWB_LAMP">WB電球</string>
+    <string name="MWB_FLUORESCENCE1">WB蛍光灯</string>
+    <string name="MWB_WATER_1">WB水中</string>
+    <string name="WB_CUSTOM1">WBカスタム</string>
+
+    <!-- 画像圧縮率 -->
+    <string name="CMP_2_7">Super Fine</string>
+    <string name="CMP_4">Fine</string>
+    <string name="CMP_8">Normal</string>
+    <string name="CMP_12">Basic</string>
+
+    <!-- 動画画質モード -->
+    <string name="QUALITY_MOVIE_FULL_HD_FINE">フルHD(Fine)</string>
+    <string name="QUALITY_MOVIE_FULL_HD_NORMAL">フルHD(Normal)</string>
+    <string name="QUALITY_MOVIE_HD_FINE">HD(Fine)</string>
+    <string name="QUALITY_MOVIE_HD_NORMAL">HD(Normal)</string>
+    <string name="QUALITY_MOVIE_SHORT_MOVIE">フルHD(ショート)</string>
+
+    <!-- フォーカスモード -->
+    <string name="FOCUS_MF">マニュアルフォーカス</string>
+    <string name="FOCUS_SAF">シングルオートフォーカス</string>
+    <string name="FOCUS_CAF">連続オートフォーカス</string>
+
+    <!-- 顔検出 -->
+    <string name="FACE_SCAN_OFF">OFF</string>
+    <string name="FACE_SCAN_ON">顔優先AF</string>
+    <string name="FACE_SCAN_NEAR">瞳AF</string>
+
+    <!-- バッテリーレベル -->
+    <string name="EMPTY_AC">EMPTY(SUPPLY)</string>
+    <string name="SUPPLY_WARNING">WARNING(SUPPLY)</string>
+    <string name="SUPPLY_LOW">LOW(SUPPLY)</string>
+    <string name="SUPPLY_FULL">FULL(SUPPLY)</string>
+
+    <!-- 撮影画像保存先 -->
+    <string name="DESTINATION_FILE_MEDIA">本体メモリカード</string>
+    <string name="DESTINATION_FILE_WIFI">Wi-Fi転送</string>
+
+    <!-- アートエフェクト -->
+    <string name="WHITE_EDGE">ホワイトエッジ</string>
+    <string name="FRAME_JAGGY">フレーム</string>
+    <string name="STARLIGHT">スターライト</string>
+    <string name="MINIATURE_VERTICAL">左右ぼかし</string>
+    <string name="MINIATURE_HORIZON">上下ぼかし</string>
+    <string name="SHADING_VERTICAL">左右シェード</string>
+    <string name="SHADING_HORIZON">上下シェード</string>
+
+    <!-- 階調 -->
+    <string name="AUTO">自動</string>
+    <string name="NORMAL">標準</string>
+    <string name="HIGHKEY">ハイキー</string>
+    <string name="LOWKEY">ローキー</string>
+
+    <!-- モノクロフィルター -->
+    <string name="YELLOW">黄色</string>
+    <string name="ORANGE">橙色</string>
+    <string name="RED">赤色</string>
+    <string name="GREEN">緑色</string>
+
+    <!-- 調色効果 -->
+    <string name="LIKE_SEPIA">セピア</string>
+    <string name="LIKE_BLUE">青味</string>
+    <string name="LIKE_PURPLE">紫味</string>
+    <string name="LIKE_GREEN">緑味</string>
+
+    <!-- 仕上がり・ピクチャーモード -->
+    <string name="I_FINISH">i-Finish</string>
+    <string name="VIVID">Vivid</string>
+    <string name="NATURAL">Natural</string>
+    <string name="FLAT">FLAT</string>
+    <string name="Portrait">Portrait</string>
+    <string name="Monotone">Monotone</string>
+    <string name="ePortrait">ePortrait</string>
+    <string name="COLOR_CREATOR">カラークリエーター</string>
+    <string name="POPART">ポップアート</string>
+    <string name="FANTASIC_FOCUS">ファンタジックフォーカス</string>
+    <string name="DAYDREAM">デイドリーム</string>
+    <string name="LIGHT_TONE">ライトトーン</string>
+    <string name="ROUGH_MONOCHROME">ラフモノクローム</string>
+    <string name="TOY_PHOTO">トイフォト</string>
+    <string name="MINIATURE">ジオラマ</string>
+    <string name="CROSS_PROCESS">クロスプロセス</string>
+    <string name="GENTLE_SEPIA">ジェントルセピア</string>
+    <string name="DRAMATIC_TONE">ドラマチックトーン</string>
+    <string name="LIGNE_CLAIR">リーニュークレール</string>
+    <string name="PASTEL">ウォーターカラー</string>
+    <string name="VINTAGE">ヴィンテージ</string>
+    <string name="PARTCOLOR">パートカラー</string>
+    <string name="ART_BKT">アートフィルターブラケット</string>
+
+</resources>
