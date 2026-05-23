@@ -137,7 +137,8 @@ fun XmlPropertyRowItem(viewModel: CameraStatusViewModel, property: OpcProperty, 
         CameraPropertyDetailButton(
             controlModel = viewModel,
             titleRscId = property.labelId,
-            targetPropertyString = property.key
+            targetPropertyString = property.key,
+            modifier = modifier
         )
     }
 }

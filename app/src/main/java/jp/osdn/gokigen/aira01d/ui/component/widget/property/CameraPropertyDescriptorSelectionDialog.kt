@@ -43,6 +43,7 @@ fun CameraPropertyDescriptorSelectionDialog(
     val currentString = if (currentRscId == 0) { current } else { stringResource(currentRscId) }
     val isEditable = controlModel.propertyDescriptor.attribute.contains("set")
     val titleString = if (isEditable) { "${stringResource(propertyTitleId)} : $currentString" } else { "${stringResource(propertyTitleId)} : ${stringResource(R.string.message_read_only)}" }
+    val propertyNameHeader = if (propertyName == "ASPECT_RATIO") { "aspect_" } else { keyNameHeader }  // アスペクト比の文字列は数値から始まっているので。。
     AlertDialog(
         onDismissRequest = {
             onClose()
@@ -60,7 +61,7 @@ fun CameraPropertyDescriptorSelectionDialog(
                         controlModel = controlModel,
                         targetProperty = null,
                         propertyName = propertyName,
-                        propertyNameHeader = keyNameHeader,
+                        propertyNameHeader = propertyNameHeader,
                         currentValue = current,
                         propertyList = controlModel.propertyDescriptor.values,
                         onClose = { onClose() }

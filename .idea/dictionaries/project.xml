@@ -33,11 +33,13 @@
       <w>getlastjpg</w>
       <w>getlist</w>
       <w>getrecview</w>
+      <w>highkey</w>
       <w>imagesize</w>
       <w>imagingstate</w>
       <w>isospeedvalue</w>
       <w>lensmountstatus</w>
       <w>locationinfo</w>
+      <w>lowkey</w>
       <w>lvqty</w>
       <w>lvscale</w>
       <w>macrosetting</w>

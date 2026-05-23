@@ -6,7 +6,7 @@ import jp.osdn.gokigen.aira01d.preference.camera.OpcProperty
 class StringResourceConverter
 {
     private val convertStringIdTable = mutableMapOf<String, Int>()
-    private val convertIconIdTable = mutableMapOf<String, Int>()
+
     init {
         // ----- カメラプロパティグループ
         convertStringIdTable["cameraProp_BASIC"] = R.string.cameraProp_BASIC
@@ -75,6 +75,67 @@ class StringResourceConverter
         convertStringIdTable["VINTAGE"] = R.string.VINTAGE
         convertStringIdTable["PARTCOLOR"] = R.string.PARTCOLOR
         convertStringIdTable["ART_BKT"] = R.string.ART_BKT
+
+        // --- 画像圧縮率
+        convertStringIdTable["CMP_2_7"] = R.string.CMP_2_7
+        convertStringIdTable["CMP_4"] = R.string.CMP_4
+        convertStringIdTable["CMP_8"] = R.string.CMP_8
+        convertStringIdTable["CMP_12"] = R.string.CMP_12
+
+        // --- 動画画質モード
+        convertStringIdTable["QUALITY_MOVIE_FULL_HD_FINE"] = R.string.QUALITY_MOVIE_FULL_HD_FINE
+        convertStringIdTable["QUALITY_MOVIE_FULL_HD_NORMAL"] = R.string.QUALITY_MOVIE_FULL_HD_NORMAL
+        convertStringIdTable["QUALITY_MOVIE_HD_FINE"] = R.string.QUALITY_MOVIE_HD_FINE
+        convertStringIdTable["QUALITY_MOVIE_HD_NORMAL"] = R.string.QUALITY_MOVIE_HD_NORMAL
+        convertStringIdTable["QUALITY_MOVIE_SHORT_MOVIE"] = R.string.QUALITY_MOVIE_SHORT_MOVIE
+
+        // --- フォーカスモード
+        convertStringIdTable["FOCUS_MF"] = R.string.FOCUS_MF
+        convertStringIdTable["FOCUS_SAF"] = R.string.FOCUS_SAF
+        convertStringIdTable["FOCUS_CAF"] = R.string.FOCUS_CAF
+
+        // --- 顔検出
+        convertStringIdTable["FACE_SCAN_OFF"] = R.string.FACE_SCAN_OFF
+        convertStringIdTable["FACE_SCAN_ON"] = R.string.FACE_SCAN_ON
+        convertStringIdTable["FACE_SCAN_NEAR"] = R.string.FACE_SCAN_NEAR
+
+        // --- バッテリーレベル
+        convertStringIdTable["EMPTY_AC"] = R.string.EMPTY_AC
+        convertStringIdTable["SUPPLY_WARNING"] = R.string.SUPPLY_WARNING
+        convertStringIdTable["SUPPLY_LOW"] = R.string.SUPPLY_LOW
+        convertStringIdTable["SUPPLY_FULL"] = R.string.SUPPLY_FULL
+
+        // --- 撮影画像保存先
+        convertStringIdTable["DESTINATION_FILE_MEDIA"] = R.string.DESTINATION_FILE_MEDIA
+        convertStringIdTable["DESTINATION_FILE_WIFI"] = R.string.DESTINATION_FILE_WIFI
+
+        // --- アートエフェクト
+        convertStringIdTable["WHITE_EDGE"] = R.string.WHITE_EDGE
+        convertStringIdTable["FRAME_JAGGY"] = R.string.FRAME_JAGGY
+        convertStringIdTable["STARLIGHT"] = R.string.STARLIGHT
+        convertStringIdTable["MINIATURE_VERTICAL"] = R.string.MINIATURE_VERTICAL
+        convertStringIdTable["MINIATURE_HORIZON"] = R.string.MINIATURE_HORIZON
+        convertStringIdTable["SHADING_VERTICAL"] = R.string.SHADING_VERTICAL
+        convertStringIdTable["SHADING_HORIZON"] = R.string.SHADING_HORIZON
+
+        // --- 階調
+        convertStringIdTable["AUTO"] = R.string.AUTO
+        convertStringIdTable["NORMAL"] = R.string.NORMAL
+        convertStringIdTable["HIGHKEY"] = R.string.HIGHKEY
+        convertStringIdTable["LOWKEY"] = R.string.LOWKEY
+
+        // --- 調色効果
+        convertStringIdTable["LIKE_SEPIA"] = R.string.LIKE_SEPIA
+        convertStringIdTable["LIKE_BLUE"] = R.string.LIKE_BLUE
+        convertStringIdTable["LIKE_PURPLE"] = R.string.LIKE_PURPLE
+        convertStringIdTable["LIKE_GREEN"] = R.string.LIKE_GREEN
+
+        // --- モノクロフィルター効果
+        convertStringIdTable["YELLOW"] = R.string.YELLOW
+        convertStringIdTable["ORANGE"] = R.string.ORANGE
+        convertStringIdTable["RED"] = R.string.RED
+        convertStringIdTable["GREEN"] = R.string.GREEN
+
     }
 
     // ----- stringのリソースIDを取得する
@@ -111,10 +172,5 @@ class StringResourceConverter
     fun getStringResourceId(key: String) : Int {
         try { return convertStringIdTable[key]?: 0 } catch (_: Exception) { }
         return 0
-    }
-
-    fun getIconResourceId(key: String, defaultId : Int = R.drawable.outline_question_mark_24) : Int {
-        try { return convertIconIdTable[key]?: defaultId } catch (_: Exception) { }
-        return defaultId
     }
 }
