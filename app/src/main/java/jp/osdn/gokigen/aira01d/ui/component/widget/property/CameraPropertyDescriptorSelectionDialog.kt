@@ -41,12 +41,13 @@ fun CameraPropertyDescriptorSelectionDialog(
     // ----- リソースの文字列を変換する
     val currentRscId = AppSingleton.resourceConverter.getStringResourceId("$keyNameHeader$current")
     val currentString = if (currentRscId == 0) { current } else { stringResource(currentRscId) }
-
+    val isEditable = controlModel.propertyDescriptor.attribute.contains("set")
+    val titleString = if (isEditable) { "${stringResource(propertyTitleId)} : $currentString" } else { "${stringResource(propertyTitleId)} : ${stringResource(R.string.message_read_only)}" }
     AlertDialog(
         onDismissRequest = {
             onClose()
         },
-        title = { Text(text = "${stringResource(propertyTitleId)} : $currentString") },
+        title = { Text(text = titleString) },
         text = {
             // ----- スクロール可能なリストを表示
             Column(
@@ -54,23 +55,33 @@ fun CameraPropertyDescriptorSelectionDialog(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                controlModel.propertyDescriptor.values.forEach { mode ->
+                if (isEditable) {
+                    ShowCameraPropertyChoiceButtons(
+                        controlModel = controlModel,
+                        targetProperty = null,
+                        propertyName = propertyName,
+                        propertyNameHeader = keyNameHeader,
+                        currentValue = current,
+                        propertyList = controlModel.propertyDescriptor.values,
+                        onClose = { onClose() }
+                    )
+                }
+                else
+                {
+                    // ----- 編集ができない場合は、現在値の表示
                     OutlinedButton(
-                        onClick = {
-                            // ----- 選択したアイテムで Propertyを更新
-                            controlModel.setPropertyString(propertyName, mode)
-                            onClose()
-                        },
-                        modifier = Modifier.fillMaxWidth()
+                        onClick = { onClose() },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = false
                     ) {
-                        val rscId = AppSingleton.resourceConverter.getStringResourceId("$keyNameHeader$mode")
-                        val modeString = if (rscId == 0) { mode } else { stringResource(rscId) }
+                        val rscId = AppSingleton.resourceConverter.getStringResourceId("$keyNameHeader$current")
+                        val modeString = if (rscId == 0) { current } else { stringResource(rscId) }
                         Text(
                             text = modeString,
                             modifier = Modifier.padding(vertical = 2.dp),
                             style =  TextStyle(
-                                textDecoration = if (mode == current) { TextDecoration.Underline } else { TextDecoration.None },
-                                fontWeight = if (mode == current) { FontWeight.Bold } else { FontWeight.Normal },
+                                textDecoration = TextDecoration.Underline,
+                                fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         )

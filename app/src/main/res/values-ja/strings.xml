@@ -17,6 +17,7 @@
     <string name="dialog_title_selection">変更</string>
     <string name="dialog_title_digital_zoom_selection">デジタル倍率</string>
 
+    <string name="message_read_only">変更不可</string>
     <string name="exposure_warning">露出</string>
     <string name="media_busy">書き込み中</string>
     <string name="capturing">撮影中</string>

@@ -17,6 +17,7 @@
     <string name="dialog_title_selection">Change</string>
     <string name="dialog_title_digital_zoom_selection">Change Scale</string>
 
+    <string name="message_read_only">Read Only</string>
     <string name="exposure_warning">Exposure warning</string>
     <string name="media_busy">Media Busy</string>
     <string name="capturing">Capturing…</string>

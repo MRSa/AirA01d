@@ -2,7 +2,6 @@ package jp.osdn.gokigen.aira01d.ui.component.widget.property
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -17,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
@@ -54,28 +52,15 @@ fun PropertyTextSelectionDialog(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                controlModel.propertyList.forEach { mode ->
-                    OutlinedButton(
-                        onClick = {
-                            // ----- 選択したアイテムで Propertyを更新
-                            controlModel.setProperty(targetProperty, mode)
-                            onClose()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        val rscId = AppSingleton.resourceConverter.getStringResourceId("$keyNameHeader$mode")
-                        val modeString = if (rscId == 0) { mode } else { stringResource(rscId) }
-                        Text(
-                            text = modeString,
-                            modifier = Modifier.padding(vertical = 2.dp),
-                            style =  TextStyle(
-                                textDecoration = if (mode == current) { TextDecoration.Underline } else { TextDecoration.None },
-                                fontWeight = if (mode == current) { FontWeight.Bold } else { FontWeight.Normal },
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                    }
-                }
+                ShowCameraPropertyChoiceButtons(
+                    controlModel = controlModel,
+                    targetProperty = targetProperty,
+                    propertyName = "",
+                    propertyNameHeader = keyNameHeader,
+                    currentValue = current,
+                    propertyList = controlModel.propertyList,
+                    onClose = { onClose() }
+                )
             }
         },
         confirmButton = {

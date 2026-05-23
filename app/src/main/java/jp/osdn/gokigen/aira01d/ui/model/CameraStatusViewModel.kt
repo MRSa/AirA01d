@@ -393,8 +393,11 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     fun getPropertyDescriptor(propertyName: String)
     {
         // ディスクリプタの問い合わせ
-        if (queryPropertyName != null) return // 既に問い合わせ中の時は、何もしない
-
+        if (queryPropertyName != null)
+        {
+            Log.v(TAG, "getPropertyDescriptor($propertyName) : Now Querying [$queryPropertyName]")
+            return // 既に問い合わせ中の時は、何もしない
+        }
         Log.v(TAG, "--- getPropertyDescriptor($propertyName)")
 
         queryPropertyName = propertyName
@@ -414,6 +417,18 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 if (queryPropertyName == propertyName) {
                     propertyDescriptor = descriptor
                     Log.v(TAG, " --- RECEIVED PROPERTY DESCRIPTOR : $queryPropertyName (${propertyDescriptor.current})")
+                    if (propertyDescriptor.values.isEmpty())
+                    {
+                        // ---- うまく選択肢のデータが取れなかった... "待ち"を解除する
+                        Log.v(TAG, "      DESCRIPTOR IS NONE...(${propertyDescriptor.propertyName})")
+                        queryPropertyName = null
+                    }
+                }
+                else
+                {
+                    // --- 待っているのと違うのが送られてきた... 無視（待ちを解除）する
+                    Log.v(TAG, "--- Received Wrong Property: $queryPropertyName (wait: $propertyName)")
+                    queryPropertyName = null
                 }
             }
             catch (e: Exception)
