@@ -510,9 +510,12 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 withContext(Dispatchers.IO) {
                     AppSingleton.cameraControl.finishCamera(true)
                 }
-                onFinish()
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                viewModelScope.launch(Dispatchers.Main) {
+                    onFinish()
+                }
             }
         }
     }

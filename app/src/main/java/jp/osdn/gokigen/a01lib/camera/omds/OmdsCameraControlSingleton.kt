@@ -219,6 +219,8 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
 
     override fun getCameraHardwareInformation(): ICameraHardwareInformation { return cameraHardwareInformation }
 
+    override fun getCameraConnectionProtocol(): ICameraConnectionStatus.CameraProtocol { return cameraProtocol }
+
     override fun onStatusNotify(status: CameraConnectionStatus)
     {
         try
@@ -261,21 +263,22 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         {
             cameraProtocol = protocol
 
-            // ----- プロトコルが変わった場合は、プロトコル変更を通知する (以下のクラスに通知が必要になるはず)
-            //runModeControl : OmdsRunModeControl
-            //commPathControl : OmdsCommPathControl
-            //timeSync: OmdsTimeSync
-            //cameraHardwareInformation: OmdsCameraHardwareInformation
-            //getCameraProperty: OmdsCameraGetProperty
-            //postCommand: OmdsPostCommand
-            //camInState: OmdsCamIndStatus
-            //camCommPathStatus: OmdsCommPathStatus
-            //focusControl: OmdsFocusControl
-            //captureControl: OmdsCaptureControl
-            //getRecordImage: OmdsGetRecordImage
-            //liveviewMagnify: OmdsOpcLiveviewMagnifyControl
-            //zoomLensControl: OmdsZoomLensControl
-            //statusWatcher: OmdsCameraStatusWatcher
+            // プロトコルが変わった場合は、各制御クラスにプロトコルを通知して切り替える
+            val isOpcProtocol = (protocol == ICameraConnectionStatus.CameraProtocol.OPC)
+            statusWatcher.setUseOpcProtocol(isOpcProtocol)
+            runModeControl.setUseOpcProtocol(isOpcProtocol)
+            commPathControl.setUseOpcProtocol(isOpcProtocol)
+            timeSync.setUseOpcProtocol(isOpcProtocol)
+            cameraHardwareInformation.setUseOpcProtocol(isOpcProtocol)
+            getCameraProperty.setUseOpcProtocol(isOpcProtocol)
+            camInState.setUseOpcProtocol(isOpcProtocol)
+            camCommPathStatus.setUseOpcProtocol(isOpcProtocol)
+            focusControl.setUseOpcProtocol(isOpcProtocol)
+            captureControl.setUseOpcProtocol(isOpcProtocol)
+            getRecordImage.setUseOpcProtocol(isOpcProtocol)
+            liveviewMagnify.setUseOpcProtocol(isOpcProtocol)
+            zoomLensControl.setUseOpcProtocol(isOpcProtocol)
+            digitalZoomControl.setUseOpcProtocol(isOpcProtocol)
         }
     }
 

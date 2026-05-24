@@ -8,10 +8,15 @@ import java.util.*
 class OmdsAeLockControl(
     userAgent: String = "OlympusCameraKit",
     private val executeUrl : String = "http://192.168.0.10",
-    private val useOpcProtocol : Boolean = true
 ) {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
+    private var useOpcProtocol : Boolean = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     fun lockAe()
     {

@@ -10,11 +10,16 @@ import java.util.Locale
 class OmdsDigitalZoomControl(
     userAgent: String = "OlympusCameraKit",
     private val executeUrl : String = "http://192.168.0.10",
-    private val useOpcProtocol: Boolean = true
 ) : IDigitalZoomControl
 {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
+    private var useOpcProtocol: Boolean = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     override fun getDigitalScopeScale(callback: IDigitalZoomControl.DigitalZoomScaleCallback)
     {

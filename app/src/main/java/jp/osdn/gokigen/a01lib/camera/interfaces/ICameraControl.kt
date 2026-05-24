@@ -31,4 +31,5 @@ interface ICameraControl
     fun getLiveviewMagnify() : ICameraLiveviewMagnify?
     fun getDigitalZoomControl() : IDigitalZoomControl?
     fun getCameraHardwareInformation() : ICameraHardwareInformation
+    fun getCameraConnectionProtocol() : ICameraConnectionStatus.CameraProtocol
 }

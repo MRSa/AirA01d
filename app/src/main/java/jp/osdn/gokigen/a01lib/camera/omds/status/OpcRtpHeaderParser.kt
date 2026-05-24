@@ -308,6 +308,10 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
         private const val ID_EXPOSURE_WARNING = 0x10
         private const val ID_FOCUS_TYPE = 0x11
         private const val ID_ZOOM_LENS_INFO = 0x12
+        private const val ID_OMDS_UNKNOWN_07 = 0x13
+        private const val ID_OMDS_UNKNOWN_08 = 0x14
+        private const val ID_OMDS_UNKNOWN_09 = 0x16
+        private const val ID_OMDS_UNKNOWN_10 = 0x1a
         private const val ID_REMAIN_VIDEO_TIME = 0x6a
         private const val ID_POSITION_LEVEL_INFO = 0x6b
         private const val ID_FACE_DETECT_1 = 0x6c

@@ -117,6 +117,13 @@ class OmdsCameraConnection(
     fun disconnect(powerOff: Boolean)
     {
         Log.v(TAG, "disconnectFromCamera(powerOff=$powerOff)")
+
+        // --- Executorが終了している場合は処理をスキップ
+        if (cameraExecutor.isShutdown) {
+            Log.w(TAG, "disconnect(): cameraExecutor is already shutdown. Skipping.")
+            return
+        }
+
         try
         {
             cameraExecutor.execute(OmdsCameraDisconnectSequence(powerOff, cameraStatusReceiver, userAgent, executeUrl))

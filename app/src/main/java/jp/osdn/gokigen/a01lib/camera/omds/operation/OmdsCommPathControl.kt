@@ -10,6 +10,12 @@ class OmdsCommPathControl(userAgent: String = "OlympusCameraKit", private val ex
 {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
+    private var useOpcProtocol = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     fun changeCommPath(commPath: String = "wifi", callback: IOperationCallback)
     {

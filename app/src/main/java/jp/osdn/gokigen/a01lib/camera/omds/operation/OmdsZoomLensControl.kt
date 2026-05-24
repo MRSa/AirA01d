@@ -6,11 +6,17 @@ import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.lang.Exception
 import java.util.HashMap
 
-class OmdsZoomLensControl(userAgent: String = "OlympusCameraKit", private val executeUrl : String = "http://192.168.0.10", private val useOpcProtocol: Boolean = true) : IZoomLensControl
+class OmdsZoomLensControl(userAgent: String = "OlympusCameraKit", private val executeUrl : String = "http://192.168.0.10") : IZoomLensControl
 {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
     private var isZooming = false
+    private var useOpcProtocol: Boolean = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     override fun canZoom(): Boolean
     {

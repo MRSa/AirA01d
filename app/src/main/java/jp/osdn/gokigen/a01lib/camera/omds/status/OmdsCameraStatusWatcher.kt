@@ -1,6 +1,7 @@
 package jp.osdn.gokigen.a01lib.camera.omds.status
 
 import android.util.Log
+import androidx.compose.ui.layout.LookaheadScope
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus.CameraProperty
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
@@ -12,7 +13,6 @@ import kotlin.Exception
 class OmdsCameraStatusWatcher(
     opcEventReceiver: IOpcEventReceive? = null,
     userAgent: String = "OlympusCameraKit",
-    private val useOpcProtocol : Boolean = true
 ) : ICameraStatusWatcher, ICameraStatus, IOmdsCommunicationInfo, ILiveviewRtpHeaderReceiver
 {
     private val headerMap: MutableMap<String, String> = HashMap()
@@ -22,11 +22,17 @@ class OmdsCameraStatusWatcher(
     private val opcEventWatcher = OpcEventStatusWatch(statusProvider)
     private val pushEventWatcher = OpcPushEventWatcher(opcEventReceiver)
     private val opcProperties = OpcCameraProperties()
-    private val omdsEventWatcher = OmdsEventStatusWatch()
+    private val omdsEventWatcher = OmdsEventStatusWatch(statusProvider)
     private val omdsProperties = OmdsCameraProperties()
 
     private var isWatchingRtp = false
     private var isWatchingEvent = false
+    private var useOpcProtocol : Boolean = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     override fun subscribe(subscriber: ICameraStatusUpdateNotify)
     {
@@ -40,8 +46,8 @@ class OmdsCameraStatusWatcher(
 
     override fun setOmdsCommandList(commandList: String)
     {
-        // Log.v(TAG, "setOmdsCommandList : [$commandList]")
-        Log.v(TAG, "setOmdsCommandList")
+        Log.v(TAG, "setOmdsCommandList()")
+        //Log.v(TAG, "setOmdsCommandList:\n$commandList")
         startStatusWatch()
     }
 

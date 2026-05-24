@@ -12,6 +12,12 @@ class OmdsFocusControl : IFocusingControl
     private val afControl = OmdsAutoFocusControl()
     private val aeControl = OmdsAeLockControl()
 
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        afControl.setUseOpcProtocol(isOpcProtocol)
+        aeControl.setUseOpcProtocol(isOpcProtocol)
+    }
+
     override fun driveAutoFocus(posX: Float, posY: Float): Boolean
     {
         //Log.v(TAG, "driveAutoFocus()")
