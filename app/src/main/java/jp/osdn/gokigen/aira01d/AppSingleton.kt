@@ -10,13 +10,33 @@ class AppSingleton : Application()
     {
         super.onCreate()
         Log.v(TAG, "AppSingleton::create()")
-        cameraControl = OmdsCameraControlSingleton()
+        // 起動時に初期化（この時点でインスタンスが作られます）
+        _cameraControl = OmdsCameraControlSingleton()
     }
 
     companion object
     {
         private val TAG = AppSingleton::class.java.simpleName
-        lateinit var cameraControl: OmdsCameraControlSingleton
+        private var _cameraControl: OmdsCameraControlSingleton? = null
+
+        // 外部公開用の変数は「絶対に Null ではない型」にする
+        val cameraControl: OmdsCameraControlSingleton
+            get() {
+                // --- もし null（終了処理後など）なら、自動的に再生成して返す
+                if (_cameraControl == null) {
+                    Log.w(TAG, "cameraControl was null, re-initializing.")
+                    _cameraControl = OmdsCameraControlSingleton()
+                }
+                return _cameraControl!!
+            }
+
         val resourceConverter = StringResourceConverter()
+
+        fun destroyCameraControl() {
+            Log.v(TAG, "destroyCameraControl() called")
+
+            // 参照をクリア
+            _cameraControl = null
+        }
     }
 }

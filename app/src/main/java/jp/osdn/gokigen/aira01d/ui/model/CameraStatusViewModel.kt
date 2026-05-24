@@ -514,6 +514,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 e.printStackTrace()
             } finally {
                 viewModelScope.launch(Dispatchers.Main) {
+                    AppSingleton.destroyCameraControl()
                     onFinish()
                 }
             }
