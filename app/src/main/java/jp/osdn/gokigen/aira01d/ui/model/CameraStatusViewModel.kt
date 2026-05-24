@@ -21,6 +21,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.IDigitalZoomControl
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
+import jp.osdn.gokigen.aira01d.ui.component.widget.ApplicationPreferencesButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,6 +36,9 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     // ----- LiveData群（カプセル化構造を維持しつつ、by lazy を排してシンプルに宣言）
     private val _cameraConnectionStatus = MutableLiveData<CameraConnectionStatus>()
     val cameraConnectionStatus: LiveData<CameraConnectionStatus> = _cameraConnectionStatus
+
+    private val _cameraProtocol = MutableLiveData<ICameraConnectionStatus.CameraProtocol>()
+    val cameraProtocol: LiveData<ICameraConnectionStatus.CameraProtocol> = _cameraProtocol
 
     private val _isConnectError = MutableLiveData<Boolean>()
     val isConnectError: LiveData<Boolean> = _isConnectError
@@ -176,6 +180,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
         try {
             // ----- UIスレッドの初期化なので .value を使用する
             _cameraConnectionStatus.value = AppSingleton.cameraControl.getCameraConnectionStatus()
+            _cameraProtocol.value = AppSingleton.cameraControl.getCameraConnectionProtocol()
             AppSingleton.cameraControl.subscribeCameraConnectionStatus(this)
             AppSingleton.cameraControl.subscribeEventReceiver(this)
             AppSingleton.cameraControl.subscribeCameraStatus(this)
@@ -234,7 +239,12 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 _isConnectError.postValue(false)
             }
             _cameraConnectionStatus.postValue(status)
-            Log.v(TAG, "Connection : $status")
+            if (status == CameraConnectionStatus.CONNECTED)
+            {
+                // ----- Connected の時には、そのタイミングでのProtocol情報を反映させる
+                _cameraProtocol.postValue(AppSingleton.cameraControl.getCameraConnectionProtocol())
+            }
+            Log.v(TAG, "Connection : $status, protocol: ${_cameraProtocol.value}")
         }
         catch (e: Exception)
         {
