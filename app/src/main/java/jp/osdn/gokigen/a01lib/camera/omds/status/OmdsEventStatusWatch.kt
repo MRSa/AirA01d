@@ -53,6 +53,7 @@ class OmdsEventStatusWatch(
             checkAperture(getPropertyValue(eventResponse, "<propname>focalvalue</propname>"))
             checkIsoSensitivity(getPropertyValue(eventResponse, "<propname>isospeedvalue</propname>"))
             checkExposureCompensation(getPropertyValue(eventResponse, "<propname>expcomp</propname>"))
+            checkArtFilter(getPropertyValue(eventResponse, "<propname>artfilter</propname>"))
         }
         catch (e: Exception)
         {
@@ -140,6 +141,16 @@ class OmdsEventStatusWatch(
         }
     }
 
+    private fun checkArtFilter(artFilter: String)
+    {
+        val currentValue = this.currentStatuses[ICameraStatus.CameraProperty.ArtFilter] ?: ""
+        if (artFilter != currentValue)
+        {
+            currentStatuses[ICameraStatus.CameraProperty.ArtFilter] = artFilter
+            statusProvider.updateArtFilter(artFilter)
+        }
+    }
+
     fun decideWhiteBalance(wbValue: String) : String
     {
         try
@@ -153,6 +164,9 @@ class OmdsEventStatusWatch(
                 "20" -> "Incandescent"
                 "35" -> "Fluorescent"
                 "64" -> "Underwater"
+                "68" -> "UnderwaterX"
+                "67" -> "UnderwaterY"
+                "69" -> "UnderwaterZ"
                 "23" -> "Flash"
                 "256" -> "WB1"
                 "257" -> "WB2"

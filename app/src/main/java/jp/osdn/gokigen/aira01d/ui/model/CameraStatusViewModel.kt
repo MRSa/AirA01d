@@ -487,6 +487,11 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 // メインスレッドで安全にComposeのStateへ反映
                 if (activeProperty == key) {
                     propertyList = result
+                    if (result.isEmpty())
+                    {
+                        // --- 選択肢がなかった場合はコマンド要求をクリア
+                        activeProperty = null
+                    }
                 }
             }
             catch (e: Exception)
@@ -580,7 +585,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
         {
             val captureAction = ICaptureControl.CaptureAction.TOGGLE
             val isMovie = (_takeMode.value == "movie")
-            val isContinuous = !(_driveMode.value ?: "").contains("NORMAL")
+            val isContinuous = !((_driveMode.value ?: "").lowercase().contains("normal"))
 
             // UI反映用のLiveDataは、ボタンを押した瞬間に Main スレッドで即時反映 (.value)
             if (isMovie || isContinuous) {

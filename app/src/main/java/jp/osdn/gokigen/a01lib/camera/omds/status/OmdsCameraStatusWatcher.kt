@@ -1,7 +1,6 @@
 package jp.osdn.gokigen.a01lib.camera.omds.status
 
 import android.util.Log
-import androidx.compose.ui.layout.LookaheadScope
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus.CameraProperty
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
@@ -42,6 +41,11 @@ class OmdsCameraStatusWatcher(
     override fun unsubscribe(subscriber: ICameraStatusUpdateNotify)
     {
         statusProvider.unsubscribe(subscriber)
+    }
+
+    override fun setOmdsProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
     }
 
     override fun setOmdsCommandList(commandList: String)

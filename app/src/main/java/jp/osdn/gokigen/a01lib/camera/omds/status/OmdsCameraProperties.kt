@@ -29,6 +29,7 @@ class OmdsCameraProperties(
                 CameraProperty.DriveMode ->  sendSetPropertyRequest("drivemode", value)
                 CameraProperty.WhiteBalance ->  sendSetPropertyRequest("wbvalue", decideWhiteBalanceValue(value))
                 CameraProperty.PictureEffect ->  sendSetPropertyRequest("colortone", value)
+                CameraProperty.ArtFilter ->  sendSetPropertyRequest("artfilter", value)
                 else -> { }
             }
         }
@@ -64,6 +65,7 @@ class OmdsCameraProperties(
                 CameraProperty.WhiteBalance -> getAvailableWhiteBalance(sendGetPropertyDescriptionRequest("wbvalue"))
                 CameraProperty.PictureEffect -> getPropertySelectionList(sendGetPropertyDescriptionRequest("colortone"), "colortone")
                 CameraProperty.DriveMode -> getPropertySelectionList(sendGetPropertyDescriptionRequest("drivemode"), "drivemode")
+                CameraProperty.ArtFilter -> getPropertySelectionList(sendGetPropertyDescriptionRequest("artfilter"), "artfilter")
                 else -> ArrayList()
             })
         }
@@ -182,6 +184,9 @@ class OmdsCameraProperties(
                 "17" -> "Cloudy"
                 "20" -> "Incandescent"
                 "35" -> "Fluorescent"
+                "68" -> "UnderwaterX"
+                "67" -> "UnderwaterY"
+                "69" -> "UnderwaterZ"
                 "64" -> "Underwater"
                 "23" -> "Flash"
                 "256" -> "WB1"
@@ -211,6 +216,9 @@ class OmdsCameraProperties(
                 "Cloudy" -> "17"
                 "Incandescent" -> "20"
                 "Fluorescent" -> "35"
+                "UnderwaterX" -> "68"
+                "UnderwaterY" -> "67"
+                "UnderwaterZ" -> "69"
                 "Underwater" -> "64"
                 "Flash" -> "23"
                 "WB1" -> "256"

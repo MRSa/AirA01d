@@ -24,6 +24,8 @@ fun DriveModeButton(
     val iconId = when (driveMode.value) {
         "DRIVE_NORMAL" -> R.drawable.outline_crop_square_24
         "DRIVE_CONTINUE" -> R.drawable.outline_auto_awesome_motion_24
+        "normal" -> R.drawable.outline_crop_square_24
+        "silent-normal" -> R.drawable.outline_crop_square_24
         else -> R.drawable.outline_question_mark_24
     }
     val iconColor = MaterialTheme.colorScheme.primary
