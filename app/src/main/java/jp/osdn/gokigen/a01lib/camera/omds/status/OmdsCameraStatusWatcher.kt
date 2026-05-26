@@ -187,6 +187,12 @@ class OmdsCameraStatusWatcher(
         }
     }
 
+    override fun getDescriptorList(): List<ICameraStatus.CameraPropertyDescriptor>
+    {
+        // ----- descriptor list の応答は OMDS機のみサポート
+        return (if (useOpcProtocol) { emptyList() } else { omdsProperties.getDescriptorList() })
+    }
+
     override fun getDescriptor(propertyName: String): ICameraStatus.CameraPropertyDescriptor
     {
         return (if (useOpcProtocol) { opcProperties.getDescriptor(propertyName) } else { omdsProperties.getDescriptor(propertyName) })

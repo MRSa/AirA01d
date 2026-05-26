@@ -171,6 +171,12 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     var queryPropertyName by mutableStateOf<String?>(null)
         private set
 
+    var propertyDescriptorList by mutableStateOf<List<ICameraStatus.CameraPropertyDescriptor>>( emptyList() )
+        private set
+
+    var queryPropertyDescriptorList by mutableStateOf(false)
+        private set
+
     // ----- デジタルズームの倍率変更ダイアログの表示制御
     private val _showDigitalZoomScaleDialog = MutableLiveData(false)
     val showDigitalZoomScaleDialog: LiveData<Boolean> = _showDigitalZoomScaleDialog
@@ -398,6 +404,35 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             e.printStackTrace()
         }
         return ArrayList()
+    }
+
+    fun getPropertyDescriptorList()
+    {
+        // ディスクリプタリストの問い合わせ
+        if (queryPropertyDescriptorList)
+        {
+            Log.v(TAG, "getPropertyDescriptorList : Now Querying")
+            return // 既に問い合わせ中の時は、何もしない
+        }
+        queryPropertyDescriptorList = true
+        Log.v(TAG, "--- getPropertyDescriptorList()")
+
+        viewModelScope.launch {
+            try
+            {
+                val result = withContext(Dispatchers.IO) {
+                    AppSingleton.cameraControl.getCameraStatus().getDescriptorList()
+                }
+                propertyDescriptorList = result
+            }
+            catch (e: Exception)
+            {
+                Log.e("CameraViewModel", "Failed to get descriptor list", e)
+            }
+            finally {
+                queryPropertyDescriptorList = false
+            }
+        }
     }
 
     fun getPropertyDescriptor(propertyName: String)

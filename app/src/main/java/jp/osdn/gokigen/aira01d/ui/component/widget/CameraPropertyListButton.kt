@@ -21,10 +21,7 @@ fun CameraPropertyListButton(navController: NavHostController, viewModel: Camera
 {
     val haptic = LocalHapticFeedback.current
     val cameraConnectionStatus = viewModel.cameraConnectionStatus.observeAsState()
-    val cameraProtocol = viewModel.cameraProtocol.observeAsState()
-
-    val isEnabled = ((cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.CONNECTED)&&
-        (cameraProtocol.value == ICameraConnectionStatus.CameraProtocol.OPC))
+    val isEnabled = (cameraConnectionStatus.value == ICameraConnectionStatus.CameraConnectionStatus.CONNECTED)
 
     // ----- ステータスに合わせてアイコンをと色を決める
     val iconId = R.drawable.outline_settings_photo_camera_24
@@ -34,7 +31,7 @@ fun CameraPropertyListButton(navController: NavHostController, viewModel: Camera
     IconButton(
         enabled = isEnabled,
         onClick = {
-            // ----- カメラと接続中かつ、OPC接続のときのみ、画面遷移する
+            // ----- カメラと接続中のときのみ、画面遷移する
             if (isEnabled)
             {
                 // 画面を開いたことを通知する
