@@ -11,6 +11,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
@@ -28,6 +29,7 @@ fun LiveviewMagnifyButton(
     // ----- ステータスを監視する
     val isLvActivated = viewModel.isLvActivated.observeAsState()
     val lvMagnifySize = controlModel.liveViewMagnifySize.observeAsState()
+    val cameraProtocol = controlModel.cameraProtocol.observeAsState()
 
     // ----- ステータスに合わせてアイコンをと色を決める
     val iconId = when (lvMagnifySize.value)
@@ -50,9 +52,9 @@ fun LiveviewMagnifyButton(
     // ----- ボタンの表示
     IconButton(
         onClick = {
-            if (isLvActivated.value == true)
+            if ((isLvActivated.value == true)&&(cameraProtocol.value == ICameraConnectionStatus.CameraProtocol.OPC))
             {
-                // ----- ライブビュー表示時、ライブビューの拡大を実行
+                // ----- ライブビュー表示 & OPCプロトコルの時、ライブビューの拡大を実行
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 controlModel.changeLiveviewScale()
             }
@@ -65,5 +67,4 @@ fun LiveviewMagnifyButton(
             tint = iconColor
         )
     }
-
 }

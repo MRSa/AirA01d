@@ -11,6 +11,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
@@ -28,6 +29,7 @@ fun RawModeButton(
     // ----- ステータスを監視する
     val isLvActivated = viewModel.isLvActivated.observeAsState()
     val rawMode = controlModel.rawMode.observeAsState()
+    val cameraProtocol = controlModel.cameraProtocol.observeAsState()
 
     // ----- ステータスに合わせてアイコンをと色を決める
     val iconId = when (rawMode.value) {
@@ -50,10 +52,17 @@ fun RawModeButton(
     // ----- ボタンの表示
     IconButton(
         onClick = {
-            // ----- コマンド実行
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            val command = if (rawMode.value == "ON") { "OFF" } else { "ON" }
-            controlModel.setProperty(ICameraStatus.CameraProperty.RawMode, command)
+            if (cameraProtocol.value == ICameraConnectionStatus.CameraProtocol.OPC)
+            {
+                // ----- コマンド実行 (OPCモードのときのみ)
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                val command = if (rawMode.value == "ON") {
+                    "OFF"
+                } else {
+                    "ON"
+                }
+                controlModel.setProperty(ICameraStatus.CameraProperty.RawMode, command)
+            }
         },
         modifier = modifier.size(48.dp)
     ) {

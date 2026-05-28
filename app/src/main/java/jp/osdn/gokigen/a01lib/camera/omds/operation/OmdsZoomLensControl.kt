@@ -62,7 +62,16 @@ class OmdsZoomLensControl(userAgent: String = "OlympusCameraKit", private val ex
                     }
                     else
                     {
-                        "/exec_takemisc.cgi?com=ctrlzoom&move=start&dir=fix&focallen=$targetLengthInt"
+
+                        // ----- OMDS Zoom操作 (正ならズームイン、負ならズームアウト）
+                        if (targetLength > 0.0f)
+                        {
+                            "/exec_takemisc.cgi?com=ctrlzoom&move=teleterm"
+                        }
+                        else
+                        {
+                            "/exec_takemisc.cgi?com=ctrlzoom&move=wideterm"
+                        }
                     }
                     http.httpGetWithHeader(
                         executeUrl + command,

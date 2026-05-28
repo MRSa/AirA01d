@@ -44,15 +44,7 @@ fun OpcCameraPropertySettingScreen(
     modifier: Modifier = Modifier
 )
 {
-    val context = LocalContext.current
-
-    // 起動時に XML からデータをロードする
-    val allProperties = remember { StringResourceConverter().loadOpcPropertiesFromXml(context) }
-
-    // カテゴリごとにグループ化（Map<String, List<OpcProperty>>）
-    val groupedProperties = remember(allProperties) {
-        allProperties.groupBy { it.category }
-    }
+    val groupedProperties = viewModel.groupedOpcProperties
 
     Scaffold(
         topBar = {

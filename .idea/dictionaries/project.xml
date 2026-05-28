@@ -81,11 +81,13 @@
       <w>takemotion</w>
       <w>telefocallength</w>
       <w>telemove</w>
+      <w>teleterm</w>
       <w>upperlimit</w>
       <w>utctimediff</w>
       <w>wbvalue</w>
       <w>widefocallength</w>
       <w>widemove</w>
+      <w>wideterm</w>
     </words>
   </dictionary>
 </component>

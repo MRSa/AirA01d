@@ -2,8 +2,10 @@ package jp.osdn.gokigen.aira01d.ui.model
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -21,6 +23,8 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICaptureControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.IDigitalZoomControl
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
+import jp.osdn.gokigen.aira01d.StringResourceConverter
+import jp.osdn.gokigen.aira01d.preference.camera.OpcProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -132,6 +136,10 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     private val _checkingCameraHardware = MutableLiveData<Boolean>()
     val checkingCameraHardware: LiveData<Boolean> = _checkingCameraHardware
 
+    private val _allOpcProperties = mutableStateOf<List<OpcProperty>>(emptyList())
+    val groupedOpcProperties: Map<String, List<OpcProperty>> by derivedStateOf {
+        _allOpcProperties.value.groupBy { it.category }
+    }
     // ----- MediatorLiveData
     val digitalZoomScaleList = MediatorLiveData<List<Int>>().apply {
         addSource(digitalZoomScaleMin) { updateDigitalZoomScaleList() }
@@ -180,7 +188,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     private val _showDigitalZoomScaleDialog = MutableLiveData(false)
     val showDigitalZoomScaleDialog: LiveData<Boolean> = _showDigitalZoomScaleDialog
 
-    fun initializeViewModel()
+    fun initializeViewModel(context: android.content.Context)
     {
         try {
             // ----- UIスレッドの初期化なので .value を使用する
@@ -191,6 +199,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             AppSingleton.cameraControl.subscribeCameraStatus(this)
 
             cameraStatus = AppSingleton.cameraControl.getCameraStatus()
+
 
             _isConnectError.value = false
             _isCaptureActivated.value = false
@@ -219,6 +228,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             _digitalZoomScaleMax.value = 100
             _digitalZoomScaleCurrent.value = 100
             _showDigitalZoomScaleDialog.value = false
+            _allOpcProperties.value = StringResourceConverter().loadOpcPropertiesFromXml(context)
         }
         catch (e: Exception)
         {
@@ -618,7 +628,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
         try
         {
             val captureAction = ICaptureControl.CaptureAction.TOGGLE
-            val isMovie = (_takeMode.value == "movie")
+            val isMovie = ((_takeMode.value ?: "").lowercase() == "movie")
             val isContinuous = !((_driveMode.value ?: "").lowercase().contains("normal"))
 
             // UI反映用のLiveDataは、ボタンを押した瞬間に Main スレッドで即時反映 (.value)

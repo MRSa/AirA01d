@@ -36,6 +36,7 @@ fun CameraTuningButton(viewModel: CameraStatusViewModel, modifier: Modifier = Mo
         onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
         },
+        enabled = false,
         modifier = modifier.size(48.dp)
     ) {
         Icon(
