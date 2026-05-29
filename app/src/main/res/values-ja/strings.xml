@@ -16,6 +16,8 @@
 
     <string name="dialog_title_selection">変更</string>
     <string name="dialog_title_digital_zoom_selection">デジタル倍率</string>
+    <string name="dialog_title_zoom_direction">ズーム操作</string>
+    <string name="dialog_message_zoom_direction">ズーム</string>
 
     <string name="title_camera_properties">カメラプロパティ一覧</string>
     <string name="message_getting_properties">プロパティ取得中…</string>

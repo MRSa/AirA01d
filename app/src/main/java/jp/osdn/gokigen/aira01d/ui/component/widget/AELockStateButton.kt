@@ -32,13 +32,16 @@ fun AELockStateButton(
     val cameraProtocol = controlModel.cameraProtocol.observeAsState()
 
     // ----- ステータスに合わせてアイコンをと色を決める
-    val iconId =
-        when (aeLockState.value)
-        {
+    val iconId = if (cameraProtocol.value  == ICameraConnectionStatus.CameraProtocol.OPC) {
+        when (aeLockState.value) {
             "UNLOCK" -> R.drawable.ae_unlock
             "LOCK" -> R.drawable.ae_lock
             else -> R.drawable.ae_unlock
         }
+    } else
+    {
+        R.drawable.outline_reset_focus_24
+    }
     val iconColor = if (isLvActivated.value == true) {
         when (aeLockState.value)
         {
@@ -59,6 +62,12 @@ fun AELockStateButton(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 val command = (aeLockState.value == "UNLOCK")
                 controlModel.changeAELockState(command)
+            }
+            else
+            {
+                // ----- フォーカスロックを解除させる
+                viewModel.unlockFocus()
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
             }
         },
         modifier = modifier.size(48.dp)

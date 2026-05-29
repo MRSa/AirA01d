@@ -1,5 +1,7 @@
 package jp.osdn.gokigen.aira01d.ui.component.widget
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -13,12 +15,15 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
+import jp.osdn.gokigen.aira01d.ui.component.widget.dialog.ZoomDirectionSelectMenu
 import jp.osdn.gokigen.aira01d.ui.component.widget.dialog.ZoomSelectionDialog
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 
@@ -29,6 +34,7 @@ fun InformationArea2(
 ) {
     val haptic = LocalHapticFeedback.current
     var showDialog by remember { mutableStateOf(false) }
+    var showDialogOmds by remember { mutableStateOf(false) }
 
     // Stateの集約
     val cameraInformation by controlModel.cameraInformation.observeAsState("")
@@ -39,6 +45,7 @@ fun InformationArea2(
     val checkingHardware by controlModel.checkingCameraHardware.observeAsState(false)
     val electricZoom by controlModel.electricZoom.observeAsState("")
     val focalLengthList by controlModel.focalLengthList.observeAsState(emptyList())
+    val cameraProtocol = controlModel.cameraProtocol.observeAsState()
 
     // 表示メッセージと色などの計算部分
     val colorScheme = colorScheme
@@ -56,42 +63,63 @@ fun InformationArea2(
         }
     }
 
-    // ----- メインボタン
-    TextButton(
-        onClick = {
-            // --- ボタンが押されたときの処理... 電動ズームの時だけダイアログを出す
-            if (focalLengthWide < focalLengthTele) {
-                controlModel.clearElectricZoomInfo()
-                controlModel.checkElectricZoom()
-                showDialog = true
-            }
-        },
+    Box(
         modifier = modifier.height(48.dp).widthIn(min = 48.dp, max = 106.dp)
-    ) {
-        Text(
-            text = displayInfo.first,
-            style = TextStyle(fontWeight = displayInfo.third, color = displayInfo.second)
-        )
-    }
-
-    // ----- ダイアログ制御ロジック
-    if (showDialog && !checkingHardware) {
-        when (electricZoom) {
-            "OK" -> {
-                LaunchedEffect(Unit) {
-                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+    )
+    {
+        // ----- メインボタン
+        TextButton(
+            onClick = {
+                // --- ボタンが押されたときの処理... 電動ズームの時だけダイアログを出す
+                if (focalLengthWide < focalLengthTele) {
+                    if (cameraProtocol.value == ICameraConnectionStatus.CameraProtocol.OPC) {
+                        controlModel.clearElectricZoomInfo()
+                        controlModel.checkElectricZoom()
+                        showDialog = true
+                    } else {
+                        // ----- OMDS機は、デジタルズームかどうか関係なくズーム制御ダイアログを表示
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        showDialogOmds = true
+                    }
                 }
-                ZoomSelectionDialog(
-                    currentFocal = focalLengthNow,
-                    focalList = focalLengthList,
-                    onSelect = {
-                        controlModel.driveZoomLens(it)
-                        showDialog = false
-                    },
-                    onDismiss = { showDialog = false }
-                )
+            },
+            modifier = modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = displayInfo.first,
+                style = TextStyle(fontWeight = displayInfo.third, color = displayInfo.second)
+            )
+        }
+
+        // ----- ダイアログ制御ロジック
+        if (showDialog && !checkingHardware) {
+            when (electricZoom) {
+                "OK" -> {
+                    LaunchedEffect(Unit) {
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    }
+                    ZoomSelectionDialog(
+                        currentFocal = focalLengthNow,
+                        focalList = focalLengthList,
+                        onSelect = {
+                            controlModel.driveZoomLens(it)
+                            showDialog = false
+                        },
+                        onDismiss = { showDialog = false }
+                    )
+                }
+                "NG" -> showDialog = false
             }
-            "NG" -> showDialog = false
+        }
+
+        if (showDialogOmds)
+        {
+            // ----- OMDS用のズーム操作メニュー -----
+            ZoomDirectionSelectMenu(
+                controlModel = controlModel,
+                modifier = Modifier.align(Alignment.BottomEnd),
+                onDismiss = { showDialogOmds = false }
+            )
         }
     }
 }
