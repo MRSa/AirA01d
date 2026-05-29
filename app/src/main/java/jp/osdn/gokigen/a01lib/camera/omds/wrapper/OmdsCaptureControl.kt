@@ -16,6 +16,13 @@ class OmdsCaptureControl(val statusChecker : ICameraStatus): ICaptureControl
     private val continuousShotControl = OmdsContinuousShotControl()
     private val movieShotControl = OmdsMovieShotControl()
 
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        singleShotControl.setUseOpcProtocol(isOpcProtocol)
+        continuousShotControl.setUseOpcProtocol(isOpcProtocol)
+        movieShotControl.setUseOpcProtocol(isOpcProtocol)
+    }
+
     override fun doCapture(captureAction: ICaptureControl.CaptureAction)
     {
         Log.v(TAG, "doCapture() : $captureAction")

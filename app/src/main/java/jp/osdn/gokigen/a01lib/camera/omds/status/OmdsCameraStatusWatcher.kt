@@ -12,7 +12,6 @@ import kotlin.Exception
 class OmdsCameraStatusWatcher(
     opcEventReceiver: IOpcEventReceive? = null,
     userAgent: String = "OlympusCameraKit",
-    private val useOpcProtocol : Boolean = true
 ) : ICameraStatusWatcher, ICameraStatus, IOmdsCommunicationInfo, ILiveviewRtpHeaderReceiver
 {
     private val headerMap: MutableMap<String, String> = HashMap()
@@ -22,11 +21,17 @@ class OmdsCameraStatusWatcher(
     private val opcEventWatcher = OpcEventStatusWatch(statusProvider)
     private val pushEventWatcher = OpcPushEventWatcher(opcEventReceiver)
     private val opcProperties = OpcCameraProperties()
-    private val omdsEventWatcher = OmdsEventStatusWatch()
+    private val omdsEventWatcher = OmdsEventStatusWatch(statusProvider)
     private val omdsProperties = OmdsCameraProperties()
 
     private var isWatchingRtp = false
     private var isWatchingEvent = false
+    private var useOpcProtocol : Boolean = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     override fun subscribe(subscriber: ICameraStatusUpdateNotify)
     {
@@ -38,10 +43,15 @@ class OmdsCameraStatusWatcher(
         statusProvider.unsubscribe(subscriber)
     }
 
+    override fun setOmdsProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
+
     override fun setOmdsCommandList(commandList: String)
     {
-        // Log.v(TAG, "setOmdsCommandList : [$commandList]")
-        Log.v(TAG, "setOmdsCommandList")
+        Log.v(TAG, "setOmdsCommandList()")
+        //Log.v(TAG, "setOmdsCommandList:\n$commandList")
         startStatusWatch()
     }
 
@@ -175,6 +185,12 @@ class OmdsCameraStatusWatcher(
         {
             omdsProperties.setStatus(key, value)
         }
+    }
+
+    override fun getDescriptorList(): List<ICameraStatus.CameraPropertyDescriptor>
+    {
+        // ----- descriptor list の応答は OMDS機のみサポート
+        return (if (useOpcProtocol) { emptyList() } else { omdsProperties.getDescriptorList() })
     }
 
     override fun getDescriptor(propertyName: String): ICameraStatus.CameraPropertyDescriptor

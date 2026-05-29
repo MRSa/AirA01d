@@ -34,7 +34,7 @@ class OmdsCameraConnectSequence(private val cameraStatusReceiver: ICameraConnect
 
                 // --- カメラが受け付けるコマンドリストを取得する
                 val response1: String = http.httpGetWithHeader(getCommandListUrl, headerMap, null, TIMEOUT_MS) ?: ""
-                Log.v(TAG, " $getCommandListUrl (${response1.length})")
+                Log.v(TAG, " $getCommandListUrl (length: ${response1.length})")
                 communicationInfo.setOmdsCommandList(response1)
 
                 // --- 通信経路をWiFiに(強制)変更する

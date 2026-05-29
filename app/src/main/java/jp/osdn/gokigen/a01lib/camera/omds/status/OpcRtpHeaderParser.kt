@@ -66,16 +66,10 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
                     ID_MEDIA_INFO -> { checkMediaInfo(buffer, position, length) }  // メディア情報 (カード撮影可否など)
                     ID_ROTATION_INFO -> { checkRotationInfo(buffer, position, length) }  // 回転情報
                     ID_AVAILABLE_SHOTS -> { checkAvailableShots(buffer, position, length) }  // 撮影可能枚数
-                    ID_OMDS_UNKNOWN_01 -> { }
-                    ID_OMDS_UNKNOWN_02 -> { }
                     ID_SHUTTER_SPEED -> { checkShutterSpeed(buffer, position, length)  }  // シャッタースピード
                     ID_APERTURE -> { checkAperture(buffer, position, length) }            // 絞り値
                     ID_EXPOSURE_COMPENSATION -> { checkExposureCompensation(buffer, position, length) }  // 露出補正値
-                    ID_OMDS_UNKNOWN_03 -> { }
                     ID_ISO_SENSITIVITY -> { checkIsoSensitivity(buffer, position, length) }    // ISO感度
-                    ID_OMDS_UNKNOWN_04 -> { }
-                    ID_OMDS_UNKNOWN_05 -> { }
-                    ID_OMDS_UNKNOWN_06 -> { }
                     ID_EXPOSURE_WARNING -> { checkExposureWarning(buffer, position, length) }  // 露出警告
                     ID_FOCUS_TYPE -> { checkFocusType(buffer, position, length) }              // フォーカスモード (AF/MFなど)
                     ID_ZOOM_LENS_INFO -> { checkZoomInfo(buffer, position, length) }           // ズーム情報
@@ -90,7 +84,24 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
                     ID_FACE_DETECT_7 -> { }
                     ID_FACE_DETECT_8 -> { }
                     ID_CONTINUOUS_SHOT_PICTURE_INFO -> { }
-                    else -> { Log.v(TAG, "RTP HEADER INFO UNKNOWN(cmd: $commandId (0x${commandId.toString(16)}) len: $length)") }
+                    ID_OMDS_UNKNOWN_01 -> { }   // 0x06 -> 0
+                    ID_OMDS_UNKNOWN_02 -> { }   // 0x07 -> 0
+                    ID_OMDS_UNKNOWN_03 -> { }   // 0x0b -> 0 b
+                    //ID_OMDS_UNKNOWN_04 -> { }   // 0x0d
+                    ID_OMDS_UNKNOWN_05 -> { }   // 0x0e -> 0
+                    //ID_OMDS_UNKNOWN_06 -> { }   // 0x0f
+                    ID_OMDS_UNKNOWN_07 -> { }   // 0x13 -> 0  13
+                    //ID_OMDS_UNKNOWN_08 -> { }   // 0x14
+                    //ID_OMDS_UNKNOWN_09 -> { }   // 0x16
+                    //ID_OMDS_UNKNOWN_10 -> { }   // 0x1a
+                    else -> {
+                        Log.v(TAG, "RTP HEADER INFO UNKNOWN(cmd: $commandId (0x${commandId.toString(16)}) len: $length)")
+                        var dumpData = ""
+                        for (i in 0 until length) {
+                            dumpData += "${((buffer?.get(position + i) ?: 0).toInt() and 0xff).toString(16)} "
+                        }
+                        Log.v(TAG, " ----- BODY: $dumpData")
+                    }
                 }
                 position += 4 + length * 4  // header : 4bytes , data : length * 4 bytes
             }
@@ -308,6 +319,10 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
         private const val ID_EXPOSURE_WARNING = 0x10
         private const val ID_FOCUS_TYPE = 0x11
         private const val ID_ZOOM_LENS_INFO = 0x12
+        private const val ID_OMDS_UNKNOWN_07 = 0x13
+        private const val ID_OMDS_UNKNOWN_08 = 0x14
+        private const val ID_OMDS_UNKNOWN_09 = 0x16
+        private const val ID_OMDS_UNKNOWN_10 = 0x1a
         private const val ID_REMAIN_VIDEO_TIME = 0x6a
         private const val ID_POSITION_LEVEL_INFO = 0x6b
         private const val ID_FACE_DETECT_1 = 0x6c

@@ -11,6 +11,7 @@ class OmdsRunModeControl(private val liveViewQuality : String = "0640x0480", use
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
     private var currentRunMode = "unknown"
+    private var useOpcProtocol = true
 
     fun changeRunMode(runMode: String, callback: IOperationCallback)
     {
@@ -62,6 +63,11 @@ class OmdsRunModeControl(private val liveViewQuality : String = "0640x0480", use
     fun getRunMode() : String
     {
         return currentRunMode
+    }
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
     }
 
     init

@@ -10,6 +10,12 @@ class OmdsCameraGetProperty(userAgent: String = "OlympusCameraKit", private val 
 {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
+    private var useOpcProtocol = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     fun getCameraProperty(propertyName: String, propertyLabel: String?, callback: IOperationCallback)
     {

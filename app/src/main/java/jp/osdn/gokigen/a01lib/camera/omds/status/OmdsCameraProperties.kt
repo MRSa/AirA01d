@@ -29,6 +29,7 @@ class OmdsCameraProperties(
                 CameraProperty.DriveMode ->  sendSetPropertyRequest("drivemode", value)
                 CameraProperty.WhiteBalance ->  sendSetPropertyRequest("wbvalue", decideWhiteBalanceValue(value))
                 CameraProperty.PictureEffect ->  sendSetPropertyRequest("colortone", value)
+                CameraProperty.ArtFilter ->  sendSetPropertyRequest("artfilter", value)
                 else -> { }
             }
         }
@@ -64,6 +65,7 @@ class OmdsCameraProperties(
                 CameraProperty.WhiteBalance -> getAvailableWhiteBalance(sendGetPropertyDescriptionRequest("wbvalue"))
                 CameraProperty.PictureEffect -> getPropertySelectionList(sendGetPropertyDescriptionRequest("colortone"), "colortone")
                 CameraProperty.DriveMode -> getPropertySelectionList(sendGetPropertyDescriptionRequest("drivemode"), "drivemode")
+                CameraProperty.ArtFilter -> getPropertySelectionList(sendGetPropertyDescriptionRequest("artfilter"), "artfilter")
                 else -> ArrayList()
             })
         }
@@ -72,6 +74,72 @@ class OmdsCameraProperties(
             e.printStackTrace()
         }
         return (ArrayList())
+    }
+
+    fun getDescriptorList(): List<ICameraStatus.CameraPropertyDescriptor>
+    {
+        try
+        {
+            val descriptorList = mutableListOf<ICameraStatus.CameraPropertyDescriptor>()
+            // ----- ディスクリプタリストを取得する
+            val requestUrl = "$executeUrl/get_camprop.cgi?com=desc&propname=desclist"
+            val response: String = http.httpGetWithHeader(requestUrl, headerMap, null, TIMEOUT_MS) ?: ""
+            if (response.isEmpty()) return emptyList() // 応答エラー
+
+            val startIndex = response.indexOf("<desclist>")
+            val endIndex = response.indexOf("</desclist>")
+            if ((startIndex < endIndex) && (startIndex >= 0))
+            {
+                // 対象となるXML文字列を切り出し
+                val xmlString = response.substring(startIndex, endIndex + "</desclist>".length)
+
+                //  <desc>...</desc> で囲まれた各要素を抽出する正規表現
+                val descRegex = Regex("<desc>(.*?)</desc>")
+
+                // 各タグ内のテキストを抽出する正規表現
+                val propnameRegex = Regex("<propname>(.*?)</propname>")
+                val attributeRegex = Regex("<attribute>(.*?)</attribute>")
+                val valueRegex = Regex("<value>(.*?)</value>")
+                val enumRegex = Regex("<enum>(.*?)</enum>")
+
+                // <desc> タグにマッチする部分を順番に処理
+                descRegex.findAll(xmlString).forEach { matchResult ->
+                    val descContent = matchResult.groupValues[1] // <desc>の内側の文字列
+
+                    // 各タグのテキストを抽出（見つからない場合は空文字）
+                    val propName = propnameRegex.find(descContent)?.groupValues?.get(1) ?: ""
+                    val attribute = attributeRegex.find(descContent)?.groupValues?.get(1) ?: ""
+                    val current = valueRegex.find(descContent)?.groupValues?.get(1) ?: ""
+                    val enumStr = enumRegex.find(descContent)?.groupValues?.get(1) ?: ""
+
+                    // enumはスペース区切りでリスト化
+                    val values = if (enumStr.isNotEmpty())
+                    {
+                        enumStr.split(" ")
+                    }
+                    else
+                    {
+                        emptyList()
+                    }
+
+                    // リストに追加
+                    descriptorList.add(
+                        ICameraStatus.CameraPropertyDescriptor(
+                            propertyName = propName,
+                            attribute = attribute,
+                            current = current,
+                            values = values
+                        )
+                    )
+                }
+                return descriptorList
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return emptyList()
     }
 
     fun getDescriptor(propertyName: String): ICameraStatus.CameraPropertyDescriptor
@@ -182,6 +250,9 @@ class OmdsCameraProperties(
                 "17" -> "Cloudy"
                 "20" -> "Incandescent"
                 "35" -> "Fluorescent"
+                "68" -> "UnderwaterX"
+                "67" -> "UnderwaterY"
+                "69" -> "UnderwaterZ"
                 "64" -> "Underwater"
                 "23" -> "Flash"
                 "256" -> "WB1"
@@ -211,6 +282,9 @@ class OmdsCameraProperties(
                 "Cloudy" -> "17"
                 "Incandescent" -> "20"
                 "Fluorescent" -> "35"
+                "UnderwaterX" -> "68"
+                "UnderwaterY" -> "67"
+                "UnderwaterZ" -> "69"
                 "Underwater" -> "64"
                 "Flash" -> "23"
                 "WB1" -> "256"

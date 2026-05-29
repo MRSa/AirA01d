@@ -2,6 +2,7 @@
   <dictionary name="project">
     <words>
       <w>Levelvial</w>
+      <w>artfilter</w>
       <w>assignafframe</w>
       <w>cameramode</w>
       <w>camindstate</w>
@@ -80,11 +81,13 @@
       <w>takemotion</w>
       <w>telefocallength</w>
       <w>telemove</w>
+      <w>teleterm</w>
       <w>upperlimit</w>
       <w>utctimediff</w>
       <w>wbvalue</w>
       <w>widefocallength</w>
       <w>widemove</w>
+      <w>wideterm</w>
     </words>
   </dictionary>
 </component>

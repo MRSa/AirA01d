@@ -15,9 +15,16 @@ class OmdsTimeSync(userAgent: String = "OlympusCameraKit", private val executeUr
 {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
+    private var useOpcProtocol = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     fun setTimeSync(callback: IOperationCallback)
     {
+        // ----- OI.Share と OPCで同じコマンドが使用可能
         try
         {
             val currentDateTime = Date(System.currentTimeMillis())

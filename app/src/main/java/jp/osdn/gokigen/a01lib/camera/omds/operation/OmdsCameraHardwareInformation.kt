@@ -11,6 +11,12 @@ class OmdsCameraHardwareInformation(userAgent: String = "OlympusCameraKit", priv
 {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
+    private var useOpcProtocol = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     override fun getCameraStatus(callback: ICameraHardwareInformation.Callback)
     {

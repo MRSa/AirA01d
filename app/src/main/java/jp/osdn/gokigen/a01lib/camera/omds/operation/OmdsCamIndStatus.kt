@@ -10,6 +10,12 @@ class OmdsCamIndStatus(userAgent: String = "OlympusCameraKit", private val execu
 {
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
+    private var useOpcProtocol = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     fun getCamInState(callback: IOperationCallback)
     {

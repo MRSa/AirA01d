@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
+import jp.osdn.gokigen.aira01d.ui.component.widget.property.OmdsCameraPropertySettingScreen
 import jp.osdn.gokigen.aira01d.ui.component.widget.property.OpcCameraPropertySettingScreen
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 
@@ -17,6 +20,7 @@ fun CameraPreferenceScreen(
     viewModel: CameraStatusViewModel,
     modifier: Modifier = Modifier
 ) {
+    val cameraProtocol = viewModel.cameraProtocol.observeAsState()
     Scaffold(
         topBar = {
             Column {
@@ -30,11 +34,22 @@ fun CameraPreferenceScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            OpcCameraPropertySettingScreen(
-                viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
-                modifier = modifier
-            )
+            if (cameraProtocol.value == ICameraConnectionStatus.CameraProtocol.OPC)
+            {
+                OpcCameraPropertySettingScreen(
+                    viewModel = viewModel,
+                    onBackClick = { navController.popBackStack() },
+                    modifier = modifier
+                )
+            }
+            else
+            {
+                OmdsCameraPropertySettingScreen(
+                    viewModel = viewModel,
+                    onBackClick = { navController.popBackStack() },
+                    modifier = modifier
+                )
+            }
         }
     }
 }

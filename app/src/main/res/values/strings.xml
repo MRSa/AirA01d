@@ -16,7 +16,14 @@
 
     <string name="dialog_title_selection">Change</string>
     <string name="dialog_title_digital_zoom_selection">Change Scale</string>
+    <string name="dialog_title_zoom_direction">Zoom</string>
+    <string name="dialog_message_zoom_direction">direction</string>
 
+    <string name="title_camera_properties">Camera Property List</string>
+    <string name="message_getting_properties">getting properties…</string>
+    <string name="title_property">Property</string>
+    <string name="message_current">Current Value: </string>
+    <string name="message_read_write">Editable</string>
     <string name="message_read_only">Read Only</string>
     <string name="exposure_warning">Exposure warning</string>
     <string name="media_busy">Media Busy</string>

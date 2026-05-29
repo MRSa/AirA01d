@@ -56,7 +56,7 @@ fun PowerOffButton(viewModel: CameraStatusViewModel, modifier: Modifier = Modifi
                 showDialog = false
 
                 // --- Power Offの実処理
-                viewModel.confirmPowerOff(onFinish = { activity?.finish() })
+                viewModel.confirmPowerOff(onFinish = { activity?.finishAndRemoveTask() })
             },
             onDismiss = { showDialog = false }
         )

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
+import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.StringResourceConverter
 import jp.osdn.gokigen.aira01d.preference.camera.OpcProperty
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
@@ -42,18 +44,20 @@ fun OpcCameraPropertySettingScreen(
     modifier: Modifier = Modifier
 )
 {
-    val context = LocalContext.current
+    val groupedProperties = viewModel.groupedOpcProperties
 
-    // 起動時に XML からデータをロードする
-    val allProperties = remember { StringResourceConverter().loadOpcPropertiesFromXml(context) }
-
-    // カテゴリごとにグループ化（Map<String, List<OpcProperty>>）
-    val groupedProperties = remember(allProperties) {
-        allProperties.groupBy { it.category }
-    }
+    Scaffold(
+        topBar = {
+            Text(
+                text = stringResource(R.string.title_camera_properties),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    ) { innerPadding ->
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().padding(innerPadding),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -77,9 +81,14 @@ fun OpcCameraPropertySettingScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            val rscId = resourceConverter.getStringResourceId("cameraProp_$categoryName")
+                            val rscId =
+                                resourceConverter.getStringResourceId("cameraProp_$categoryName")
                             Text(
-                                text = if (rscId == 0) { categoryName } else { stringResource(resourceConverter.getStringResourceId("cameraProp_$categoryName")) },
+                                text = if (rscId == 0) {
+                                    categoryName
+                                } else {
+                                    stringResource(resourceConverter.getStringResourceId("cameraProp_$categoryName"))
+                                },
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -111,7 +120,11 @@ fun OpcCameraPropertySettingScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             propertiesInGroup.forEach { property ->
-                                XmlPropertyRowItem(viewModel = viewModel, property = property, modifier)
+                                XmlPropertyRowItem(
+                                    viewModel = viewModel,
+                                    property = property,
+                                    modifier
+                                )
                             }
                         }
                     }
@@ -120,16 +133,28 @@ fun OpcCameraPropertySettingScreen(
             }
         }
     }
+    }
 }
 
 @Composable
-fun XmlPropertyRowItem(viewModel: CameraStatusViewModel, property: OpcProperty, modifier: Modifier)
+fun XmlPropertyRowItem(
+    viewModel: CameraStatusViewModel,
+    property: OpcProperty,
+    modifier: Modifier = Modifier)
 {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = stringResource(property.labelId), fontSize = 15.sp, fontWeight = FontWeight.Medium)
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(property.labelId),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium
+        )
         Spacer(modifier = Modifier.height(2.dp))
         // サブ情報としてキー名を表示
-        Text(text = property.key, fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
+        Text(
+            text = property.key,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline
+        )
 
         Spacer(modifier = Modifier.height(6.dp))
 
@@ -138,7 +163,7 @@ fun XmlPropertyRowItem(viewModel: CameraStatusViewModel, property: OpcProperty, 
             controlModel = viewModel,
             titleRscId = property.labelId,
             targetPropertyString = property.key,
-            modifier = modifier
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

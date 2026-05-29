@@ -2,10 +2,12 @@ package jp.osdn.gokigen.a01lib.camera.omds.status
 
 import android.util.Log
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus
+import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.util.HashMap
 
 class OmdsEventStatusWatch(
+    private val statusProvider: ICameraStatusUpdateNotify,
     userAgent: String = "OlympusCameraKit",
     private val executeUrl : String = "http://192.168.0.10",
 )
@@ -51,6 +53,7 @@ class OmdsEventStatusWatch(
             checkAperture(getPropertyValue(eventResponse, "<propname>focalvalue</propname>"))
             checkIsoSensitivity(getPropertyValue(eventResponse, "<propname>isospeedvalue</propname>"))
             checkExposureCompensation(getPropertyValue(eventResponse, "<propname>expcomp</propname>"))
+            checkArtFilter(getPropertyValue(eventResponse, "<propname>artfilter</propname>"))
         }
         catch (e: Exception)
         {
@@ -64,6 +67,7 @@ class OmdsEventStatusWatch(
         if (takeMode != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.TakeMode] = takeMode
+            statusProvider.changedTakeMode(takeMode)
         }
     }
 
@@ -73,6 +77,7 @@ class OmdsEventStatusWatch(
         if (wb != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.WhiteBalance] = wb
+            statusProvider.updatedWhiteBalance(wb)
         }
     }
 
@@ -82,6 +87,7 @@ class OmdsEventStatusWatch(
         if (pictureEffect != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.PictureEffect] = pictureEffect
+            statusProvider.updatePictureEffect(pictureEffect)
         }
     }
 
@@ -91,6 +97,7 @@ class OmdsEventStatusWatch(
         if (driveMode != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.DriveMode] = driveMode
+            statusProvider.updateDriveMode(driveMode)
         }
     }
 
@@ -100,6 +107,7 @@ class OmdsEventStatusWatch(
         if (shutterSpeed != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.ShutterSpeed] = shutterSpeed
+            statusProvider.updatedShutterSpeed(shutterSpeed)
         }
     }
 
@@ -109,6 +117,7 @@ class OmdsEventStatusWatch(
         if (aperture != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.Aperture] = aperture
+            statusProvider.updatedAperture(aperture)
         }
     }
 
@@ -118,6 +127,7 @@ class OmdsEventStatusWatch(
         if (isoSensitivity != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.IsoSensitivity] = isoSensitivity
+            statusProvider.updateIsoSensitivity(isoSensitivity)
         }
     }
 
@@ -127,6 +137,17 @@ class OmdsEventStatusWatch(
         if (exposureCompensation != currentValue)
         {
             currentStatuses[ICameraStatus.CameraProperty.ExposureCompensation] = exposureCompensation
+            statusProvider.updatedExposureCompensation(exposureCompensation)
+        }
+    }
+
+    private fun checkArtFilter(artFilter: String)
+    {
+        val currentValue = this.currentStatuses[ICameraStatus.CameraProperty.ArtFilter] ?: ""
+        if (artFilter != currentValue)
+        {
+            currentStatuses[ICameraStatus.CameraProperty.ArtFilter] = artFilter
+            statusProvider.updateArtFilter(artFilter)
         }
     }
 
@@ -143,6 +164,9 @@ class OmdsEventStatusWatch(
                 "20" -> "Incandescent"
                 "35" -> "Fluorescent"
                 "64" -> "Underwater"
+                "68" -> "UnderwaterX"
+                "67" -> "UnderwaterY"
+                "69" -> "UnderwaterZ"
                 "23" -> "Flash"
                 "256" -> "WB1"
                 "257" -> "WB2"
