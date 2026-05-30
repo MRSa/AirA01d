@@ -39,11 +39,11 @@ fun CameraPropertyDescriptorSelectionDialog(
     haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
 
     // ----- リソースの文字列を変換する
-    val currentRscId = AppSingleton.resourceConverter.getStringResourceId("$keyNameHeader$current")
+    val propertyNameHeader = if (propertyName == "ASPECT_RATIO") { "aspect_" } else { keyNameHeader }  // アスペクト比の文字列は数値から始まっているので。。
+    val currentRscId = AppSingleton.resourceConverter.getStringResourceId("$propertyNameHeader$current")
     val currentString = if (currentRscId == 0) { current } else { stringResource(currentRscId) }
     val isEditable = controlModel.propertyDescriptor.attribute.contains("set")
     val titleString = if (isEditable) { "${stringResource(propertyTitleId)} : $currentString" } else { "${stringResource(propertyTitleId)} : ${stringResource(R.string.message_read_only)}" }
-    val propertyNameHeader = if (propertyName == "ASPECT_RATIO") { "aspect_" } else { keyNameHeader }  // アスペクト比の文字列は数値から始まっているので。。
     AlertDialog(
         onDismissRequest = {
             onClose()

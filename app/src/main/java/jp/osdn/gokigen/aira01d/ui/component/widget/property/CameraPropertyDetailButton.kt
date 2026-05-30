@@ -6,11 +6,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -34,20 +29,12 @@ fun CameraPropertyDetailButton(
     val textColor = MaterialTheme.colorScheme.primary
 
     // ----- ダイアログの表示状態を管理
-    var showDialog by remember { mutableStateOf(false) }
-
-    // --- 通信完了を監視してダイアログを開く --- 一覧が更新され、かつ空でない場合にダイアログを表示
-    LaunchedEffect(controlModel.propertyDescriptor, controlModel.queryPropertyName) {
-        if ((controlModel.queryPropertyName == targetPropertyString)&&(controlModel.propertyDescriptor.values.isNotEmpty())) {
-            showDialog = true
-        }
-    }
+    val showDialog = (controlModel.showCameraPropertySelectionDialog)&&(controlModel.queryPropertyName == targetPropertyString)
 
     // ----- ボタンの表示
     OutlinedButton(
-        onClick = {
-            controlModel.getPropertyDescriptor(targetPropertyString)
-        },
+        onClick = { controlModel.getPropertyDescriptor(targetPropertyString) },
+        enabled = controlModel.queryPropertyName == null || controlModel.queryPropertyName == targetPropertyString,
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
     ) {
@@ -70,7 +57,6 @@ fun CameraPropertyDetailButton(
             current = controlModel.propertyDescriptor.current,
             keyNameHeader = "",
             onClose = {
-                showDialog = false
                 controlModel.onDismissedPropertyDescriptor()
             }
         )

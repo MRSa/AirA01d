@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -166,6 +165,9 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     var canUseDigitalZoom by mutableStateOf(false)
         private set
 
+    var showCameraPropertySelectionDialog by mutableStateOf(false)
+        private set
+
     var propertyDescriptor by mutableStateOf(
         ICameraStatus.CameraPropertyDescriptor(
             propertyName = "",
@@ -188,7 +190,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     private val _showDigitalZoomScaleDialog = MutableLiveData(false)
     val showDigitalZoomScaleDialog: LiveData<Boolean> = _showDigitalZoomScaleDialog
 
-    fun initializeViewModel(context: android.content.Context)
+    fun initializeViewModel(context: Context)
     {
         try {
             // ----- UIスレッドの初期化なので .value を使用する
@@ -240,30 +242,35 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     {
         try
         {
-            // カメラからの通知はバックグラウンドスレッドの可能性があるため postValue を使用
             val currentStatus = _cameraConnectionStatus.value
-            if ((status == CameraConnectionStatus.NOT_FOUND) &&
-                ((currentStatus == CameraConnectionStatus.CHECK_WIFI) ||
-                        (currentStatus == CameraConnectionStatus.CONNECTING) ||
-                        (currentStatus == CameraConnectionStatus.NOT_FOUND)))
-            {
-                _isConnectError.postValue(true)
-            } else if ((status == CameraConnectionStatus.ERROR) || (status == CameraConnectionStatus.EXCEPTION)) {
-                _isConnectError.postValue(true)
-            } else {
-                _isConnectError.postValue(false)
+
+            // --- エラー状態の判定ロジック
+            val isError = when (status) {
+                CameraConnectionStatus.NOT_FOUND -> currentStatus in listOf(
+                    CameraConnectionStatus.CHECK_WIFI,
+                    CameraConnectionStatus.CONNECTING,
+                    CameraConnectionStatus.NOT_FOUND
+                )
+                CameraConnectionStatus.ERROR,
+                CameraConnectionStatus.EXCEPTION -> true
+                else -> false
             }
+            _isConnectError.postValue(isError)
+
+            // --- ステータスの更新
             _cameraConnectionStatus.postValue(status)
+
+            // --- 接続成功時のプロトコル情報更新
+            var protocol = _cameraProtocol.value
             if (status == CameraConnectionStatus.CONNECTED)
             {
-                // ----- Connected の時には、そのタイミングでのProtocol情報を反映させる
-                _cameraProtocol.postValue(AppSingleton.cameraControl.getCameraConnectionProtocol())
+                protocol = AppSingleton.cameraControl.getCameraConnectionProtocol()
+                _cameraProtocol.postValue(protocol)
             }
-            Log.v(TAG, "Connection : $status, protocol: ${_cameraProtocol.value}")
-        }
-        catch (e: Exception)
-        {
-            e.printStackTrace()
+            // --- ログ出力
+            Log.v(TAG, "Connection : $status, protocol: $protocol")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in onStatusNotify", e)
         }
     }
 
@@ -461,6 +468,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 current = "",
                 values = emptyList()
         )
+        showCameraPropertySelectionDialog = false // 問い合わせ中の時は、ダイアログを出さない
 
         viewModelScope.launch {
             try
@@ -470,12 +478,14 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 }
                 if (queryPropertyName == propertyName) {
                     propertyDescriptor = descriptor
+                    showCameraPropertySelectionDialog = true
                     Log.v(TAG, " --- RECEIVED PROPERTY DESCRIPTOR : $queryPropertyName (${propertyDescriptor.current})")
                     if (propertyDescriptor.values.isEmpty())
                     {
                         // ---- うまく選択肢のデータが取れなかった... "待ち"を解除する
                         Log.v(TAG, "      DESCRIPTOR IS NONE...(${propertyDescriptor.propertyName})")
                         queryPropertyName = null
+                        showCameraPropertySelectionDialog = false
                     }
                 }
                 else
@@ -483,18 +493,21 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                     // --- 待っているのと違うのが送られてきた... 無視（待ちを解除）する
                     Log.v(TAG, "--- Received Wrong Property: $queryPropertyName (wait: $propertyName)")
                     queryPropertyName = null
+                    showCameraPropertySelectionDialog = false
                 }
             }
             catch (e: Exception)
             {
                 Log.e("CameraViewModel", "Failed to get descriptor", e)
                 queryPropertyName = null
+                showCameraPropertySelectionDialog = false
             }
         }
     }
 
     fun onDismissedPropertyDescriptor()
     {
+        showCameraPropertySelectionDialog = false
         queryPropertyName = null
         propertyDescriptor = ICameraStatus.CameraPropertyDescriptor(
             propertyName = "",
