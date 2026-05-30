@@ -63,20 +63,27 @@ class OmdsZoomLensControl(userAgent: String = "OlympusCameraKit", private val ex
                     else
                     {
 
-                        // ----- OMDS Zoom操作 (正ならズームイン、負ならズームアウト）
-                        if (targetLength > 0.0f)
+                        //  OMDS機向けの Zoom操作
+                        //   (正ならズームイン、負ならズームアウト, 2000を超えていると端っこまで移動）
+                        if (targetLength > 2000.0f)
                         {
-                            //"/exec_takemisc.cgi?com=ctrlzoom&move=teleterm"  // テレ端まで移動
-                            "/exec_takemisc.cgi?com=ctrlzoom&move=telemove"
+                            "/exec_takemisc.cgi?com=ctrlzoom&move=teleterm"  // テレ端まで移動
+                        }
+                        else if (targetLength > 0.0f)
+                        {
+                            "/exec_takemisc.cgi?com=ctrlzoom&move=telemove"  // テレ方向へズーム
                         }
                         else if (targetLength == 0.0f)
                         {
-                            "/exec_takemisc.cgi?com=ctrlzoom&move=off"         //  動作停止
+                            "/exec_takemisc.cgi?com=ctrlzoom&move=off"       //  動作停止
+                        }
+                        else if (targetLength < -2000.0f)
+                        {
+                            "/exec_takemisc.cgi?com=ctrlzoom&move=wideterm"  // ワイド端まで移動
                         }
                         else
                         {
-                            //"/exec_takemisc.cgi?com=ctrlzoom&move=wideterm"  // ワイド端まで移動
-                            "/exec_takemisc.cgi?com=ctrlzoom&move=widemove"
+                            "/exec_takemisc.cgi?com=ctrlzoom&move=widemove"  // ワイド方向へズーム
                         }
                     }
                     http.httpGetWithHeader(

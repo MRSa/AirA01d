@@ -53,6 +53,22 @@ fun ZoomDirectionSelectMenu(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+/*
+                IconButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        controlModel.driveZoomLens(-3500)  // ズーム（ワイド端）
+                    },
+                    modifier = modifier.size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.outline_zoom_out_24),
+                        contentDescription = "zoom out term",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(modifier = Modifier.size(12.dp))
+*/
                 IconButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -66,8 +82,7 @@ fun ZoomDirectionSelectMenu(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-
-                Spacer(modifier = Modifier.weight(2f))
+                Spacer(modifier = Modifier.size(12.dp))
 
                 IconButton(
                     onClick = {
@@ -82,8 +97,8 @@ fun ZoomDirectionSelectMenu(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
+                Spacer(modifier = Modifier.size(12.dp))
 
-                Spacer(modifier = Modifier.weight(2f))
                 IconButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -97,15 +112,30 @@ fun ZoomDirectionSelectMenu(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
+/*
+                Spacer(modifier = Modifier.size(12.dp))
+                IconButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        controlModel.driveZoomLens(3500) // ズーム（テレ端）
+                    },
+                    modifier = modifier.size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.outline_zoom_in_24),
+                        contentDescription = "zoom in term",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+*/
             }
-
             // キャンセルボタン（元々の confirmButton 部分）
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
                 OutlinedButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.button_cancel))
+                    Text(stringResource(R.string.button_close))
                 }
             }
         }
