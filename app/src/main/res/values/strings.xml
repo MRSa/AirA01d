@@ -8,6 +8,7 @@
     <string name="button_power_off_confirm">OK(Exit)</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_detail">Detail…</string>
+    <string name="button_close">Close</string>
 
     <string name="dialog_title_connect_failed">Connect failed.</string>
     <string name="dialog_button_retry">Retry</string>
