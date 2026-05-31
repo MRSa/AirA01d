@@ -1,5 +1,6 @@
 package jp.osdn.gokigen.aira01d.ui.model
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -50,7 +51,10 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
     private val _focusFrameRectangle: MutableLiveData<RectF> by lazy { MutableLiveData<RectF>() }
     val focusFrameRectangle : LiveData<RectF> = _focusFrameRectangle
 
-    fun initializeViewModel(context: android.content.Context)
+    //private val _consecutiveErrorCount = MutableLiveData<Int>()
+    //val consecutiveErrorCount: LiveData<Int> = _consecutiveErrorCount
+
+    fun initializeViewModel(context: Context)
     {
         Log.v(TAG, "LiveviewViewModel::initializeViewModel()")
         try
@@ -95,6 +99,7 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
             _isLvActivated.postValue(false)
             _isGridOn.postValue(false)
             _isShowFocusFrame.postValue(false)
+            //_consecutiveErrorCount.postValue(0)
             _focusFrameStatus.postValue(FocusFrameStatus.None)
         }
         catch (t: Throwable)
@@ -280,6 +285,11 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
             CameraEvent.FinishCreateLatestImage -> { getLastCapturedImage() }
             else -> { }  // 処理しない
         }
+    }
+
+    override fun statusWatcherConsecutiveErrorCount(count: Int)
+    {
+        //_consecutiveErrorCount.postValue(count)
     }
 
     private fun getLastCapturedImage()

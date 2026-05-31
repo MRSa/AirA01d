@@ -4,4 +4,5 @@ interface ICameraEventNotify
 {
     fun getSubscribeId(): String
     fun receivedCameraEvent(eventMessage: ByteArray)
+    fun statusWatcherConsecutiveErrorCount(count: Int)
 }

@@ -31,9 +31,6 @@ class SelfTimerViewModel : ViewModel()
     private val _isTimerRemainSec = MutableStateFlow(0)
     val isTimerRemainSec = _isTimerRemainSec.asStateFlow()
 
-    // --- viewModelの初期化 ----
-    fun initializeViewModel() { }
-
     fun startSelfTimer() {
         // 現在の設定値に基づいて秒数を決定
         val seconds = when (_isTimerOn.value) {

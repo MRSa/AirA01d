@@ -1,5 +1,6 @@
 package jp.osdn.gokigen.aira01d.ui.model
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.derivedStateOf
@@ -10,7 +11,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus.CameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
@@ -23,6 +27,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.IDigitalZoomControl
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.StringResourceConverter
+import jp.osdn.gokigen.aira01d.preference.PreferenceRepository
 import jp.osdn.gokigen.aira01d.preference.camera.OpcProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +36,10 @@ import kotlin.math.roundToInt
 import kotlin.text.isNotEmpty
 
 // ----- カメラ状態を保持し、画面表示のためにデータを提供する
-class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEventNotify, ICameraStatusUpdateNotify {
+class CameraStatusViewModel(
+    application: Application,
+    preferenceRepository: PreferenceRepository
+) : ViewModel(), ICameraConnectionStatus, ICameraEventNotify, ICameraStatusUpdateNotify {
 
     private lateinit var cameraStatus: ICameraStatus
 
@@ -77,6 +85,9 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
 
     private val _digitalZoomScaleCurrent = MutableLiveData<Int>()
     val digitalZoomScaleCurrent: LiveData<Int> = _digitalZoomScaleCurrent
+
+    private val _consecutiveErrorCount = MutableLiveData<Int>()
+    val consecutiveErrorCount: LiveData<Int> = _consecutiveErrorCount
 
     private val _takeMode = MutableLiveData<String>()
     val takeMode: LiveData<String> = _takeMode
@@ -190,8 +201,12 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     private val _showDigitalZoomScaleDialog = MutableLiveData(false)
     val showDigitalZoomScaleDialog: LiveData<Boolean> = _showDigitalZoomScaleDialog
 
-    fun initializeViewModel(context: Context)
-    {
+    // ---- preference
+    val issueCommandSingleLiveData: LiveData<Boolean> = preferenceRepository.issueCommandSingleFlow.asLiveData()
+
+    private var _nowCommandIssued : Boolean  = false
+
+    init {
         try {
             // ----- UIスレッドの初期化なので .value を使用する
             _cameraConnectionStatus.value = AppSingleton.cameraControl.getCameraConnectionStatus()
@@ -230,7 +245,8 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             _digitalZoomScaleMax.value = 100
             _digitalZoomScaleCurrent.value = 100
             _showDigitalZoomScaleDialog.value = false
-            _allOpcProperties.value = StringResourceConverter().loadOpcPropertiesFromXml(context)
+            _allOpcProperties.value = StringResourceConverter().loadOpcPropertiesFromXml(application)
+            _consecutiveErrorCount.value = 0
         }
         catch (e: Exception)
         {
@@ -291,6 +307,11 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
         val length = ((eventMessage[2].toInt() and 0xFF) shl 8) or (eventMessage[3].toInt() and 0xFF)
         val dataBody = String(eventMessage, 4, eventMessage.size - 4, Charsets.UTF_8)
         Log.v(TAG, " - - - - - - - - - receivedCameraEvent(CameraStatusViewModel) : $appId [evt:$event] len:$length   '$dataBody'")
+    }
+
+    override fun statusWatcherConsecutiveErrorCount(count: Int)
+    {
+        _consecutiveErrorCount.postValue(count)
     }
 
     override fun changedTakeMode(newMode: String) {
@@ -413,23 +434,15 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
 
     override fun updatedLevelGauge(accuracy: Int, orientation: Int, roll: Int, pitch: Int) {}
 
-    private fun getPropertyValueList(key: ICameraStatus.CameraProperty): List<String> {
-        try {
-            return AppSingleton.cameraControl.getCameraStatus().getStatusList(key)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return ArrayList()
-    }
-
     fun getPropertyDescriptorList()
     {
-        // ディスクリプタリストの問い合わせ
-        if (queryPropertyDescriptorList)
+        // --- ディスクリプタリストの問い合わせ
+        if ((queryPropertyDescriptorList)||((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued)))
         {
-            Log.v(TAG, "getPropertyDescriptorList : Now Querying")
+            Log.v(TAG, "getPropertyDescriptorList : Now Querying ($_nowCommandIssued)")
             return // 既に問い合わせ中の時は、何もしない
         }
+        _nowCommandIssued = true
         queryPropertyDescriptorList = true
         Log.v(TAG, "--- getPropertyDescriptorList()")
 
@@ -447,6 +460,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             }
             finally {
                 queryPropertyDescriptorList = false
+                _nowCommandIssued = false
             }
         }
     }
@@ -454,13 +468,14 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     fun getPropertyDescriptor(propertyName: String)
     {
         // ディスクリプタの問い合わせ
-        if (queryPropertyName != null)
+        if ((queryPropertyName != null)||((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued)))
         {
-            Log.v(TAG, "getPropertyDescriptor($propertyName) : Now Querying [$queryPropertyName]")
+            Log.v(TAG, "getPropertyDescriptor($propertyName) : Now Querying [$queryPropertyName] : $_nowCommandIssued")
             return // 既に問い合わせ中の時は、何もしない
         }
         Log.v(TAG, "--- getPropertyDescriptor($propertyName)")
 
+        _nowCommandIssued = true
         queryPropertyName = propertyName
         propertyDescriptor = ICameraStatus.CameraPropertyDescriptor(
                 propertyName = "",
@@ -502,6 +517,9 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 queryPropertyName = null
                 showCameraPropertySelectionDialog = false
             }
+            finally {
+                _nowCommandIssued = false
+            }
         }
     }
 
@@ -530,7 +548,13 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     }
 
     fun loadPropertyList(key: ICameraStatus.CameraProperty) {
-        if (activeProperty != null) return
+        // ディスクリプタの問い合わせ
+        if ((activeProperty != null)||((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued)))
+        {
+            Log.v(TAG, "loadPropertyList($activeProperty) : Now Querying [$key] : $_nowCommandIssued")
+            return // 既に問い合わせ中の時は、何もしない
+        }
+        _nowCommandIssued = true
         activeProperty = key
         propertyList = emptyList()
 
@@ -539,7 +563,7 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             {
                 // Dispatchers.IO で非同期取得
                 val result = withContext(Dispatchers.IO) {
-                    getPropertyValueList(key)
+                    AppSingleton.cameraControl.getCameraStatus().getStatusList(key)
                 }
                 // メインスレッドで安全にComposeのStateへ反映
                 if (activeProperty == key) {
@@ -555,6 +579,9 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             {
                 activeProperty = null
                 e.printStackTrace()
+            }
+            finally {
+                _nowCommandIssued = false
             }
         }
     }
@@ -640,9 +667,16 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     {
         try
         {
+            if ((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued))
+            {
+                Log.v(TAG, "tryCapture() : due to communicating, omitted")
+                return // 既に問い合わせ中 or コマンド実行中の時は、何もしない
+            }
+
             val captureAction = ICaptureControl.CaptureAction.TOGGLE
             val isMovie = ((_takeMode.value ?: "").lowercase() == "movie")
             val isContinuous = !((_driveMode.value ?: "").lowercase().contains("normal"))
+            _nowCommandIssued = true
 
             // UI反映用のLiveDataは、ボタンを押した瞬間に Main スレッドで即時反映 (.value)
             if (isMovie || isContinuous) {
@@ -664,13 +698,23 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+                finally {
+                    _nowCommandIssued = false
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            _nowCommandIssued = false
         }
     }
 
     fun changeAELockState(isLock: Boolean) {
+        if ((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued))
+        {
+            Log.v(TAG, "changeAELockState($isLock) : due to communicating, omitted")
+            return // 既に問い合わせ中 or コマンド実行中の時は、何もしない
+        }
+        _nowCommandIssued = true
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -683,10 +727,19 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            finally {
+                _nowCommandIssued = false
+            }
         }
     }
 
     fun changeLiveviewScale() {
+        if ((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued))
+        {
+            Log.v(TAG, "changeLiveviewScale() : due to communicating, omitted")
+            return // 既に問い合わせ中 or コマンド実行中の時は、何もしない
+        }
+        _nowCommandIssued = true
         val nextSize = when (_liveviewMagnifySize.value) {
             5 -> 7
             7 -> 10
@@ -708,10 +761,19 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            finally {
+                _nowCommandIssued = false
+            }
         }
     }
 
     fun driveZoomLens(focalLength: Int) {
+        if ((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued))
+        {
+            Log.v(TAG, "driveZoomLens() : due to communicating, omitted")
+            return // 既に問い合わせ中 or コマンド実行中の時は、何もしない
+        }
+        _nowCommandIssued = true
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -720,10 +782,19 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            finally {
+                _nowCommandIssued = false
+            }
         }
     }
 
     fun checkElectricZoom() {
+        if ((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued))
+        {
+            Log.v(TAG, "checkElectricZoom() : due to communicating, omitted")
+            return // 既に問い合わせ中 or コマンド実行中の時は、何もしない
+        }
+        _nowCommandIssued = true
         _checkingCameraHardware.value = true
         _electricZoom.value = ""
 
@@ -749,6 +820,9 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 _checkingCameraHardware.value = false
                 e.printStackTrace()
             }
+            finally {
+                _nowCommandIssued = false
+            }
         }
     }
 
@@ -758,7 +832,12 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
 
     fun checkDigitalZoomScale()
     {
-        if (queryDigitalZoom) return // 確認中の時には処理をしない
+        if ((queryDigitalZoom)||((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued)))
+        {
+            Log.v(TAG, "checkDigitalZoomScale() : due to communicating, omitted ($_nowCommandIssued)")
+            return // 既に問い合わせ中 or コマンド実行中の時は、何もしない
+        }
+        _nowCommandIssued = true
         queryDigitalZoom = true
 
         viewModelScope.launch {
@@ -786,10 +865,19 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 queryDigitalZoom = false
                 e.printStackTrace()
             }
+            finally {
+                _nowCommandIssued = false
+            }
         }
     }
 
     fun changeDigitalZoomScale(focalLength: Int) {
+        if ((issueCommandSingleLiveData.value == true)&&(_nowCommandIssued))
+        {
+            Log.v(TAG, "changeDigitalZoomScale($focalLength) : due to communicating, omitted")
+            return // 既に問い合わせ中 or コマンド実行中の時は、何もしない
+        }
+        _nowCommandIssued = true
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -798,6 +886,9 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
                 _digitalZoomScaleCurrent.value = focalLength
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+            finally {
+                _nowCommandIssued = false
             }
         }
     }
@@ -843,5 +934,18 @@ class CameraStatusViewModel : ViewModel(), ICameraConnectionStatus, ICameraEvent
     companion object
     {
         private val TAG = CameraStatusViewModel::class.java.simpleName
+
+        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                // アプリケーションのContextを取得
+                val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
+
+                // Repository のインスタンスを作成
+                val repository = PreferenceRepository(application.applicationContext)
+
+                return CameraStatusViewModel(application, repository) as T
+            }
+        }
     }
 }

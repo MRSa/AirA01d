@@ -6,11 +6,11 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus.CameraProperty
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusWatcher
 import jp.osdn.gokigen.a01lib.camera.omds.liveview.ILiveviewRtpHeaderReceiver
-import java.util.*
 import kotlin.Exception
 
 class OmdsCameraStatusWatcher(
     opcEventReceiver: IOpcEventReceive? = null,
+    private val statusWatcherStatusReceiver: IStatusWatcherStatus? = null,
     userAgent: String = "OlympusCameraKit",
 ) : ICameraStatusWatcher, ICameraStatus, IOmdsCommunicationInfo, ILiveviewRtpHeaderReceiver
 {
@@ -27,6 +27,7 @@ class OmdsCameraStatusWatcher(
     private var isWatchingRtp = false
     private var isWatchingEvent = false
     private var useOpcProtocol : Boolean = true
+    private var consecutiveErrorCount : Int = 0
 
     fun setUseOpcProtocol(isOpcProtocol: Boolean)
     {
@@ -129,7 +130,7 @@ class OmdsCameraStatusWatcher(
                 while (isWatchingEvent)
                 {
                     // ----- EVENT POLLING
-                    if (!useOpcProtocol)
+                    val result = if (!useOpcProtocol)
                     {
                         omdsEventWatcher.watchOmdsStatus()
                     }
@@ -137,6 +138,17 @@ class OmdsCameraStatusWatcher(
                     {
                         opcEventWatcher.watchOpcStatus()
                     }
+                    // ----- 連続エラーカウントの更新
+                    if (result)
+                    {
+                        consecutiveErrorCount = 0
+                    }
+                    else
+                    {
+                        consecutiveErrorCount++
+                        Log.w(TAG, "RECV ERR : $consecutiveErrorCount")
+                    }
+                    statusWatcherStatusReceiver?.updateConsecutiveErrorCount(consecutiveErrorCount)
                     Thread.sleep(SLEEP_EVENT_TIME_MS)
                 }
             }
@@ -219,6 +231,11 @@ class OmdsCameraStatusWatcher(
     interface IOpcEventReceive
     {
         fun receivedOpcEvent(value: ByteArray)
+    }
+
+    interface IStatusWatcherStatus
+    {
+        fun updateConsecutiveErrorCount(count: Int)
     }
 
     companion object

@@ -36,9 +36,10 @@ import jp.osdn.gokigen.a01lib.camera.omds.status.OmdsCameraStatusWatcher
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsCaptureControl
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsFocusControl
 
-class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatcher.IOpcEventReceive, ICameraControl
+class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatcher.IOpcEventReceive,
+    OmdsCameraStatusWatcher.IStatusWatcherStatus, ICameraControl
 {
-    private val statusWatcher = OmdsCameraStatusWatcher(this)
+    private val statusWatcher = OmdsCameraStatusWatcher(this, this)
     private val liveviewControl = OmdsLiveViewControl()
     private var cameraConnectionStatus: CameraConnectionStatus = CameraConnectionStatus.DISCONNECTED
     private val subscriberList = ArrayList<ICameraEventNotify>()
@@ -334,7 +335,32 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         }
         catch (e: Exception)
         {
-            e.printStackTrace()
+            Log.e(TAG, "ERR>receivedOpcEvent(): ${e.localizedMessage}")
+            //e.printStackTrace()
+        }
+    }
+
+    override fun updateConsecutiveErrorCount(count: Int)
+    {
+        // ----- イベント(Polling)のエラー発生回数を受信する
+        try
+        {
+            //Log.v(TAG, "updateConsecutiveErrorCount() [subscriber: ${subscriberList.size}]")
+            subscriberList.forEach { subscriber ->
+                try
+                {
+                    subscriber.statusWatcherConsecutiveErrorCount(count)
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
+        }
+        catch (e: Exception)
+        {
+            Log.e(TAG, "ERR>updateConsecutiveErrorCount($count): ${e.localizedMessage}")
+            //e.printStackTrace()
         }
     }
 

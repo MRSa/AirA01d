@@ -20,11 +20,11 @@ class OmdsEventStatusWatch(
         return (this.currentStatuses[key] ?: "")
     }
 
-    fun watchOmdsStatus()
+    fun watchOmdsStatus(): Boolean
     {
         try
         {
-            // OMDS機のイベント受信
+            // --- OMDS機のイベント受信
             val omdsEventUrl = "$executeUrl/get_camprop.cgi?com=desc&propname=desclist"
             val eventResponse = http.httpGetWithHeader(omdsEventUrl, headerMap, null,
                 TIMEOUT_MS
@@ -33,12 +33,14 @@ class OmdsEventStatusWatch(
             {
                 dumpLog(omdsEventUrl, eventResponse)
                 parseOmdsProperties(eventResponse)
+                return true
             }
         }
         catch (e: Exception)
         {
-            e.printStackTrace()
+            Log.e(TAG, "ERR>watchOmdsStatus(): ${e.localizedMessage}")
         }
+        return false
     }
 
     private fun parseOmdsProperties(eventResponse: String)

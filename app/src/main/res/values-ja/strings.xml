@@ -29,10 +29,14 @@
     <string name="exposure_warning">露出</string>
     <string name="media_busy">書き込み中</string>
     <string name="capturing">撮影中</string>
+    <string name="receive_error">受信失敗(Evt)</string>
 
     <string name="label_return_to_liveview_screen">戻る</string>
     <string name="label_switch_connect_camera_automatically">カメラに自動接続</string>
     <string name="description_switch_connect_camera_automatically">Wi-Fi接続を確立後、自動的にカメラと接続し撮影状態へ移行します。</string>
+    <string name="label_switch_command_issue_single">コマンド同時送信数の削減</string>
+    <string name="description_switch_command_issue_single">カメラへのコマンド送信を極力減らし、カメラ側のコマンド詰まり発生を抑えます。</string>
+
 
     <string name="pref_cat_gokigen">GOKIGEN</string>
     <string name="pref_instruction_manual">操作説明</string>
