@@ -28,12 +28,8 @@ import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.StringResourceConverter
 import jp.osdn.gokigen.aira01d.preference.PreferenceRepository
-import jp.osdn.gokigen.aira01d.preference.PreferenceSettings
 import jp.osdn.gokigen.aira01d.preference.camera.OpcProperty
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
@@ -41,8 +37,8 @@ import kotlin.text.isNotEmpty
 
 // ----- カメラ状態を保持し、画面表示のためにデータを提供する
 class CameraStatusViewModel(
-    private val application: Application,
-    private val preferenceRepository: PreferenceRepository
+    application: Application,
+    preferenceRepository: PreferenceRepository
 ) : ViewModel(), ICameraConnectionStatus, ICameraEventNotify, ICameraStatusUpdateNotify {
 
     private lateinit var cameraStatus: ICameraStatus

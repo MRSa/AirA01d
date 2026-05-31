@@ -9,14 +9,11 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
 import jp.osdn.gokigen.aira01d.AppSingleton
-import jp.osdn.gokigen.aira01d.preference.PreferenceRepository
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
