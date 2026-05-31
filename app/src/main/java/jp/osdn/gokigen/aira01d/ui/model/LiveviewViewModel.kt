@@ -1,5 +1,6 @@
 package jp.osdn.gokigen.aira01d.ui.model
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -8,11 +9,14 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
 import jp.osdn.gokigen.aira01d.AppSingleton
+import jp.osdn.gokigen.aira01d.preference.PreferenceRepository
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,7 +54,10 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
     private val _focusFrameRectangle: MutableLiveData<RectF> by lazy { MutableLiveData<RectF>() }
     val focusFrameRectangle : LiveData<RectF> = _focusFrameRectangle
 
-    fun initializeViewModel(context: android.content.Context)
+    //private val _consecutiveErrorCount = MutableLiveData<Int>()
+    //val consecutiveErrorCount: LiveData<Int> = _consecutiveErrorCount
+
+    fun initializeViewModel(context: Context)
     {
         Log.v(TAG, "LiveviewViewModel::initializeViewModel()")
         try
@@ -95,6 +102,7 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
             _isLvActivated.postValue(false)
             _isGridOn.postValue(false)
             _isShowFocusFrame.postValue(false)
+            //_consecutiveErrorCount.postValue(0)
             _focusFrameStatus.postValue(FocusFrameStatus.None)
         }
         catch (t: Throwable)
@@ -280,6 +288,11 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
             CameraEvent.FinishCreateLatestImage -> { getLastCapturedImage() }
             else -> { }  // 処理しない
         }
+    }
+
+    override fun statusWatcherConsecutiveErrorCount(count: Int)
+    {
+        //_consecutiveErrorCount.postValue(count)
     }
 
     private fun getLastCapturedImage()

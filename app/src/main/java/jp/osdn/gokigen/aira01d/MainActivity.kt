@@ -30,18 +30,9 @@ import jp.osdn.gokigen.aira01d.ui.theme.AirA01dTheme
 class MainActivity : ComponentActivity()
 {
     private val myLiveviewViewModel: LiveviewViewModel by viewModels()
-    private val myCameraStatusViewModel: CameraStatusViewModel by viewModels()
+    private val myCameraStatusViewModel: CameraStatusViewModel by viewModels { CameraStatusViewModel.Factory }
     private val mySelfTimerViewModel: SelfTimerViewModel by viewModels()
-    private val myPreferenceViewModel: PreferenceViewModel by viewModels {
-        object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                // Repository を作成して ViewModel に渡す
-                val repository = PreferenceRepository(applicationContext)
-                return PreferenceViewModel(repository) as T
-            }
-        }
-    }
+    private val myPreferenceViewModel: PreferenceViewModel by viewModels { PreferenceViewModel.Factory }
 
     // 権限リクエストのランチャーは、onCreateの直下（またはプロパティ初期化時）で登録する
     private val requestPermissionLauncher = registerForActivityResult(
@@ -90,9 +81,9 @@ class MainActivity : ComponentActivity()
             // ViewModelの初期化 (イベント登録の関係から、CameraControl の方を先に初期化する必要あり...）
             AppSingleton.cameraControl.initialize(myLiveviewViewModel)
             myLiveviewViewModel.initializeViewModel(applicationContext)
-            myCameraStatusViewModel.initializeViewModel(applicationContext)
-            mySelfTimerViewModel.initializeViewModel()
-            myPreferenceViewModel.initializeViewModel()
+            //myCameraStatusViewModel.initializeViewModel(applicationContext) // init {} に移行
+            //mySelfTimerViewModel.initializeViewModel()
+            //myPreferenceViewModel.initializeViewModel()
         }
 
         // Composeのセットアップ

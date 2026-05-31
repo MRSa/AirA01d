@@ -19,34 +19,33 @@ class OpcEventStatusWatch(
         return (this.currentStatuses[key] ?: "")
     }
 
-    fun watchOpcStatus()
+    fun watchOpcStatus(): Boolean
     {
         try
         {
-            // OPC機のイベント受信
+            // --- OPC機のイベント受信
             val opcEventUrl = "$executeUrl/get_camprop.cgi?com=getlist"
             val postData = "<?xml version=\"1.0\"?><get><prop name=\"AE\"/><prop name=\"APERTURE\"/><prop name=\"BATTERY_LEVEL\"/><prop name=\"COLORTONE\"/><prop name=\"EXPREV\"/><prop name=\"ISO\"/><prop name=\"RECENTLY_ART_FILTER\"/><prop name=\"SHUTTER\"/><prop name=\"TAKEMODE\"/><prop name=\"TAKE_DRIVE\"/><prop name=\"WB\"/><prop name=\"AE_LOCK_STATE\"/><prop name=\"AF_LOCK_STATE\"/><prop name=\"RAW\"/><prop name=\"ASPECT_RATIO\"/></get>"
             val eventResponse = http.httpPostWithHeader(opcEventUrl, postData, headerMap, null,
                 TIMEOUT_MS
             ) ?: ""
-            dumpLog(opcEventUrl, eventResponse)
-            parseOpcProperties(eventResponse)
+            if (eventResponse.isNotEmpty()) {
+                dumpLog(opcEventUrl, eventResponse)
+                parseOpcProperties(eventResponse)
+                return true
+            }
         }
         catch (e: Exception)
         {
-            e.printStackTrace()
+            Log.e(TAG, "ERR>watchOpcStatus(): ${e.localizedMessage}")
         }
+        return false
     }
 
     private fun parseOpcProperties(eventResponse: String)
     {
         try
         {
-            if (DUMP_LOG)
-            {
-                Log.v(TAG, "----- parseOpcProperties : $eventResponse")
-            }
-
             // ----- 受信したプロパティを解釈して保管
             checkTakeMode(getPropertyValue(eventResponse, "<prop name=\"TAKEMODE\">"))
             checkWhiteBalance(getPropertyValue(eventResponse, "<prop name=\"WB\">"))

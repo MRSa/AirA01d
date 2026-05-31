@@ -33,155 +33,6 @@ import androidx.navigation.NavHostController
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.PreferenceViewModel
 
-/*
-@Composable
-fun PreferenceScreen(navController: NavHostController, prefsModel: PreferenceViewModel)
-{
-    val padding = 6.dp
-
-    MaterialTheme {
-        val scrollState = rememberScrollState()
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-        )
-        {
-            //Spacer(Modifier.size(padding))
-            HorizontalDivider(thickness = 1.dp)
-            ReturnToMainScreen(navController)
-            Spacer(Modifier.size(padding))
-            HorizontalDivider(thickness = 1.dp)
-            SwitchConnectCameraAutomatically(prefsModel)
-            HorizontalDivider(thickness = 1.dp)
-            ShowAboutGokigen()
-            Spacer(Modifier.size(padding))
-            HorizontalDivider(thickness = 1.dp)
-            ShowGokigenPrivacyPolicy()
-            Spacer(Modifier.size(padding))
-            HorizontalDivider(thickness = 1.dp)
-        }
-    }
-}
-
-@Composable
-fun ReturnToMainScreen(navController: NavHostController)
-{
-    val density = LocalDensity.current
-    Spacer(Modifier.size(12.dp))
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-            contentDescription = "Back",
-            modifier = Modifier.clickable( onClick = {
-                Log.v("BACK", "CURRENT SCREEN: ${navController.currentBackStackEntry?.destination?.route}")
-                if (navController.currentBackStackEntry?.destination?.route == "PreferenceScreen") {
-                    navController.popBackStack()
-                }
-            })
-        )
-        Text(text = stringResource(R.string.label_return_to_liveview_screen),
-            fontSize = with(density) { 18.dp.toSp() },
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.clickable( onClick = {
-                Log.v("BACK", "CURRENT SCREEN: ${navController.currentBackStackEntry?.destination?.route}")
-                if (navController.currentBackStackEntry?.destination?.route == "PreferenceScreen")
-                {
-                    navController.popBackStack()
-                }
-            })
-        )
-    }
-}
-
-@Composable
-fun SwitchConnectCameraAutomatically(prefsModel: PreferenceViewModel) {
-    val density = LocalDensity.current
-    val cameraAutoConnect by prefsModel.connectCameraAutomatically.collectAsStateWithLifecycle()
-
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        ) {
-            Switch(
-                checked = cameraAutoConnect, // StateFlow の最新値が Boolean として渡されます
-                onCheckedChange = { isChecked ->
-                    // 2. ViewModel のメソッドを直接呼ぶ（内部で launch されているため）
-                    prefsModel.setConnectCameraAutomatically(isChecked)
-                }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.label_switch_connect_camera_automatically),
-                fontSize = with(density) { 18.dp.toSp() },
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable {
-                    // 反転させた値をセット
-                    prefsModel.setConnectCameraAutomatically(!cameraAutoConnect)
-                }
-            )
-        }
-        Text(
-            text = stringResource(R.string.description_switch_connect_camera_automatically),
-            color = MaterialTheme.colorScheme.secondary,
-            fontSize = with(density) { 14.dp.toSp() }
-        )
-    }
-}
-
-@Composable
-fun ShowAboutGokigen()
-{
-    val density = LocalDensity.current
-    val uriHandler = LocalUriHandler.current
-    val openUri = stringResource(R.string.pref_instruction_manual_url)
-    Row(modifier = Modifier.padding(all = 8.dp)) {
-        Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Text(
-                text = stringResource(R.string.pref_instruction_manual),
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = with(density) { 18.dp.toSp() }
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = openUri,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.clickable(onClick = { uriHandler.openUri(openUri) }),
-                fontSize = with(density) { 14.dp.toSp() }
-            )
-        }
-    }
-}
-
-@Composable
-fun ShowGokigenPrivacyPolicy()
-{
-    val density = LocalDensity.current
-    val uriHandler = LocalUriHandler.current
-    val openUriLabel = stringResource(R.string.pref_label_privacy_policy_url)
-    val openUri = stringResource(R.string.pref_privacy_policy_url)
-    Row(modifier = Modifier.padding(all = 8.dp)) {
-        Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Text(
-                text = stringResource(R.string.pref_privacy_policy),
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = with(density) { 18.dp.toSp() }
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = openUriLabel,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.clickable(onClick = { uriHandler.openUri(openUri) }),
-                fontSize = with(density) { 14.dp.toSp() }
-            )
-        }
-    }
-}
-*/
-
 /**
  * 呼び出し元から使うエントリーポイント
  * ViewModelやNavigationとの依存関係をここで解決します
@@ -192,16 +43,21 @@ fun PreferenceScreen(
     prefsModel: PreferenceViewModel
 ) {
     val cameraAutoConnect by prefsModel.connectCameraAutomatically.collectAsStateWithLifecycle()
+    val commandIssueSingle by prefsModel.commandIssueSingle.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
 
     PreferenceScreenMain(
         cameraAutoConnect = cameraAutoConnect,
+        commandIssueSingle = commandIssueSingle,
         onBackClick = {
             // 安全なポップバックスタック
             navController.popBackStack()
         },
         onAutoConnectChanged = { isChecked ->
             prefsModel.setConnectCameraAutomatically(isChecked)
+        },
+        onCommandIssueSingle = { isChecked ->
+            prefsModel.setCommandIssueSingle(isChecked)
         },
         onOpenUri = { url ->
             try {
@@ -220,8 +76,10 @@ fun PreferenceScreen(
 @Composable
 fun PreferenceScreenMain(
     cameraAutoConnect: Boolean,
+    commandIssueSingle: Boolean,
     onBackClick: () -> Unit,
     onAutoConnectChanged: (Boolean) -> Unit,
+    onCommandIssueSingle: (Boolean) -> Unit,
     onOpenUri: (String) -> Unit
 ) {
     Scaffold(
@@ -245,6 +103,15 @@ fun PreferenceScreenMain(
                 description = stringResource(R.string.description_switch_connect_camera_automatically),
                 checked = cameraAutoConnect,
                 onCheckedChange = onAutoConnectChanged
+            )
+            HorizontalDivider()
+
+            // コマンド送信を絞る
+            SettingSwitchItem(
+                title = stringResource(R.string.label_switch_command_issue_single),
+                description = stringResource(R.string.description_switch_command_issue_single),
+                checked = commandIssueSingle,
+                onCheckedChange = onCommandIssueSingle
             )
             HorizontalDivider()
 

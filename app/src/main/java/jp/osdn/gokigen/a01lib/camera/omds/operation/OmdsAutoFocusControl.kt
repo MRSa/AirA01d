@@ -212,7 +212,7 @@ class OmdsAutoFocusControl(
         try
         {
             Log.v(TAG, " REPLY : $replyXml $position")
-            if ((!replyXml.contains("ok"))&&(!replyXml.contains("OK")))
+            if ((replyXml.contains("ok"))||(replyXml.contains("OK")))
             {
                 return true
             }

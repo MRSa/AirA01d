@@ -21,6 +21,9 @@ class PreferenceRepository(private val context: Context) {
         val CAMERA_CONNECT_AUTOMATICALLY = booleanPreferencesKey(
             PreferenceSettings.Camera.PREFERENCE_CAMERA_CONNECT_AUTOMATICALLY
         )
+        val CAMERA_COMMAND_ISSUE_SINGLE = booleanPreferencesKey(
+            PreferenceSettings.Camera.PREFERENCE_CAMERA_COMMAND_SINGLE_ISSUE
+        )
     }
 
     // 設定値のストリーム (Flow)
@@ -38,10 +41,30 @@ class PreferenceRepository(private val context: Context) {
                 ?: PreferenceSettings.Camera.PREFERENCE_CAMERA_CONNECT_AUTOMATICALLY_DEFAULT_VALUE
         }
 
-    // 書き込み処理 (suspend 関数)
+    val issueCommandSingleFlow: Flow<Boolean> = context.dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            // 保存されていない場合はデフォルト値を返す
+            preferences[PreferencesKeys.CAMERA_COMMAND_ISSUE_SINGLE]
+                ?: PreferenceSettings.Camera.PREFERENCE_CAMERA_COMMAND_SINGLE_ISSUE_DEFAULT_VALUE
+        }
+
+    // --- 書き込み処理 (suspend 関数) ---
     suspend fun updateConnectCameraAutomatically(value: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.CAMERA_CONNECT_AUTOMATICALLY] = value
+        }
+    }
+
+    suspend fun updateCommandIssueSingle(value: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CAMERA_COMMAND_ISSUE_SINGLE] = value
         }
     }
 }

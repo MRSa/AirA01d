@@ -25,6 +25,7 @@ fun InformationArea1(viewModel: CameraStatusViewModel, modifier: Modifier = Modi
     val exposureWarningLevel = viewModel.exposureWarningLevel.observeAsState()
     val isMediaBusy = viewModel.isMediaBusy.observeAsState()
     val isCaptureActivated = viewModel.isCaptureActivated.observeAsState()
+    val consecutiveErrorCount = viewModel.consecutiveErrorCount.observeAsState()
 
     // ----- 表示文字の装飾
     val resId = exposureWarningResId.value ?: R.string.blank
@@ -38,6 +39,12 @@ fun InformationArea1(viewModel: CameraStatusViewModel, modifier: Modifier = Modi
     if (isCaptureActivated.value == true)
     {
         informationText = "$informationText   ${stringResource(R.string.capturing)}"
+        warningLevel = 1
+    }
+    val errorCount = (consecutiveErrorCount.value ?: 0)
+    if (errorCount > 0)
+    {
+        informationText = "$informationText   ${stringResource(R.string.capturing)} ${stringResource(R.string.receive_error)} : $errorCount"
         warningLevel = 1
     }
 
