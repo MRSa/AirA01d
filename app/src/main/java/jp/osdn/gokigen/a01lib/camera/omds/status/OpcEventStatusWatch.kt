@@ -19,7 +19,7 @@ class OpcEventStatusWatch(
         return (this.currentStatuses[key] ?: "")
     }
 
-    fun watchOpcStatus(): Boolean
+    fun watchOpcStatus(addDelayMs: Int): Boolean
     {
         try
         {
@@ -27,7 +27,7 @@ class OpcEventStatusWatch(
             val opcEventUrl = "$executeUrl/get_camprop.cgi?com=getlist"
             val postData = "<?xml version=\"1.0\"?><get><prop name=\"AE\"/><prop name=\"APERTURE\"/><prop name=\"BATTERY_LEVEL\"/><prop name=\"COLORTONE\"/><prop name=\"EXPREV\"/><prop name=\"ISO\"/><prop name=\"RECENTLY_ART_FILTER\"/><prop name=\"SHUTTER\"/><prop name=\"TAKEMODE\"/><prop name=\"TAKE_DRIVE\"/><prop name=\"WB\"/><prop name=\"AE_LOCK_STATE\"/><prop name=\"AF_LOCK_STATE\"/><prop name=\"RAW\"/><prop name=\"ASPECT_RATIO\"/></get>"
             val eventResponse = http.httpPostWithHeader(opcEventUrl, postData, headerMap, null,
-                TIMEOUT_MS
+                (TIMEOUT_MS + addDelayMs)
             ) ?: ""
             if (eventResponse.isNotEmpty()) {
                 dumpLog(opcEventUrl, eventResponse)

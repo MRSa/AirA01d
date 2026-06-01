@@ -129,14 +129,15 @@ class OmdsCameraStatusWatcher(
                 isWatchingEvent = true
                 while (isWatchingEvent)
                 {
+                    val waitTimeMs = ((consecutiveErrorCount * SLEEP_EVENT_TIME_MS) * 0.25).toInt()
                     // ----- EVENT POLLING
                     val result = if (!useOpcProtocol)
                     {
-                        omdsEventWatcher.watchOmdsStatus()
+                        omdsEventWatcher.watchOmdsStatus(waitTimeMs)
                     }
                     else
                     {
-                        opcEventWatcher.watchOpcStatus()
+                        opcEventWatcher.watchOpcStatus(waitTimeMs)
                     }
                     // ----- 連続エラーカウントの更新
                     if (result)
@@ -149,7 +150,7 @@ class OmdsCameraStatusWatcher(
                         Log.w(TAG, "RECV ERR : $consecutiveErrorCount")
                     }
                     statusWatcherStatusReceiver?.updateConsecutiveErrorCount(consecutiveErrorCount)
-                    Thread.sleep(SLEEP_EVENT_TIME_MS)
+                    Thread.sleep(SLEEP_EVENT_TIME_MS + (consecutiveErrorCount * SLEEP_EVENT_TIME_MS * 0.25).toInt())
                 }
             }
             thread.start()
