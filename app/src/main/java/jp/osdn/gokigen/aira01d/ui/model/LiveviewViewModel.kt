@@ -292,6 +292,11 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
         //_consecutiveErrorCount.postValue(count)
     }
 
+    fun getLadtRecordImage()
+    {
+        getLastCapturedImage()
+    }
+
     private fun getLastCapturedImage()
     {
         Log.v(TAG, " Get last captured image...")

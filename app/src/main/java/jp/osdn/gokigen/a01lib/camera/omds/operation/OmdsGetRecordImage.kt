@@ -101,6 +101,6 @@ class OmdsGetRecordImage(userAgent: String = "OlympusCameraKit", private val exe
     companion object
     {
         private val TAG = OmdsGetRecordImage::class.java.simpleName
-        private const val TIMEOUT_MS = 3000
+        private const val TIMEOUT_MS = 10000
     }
 }

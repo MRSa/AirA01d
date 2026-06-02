@@ -31,6 +31,11 @@ class OmdsEventStatusWatch(
             ) ?: ""
             if (eventResponse.isNotEmpty())
             {
+                if ((eventResponse.indexOf("503") == 0)||(eventResponse.indexOf("520") == 0))
+                {
+                    // ----- イベント受信エラー
+                    return false
+                }
                 dumpLog(omdsEventUrl, eventResponse)
                 parseOmdsProperties(eventResponse)
                 return true

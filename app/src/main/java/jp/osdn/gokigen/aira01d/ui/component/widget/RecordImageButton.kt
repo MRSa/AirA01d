@@ -100,8 +100,9 @@ fun RecordImageButton(
                     // 通常クリックの処理  (撮影一覧画面へ遷移する)
                 },
                 onLongClick = {
+                    // ----- 長押し :
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    //liveviewViewModel.getCapturedImage()
+                    liveviewViewModel.getLadtRecordImage()
                 }
             ),
         contentAlignment = Alignment.Center
