@@ -35,8 +35,10 @@
       <w>getlist</w>
       <w>getrecview</w>
       <w>highkey</w>
+      <w>imagelist</w>
       <w>imagesize</w>
       <w>imagingstate</w>
+      <w>imglist</w>
       <w>isospeedvalue</w>
       <w>lensmountstatus</w>
       <w>locationinfo</w>

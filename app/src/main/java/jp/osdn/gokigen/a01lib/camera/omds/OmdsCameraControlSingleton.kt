@@ -32,6 +32,7 @@ import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsPostCommand
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsRunModeControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsTimeSync
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsZoomLensControl
+import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsPlaybackControl
 import jp.osdn.gokigen.a01lib.camera.omds.status.OmdsCameraStatusWatcher
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsCaptureControl
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsFocusControl
@@ -61,6 +62,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     private lateinit var liveviewMagnify: OmdsOpcLiveviewMagnifyControl
     private lateinit var zoomLensControl: OmdsZoomLensControl
     private lateinit var digitalZoomControl: OmdsDigitalZoomControl
+    private lateinit var playbackControl: OmdsPlaybackControl
 
     private var isInitialized  = false
     private var cameraProtocol: ICameraConnectionStatus.CameraProtocol = ICameraConnectionStatus.CameraProtocol.OPC
@@ -87,6 +89,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
                 this.liveviewMagnify = OmdsOpcLiveviewMagnifyControl()
                 this.zoomLensControl = OmdsZoomLensControl()
                 this.digitalZoomControl = OmdsDigitalZoomControl()
+                this.playbackControl = OmdsPlaybackControl()
                 this.subscriberList.clear()
                 this.connectionStatusReceiverList.clear()
 
@@ -280,6 +283,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
             liveviewMagnify.setUseOpcProtocol(isOpcProtocol)
             zoomLensControl.setUseOpcProtocol(isOpcProtocol)
             digitalZoomControl.setUseOpcProtocol(isOpcProtocol)
+            playbackControl.setUseOpcProtocol(isOpcProtocol)
         }
     }
 
