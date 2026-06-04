@@ -1,7 +1,7 @@
 package jp.osdn.gokigen.a01lib.camera.omds.playback
 
 import android.util.Log
-import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.util.Calendar
 
@@ -27,7 +27,7 @@ class OmdsGetImageFileList(
     /**
      * 指定したディレクトリのファイル一覧を取得します。
      */
-    fun getImageFileList(directory: String): List<IPlaybackControl.ImageFileInfo> {
+    fun getImageFileList(directory: String): List<ICameraFileInfo.ImageFileInfo> {
         try {
             // コマンドの組み立て
             val command = if (useOpcProtocol) GET_IMAGELIST_COMMAND_OPC else GET_IMAGELIST_COMMAND
@@ -49,8 +49,8 @@ class OmdsGetImageFileList(
     /**
      * レスポンス文字列をパースして ImageFileInfo のリストに変換します。
      */
-    private fun parseFileList(content: String): List<IPlaybackControl.ImageFileInfo> {
-        val fileList = mutableListOf<IPlaybackControl.ImageFileInfo>()
+    private fun parseFileList(content: String): List<ICameraFileInfo.ImageFileInfo> {
+        val fileList = mutableListOf<ICameraFileInfo.ImageFileInfo>()
 
         content.lines().forEachIndexed { index, line ->
             val lineNumber = index + 1
@@ -113,7 +113,7 @@ class OmdsGetImageFileList(
 
                 // データクラスへマッピングして追加
                 fileList.add(
-                    IPlaybackControl.ImageFileInfo(
+                    ICameraFileInfo.ImageFileInfo(
                         directory = directory,
                         fileName = fileName,
                         fileSize = fileSize,

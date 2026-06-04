@@ -1,27 +1,21 @@
 package jp.osdn.gokigen.a01lib.camera.interfaces.playback
 
-import java.util.Date
+import jp.osdn.gokigen.a01lib.camera.utils.communication.HttpBinaryResponse
 
 // -----   画像再生・取得用インタフェース
 interface IPlaybackControl
 {
-    data class ImageFileInfo(
-        val directory: String,
-        val fileName: String,
-        val fileSize: Long,
-        val isReadonly: Boolean,
-        val isHidden: Boolean,
-        val isSystem: Boolean,
-        val isVolume: Boolean,
-        val isDirectory: Boolean,
-        val isArchive: Boolean,
-        val dateTime: Date,
-    )
+
 
     fun enterPlaybackMode() : Boolean
     fun leavePlaybackMode() : Boolean
 
-    fun getImageFileList(directory: String): List<ImageFileInfo>
+    fun getImageFileList(directory: String): List<ICameraFileInfo.ImageFileInfo>
+
+    fun getMovieFileInfo(directory: String): ICameraFileInfo.MovieFileInfo
+    fun getStillImageFileInfo(directory: String): IStillImageFileInfo.StillFileParameterInfo
+
+    fun getImageThumbnail(directory: String): HttpBinaryResponse?
 
     /*
     fun getRawFileSuffix() : String?

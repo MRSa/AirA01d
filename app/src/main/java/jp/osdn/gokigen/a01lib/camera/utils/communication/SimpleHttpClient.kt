@@ -3,7 +3,7 @@ package jp.osdn.gokigen.a01lib.camera.utils.communication
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import java.io.*
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -172,6 +172,44 @@ class SimpleHttpClient
             Log.w(TAG, "HTTP Bitmap Exception: $url", e)
             null
         } finally {
+            conn?.disconnect()
+        }
+    }
+
+    fun httpCommandBinary(
+        url: String,
+        method: String,
+        postData: String?,
+        headerMap: Map<String, String>?,
+        contentType: String?,
+        timeoutMs: Int
+    ): HttpBinaryResponse?
+    {
+        var conn: HttpURLConnection? = null
+        return try {
+            conn = setupConnection(url, method, headerMap, contentType, timeoutMs, postData)
+            val responseCode = conn.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // --- 全てのレスポンスヘッダを取得 (Map<String, List<String>>)
+                val headers = conn.headerFields ?: emptyMap()
+
+                // --- ボディをバイト配列として丸ごと読み込み
+                val body = conn.inputStream.use { it.readBytes() }
+
+                HttpBinaryResponse(responseCode, headers, body)
+            } else {
+                Log.w(TAG, "HTTP GET Binary Error: $responseCode - $url")
+                // エラー時もステータスコードと空のデータを返す、もしくは null
+                HttpBinaryResponse(responseCode, conn.headerFields ?: emptyMap(), ByteArray(0))
+            }
+        }
+        catch (e: Exception)
+        {
+            Log.w(TAG, "HTTP GET Binary Exception: $url", e)
+            null
+        }
+        finally
+        {
             conn?.disconnect()
         }
     }

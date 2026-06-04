@@ -2,6 +2,8 @@
   <dictionary name="project">
     <words>
       <w>Levelvial</w>
+      <w>Telecon</w>
+      <w>Thhmm</w>
       <w>artfilter</w>
       <w>assignafframe</w>
       <w>cameramode</w>
@@ -35,6 +37,7 @@
       <w>getlist</w>
       <w>getrecview</w>
       <w>highkey</w>
+      <w>imageinfo</w>
       <w>imagelist</w>
       <w>imagesize</w>
       <w>imagingstate</w>
@@ -48,6 +51,7 @@
       <w>macrosetting</w>
       <w>monotonecolor</w>
       <w>monotonefilter</w>
+      <w>movfileinfo</w>
       <w>newassignafframe</w>
       <w>newctrldigizoom</w>
       <w>newctrlzoom</w>

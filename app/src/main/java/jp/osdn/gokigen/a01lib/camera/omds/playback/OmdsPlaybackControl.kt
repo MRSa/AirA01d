@@ -1,45 +1,53 @@
 package jp.osdn.gokigen.a01lib.camera.omds.playback
 
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
-import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IStillImageFileInfo
+import jp.osdn.gokigen.a01lib.camera.utils.communication.HttpBinaryResponse
 
 class OmdsPlaybackControl(
     userAgent: String = "OlympusCameraKit",
-    private val executeUrl : String = "http://192.168.0.10",
+    executeUrl : String = "http://192.168.0.10",
+    timeoutMs: Int = TIMEOUT_MS
 ) : IPlaybackControl
 {
-    private val headerMap: MutableMap<String, String> = HashMap()
-    private val http = SimpleHttpClient()
-    private var useOpcProtocol : Boolean = true
-
-    private val imageListGetter = OmdsGetImageFileList()
+    private val imageListGetter = OmdsGetImageFileList(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
+    private val fileInfoGetter = OmdsGetFileInfo(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
+    private val getThumbnail = OmdsGetThumbnail(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
 
     fun setUseOpcProtocol(isOpcProtocol: Boolean)
     {
-        useOpcProtocol = isOpcProtocol
         imageListGetter.useOpcProtocol = isOpcProtocol
+        fileInfoGetter.useOpcProtocol = isOpcProtocol
+        getThumbnail.useOpcProtocol = isOpcProtocol
     }
 
     override fun enterPlaybackMode(): Boolean { return true }
     override fun leavePlaybackMode(): Boolean { return true }
 
-    override fun getImageFileList(directory: String): List<IPlaybackControl.ImageFileInfo>
+    override fun getImageFileList(directory: String): List<ICameraFileInfo.ImageFileInfo>
     {
         return imageListGetter.getImageFileList(directory)
     }
 
-    init
+    override fun getMovieFileInfo(directory: String): ICameraFileInfo.MovieFileInfo
     {
-        headerMap["User-Agent"] = userAgent // "OlympusCameraKit" // "OI.Share"
-        headerMap["X-Protocol"] = userAgent // "OlympusCameraKit" // "OI.Share"
+        return fileInfoGetter.getMovieFileInfo(directory)
+    }
+
+    override fun getStillImageFileInfo(directory: String): IStillImageFileInfo.StillFileParameterInfo
+    {
+        return fileInfoGetter.getStillImageFileInfo(directory)
+    }
+
+    override fun getImageThumbnail(directory: String): HttpBinaryResponse?
+    {
+        return getThumbnail.getImageThumbnail(directory)
     }
 
     companion object
     {
         private val TAG = OmdsPlaybackControl::class.java.simpleName
-        private const val TIMEOUT_MS = 3500
-
-        private const val GET_IMAGELIST_COMMAND = "/get_imglist.cgi"
-        private const val GET_IMAGELIST_COMMAND_OPC = "/get_imglist.cgi"
+        private const val TIMEOUT_MS = 5500
     }
 }
