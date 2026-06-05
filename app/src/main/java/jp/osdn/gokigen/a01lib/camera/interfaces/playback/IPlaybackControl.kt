@@ -1,5 +1,6 @@
 package jp.osdn.gokigen.a01lib.camera.interfaces.playback
 
+import android.graphics.Bitmap
 import jp.osdn.gokigen.a01lib.camera.utils.communication.HttpBinaryResponse
 
 // -----   画像再生・取得用インタフェース
@@ -16,6 +17,8 @@ interface IPlaybackControl
     fun getStillImageFileInfo(directory: String): IStillImageFileInfo.StillFileParameterInfo
 
     fun getImageThumbnail(directory: String): HttpBinaryResponse?
+    fun getResizeImage(directory: String, size: Int): HttpBinaryResponse?
+    fun getImageScreennail(directory: String): Bitmap?
 
     /*
     fun getRawFileSuffix() : String?

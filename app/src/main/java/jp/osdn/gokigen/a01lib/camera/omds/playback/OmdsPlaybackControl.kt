@@ -1,5 +1,6 @@
 package jp.osdn.gokigen.a01lib.camera.omds.playback
 
+import android.graphics.Bitmap
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IStillImageFileInfo
@@ -14,12 +15,16 @@ class OmdsPlaybackControl(
     private val imageListGetter = OmdsGetImageFileList(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
     private val fileInfoGetter = OmdsGetFileInfo(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
     private val getThumbnail = OmdsGetThumbnail(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
+    private val getScreennail = OmdsGetScreennail(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
+    private val resizeImage = OmdsGetResizeImage(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
 
     fun setUseOpcProtocol(isOpcProtocol: Boolean)
     {
         imageListGetter.useOpcProtocol = isOpcProtocol
         fileInfoGetter.useOpcProtocol = isOpcProtocol
         getThumbnail.useOpcProtocol = isOpcProtocol
+        getScreennail.useOpcProtocol = isOpcProtocol
+        resizeImage.useOpcProtocol = isOpcProtocol
     }
 
     override fun enterPlaybackMode(): Boolean { return true }
@@ -43,6 +48,16 @@ class OmdsPlaybackControl(
     override fun getImageThumbnail(directory: String): HttpBinaryResponse?
     {
         return getThumbnail.getImageThumbnail(directory)
+    }
+
+    override fun getResizeImage(directory: String, size: Int): HttpBinaryResponse?
+    {
+        return resizeImage.getResizeImage(directory, size)
+    }
+
+    override fun getImageScreennail(directory: String): Bitmap?
+    {
+        return getScreennail.getImageScreennail(directory)
     }
 
     companion object
