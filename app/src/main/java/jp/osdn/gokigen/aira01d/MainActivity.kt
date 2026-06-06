@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import jp.osdn.gokigen.aira01d.ui.component.ViewRootComponent
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
+import jp.osdn.gokigen.aira01d.ui.model.ContentListViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 import jp.osdn.gokigen.aira01d.ui.model.PreferenceViewModel
 import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
@@ -26,10 +27,12 @@ import jp.osdn.gokigen.aira01d.ui.theme.AirA01dTheme
 
 class MainActivity : ComponentActivity()
 {
-    private val myLiveviewViewModel: LiveviewViewModel by viewModels()
+    // ----- ビューモデルの生成
+    private val myLiveviewViewModel: LiveviewViewModel by viewModels() { LiveviewViewModel.Factory }
     private val myCameraStatusViewModel: CameraStatusViewModel by viewModels { CameraStatusViewModel.Factory }
     private val mySelfTimerViewModel: SelfTimerViewModel by viewModels()
     private val myPreferenceViewModel: PreferenceViewModel by viewModels { PreferenceViewModel.Factory }
+    private val myContentListViewModel: ContentListViewModel by viewModels { ContentListViewModel.Factory }
 
     // 権限リクエストのランチャーは、onCreateの直下（またはプロパティ初期化時）で登録する
     private val requestPermissionLauncher = registerForActivityResult(
@@ -77,15 +80,20 @@ class MainActivity : ComponentActivity()
         if (savedInstanceState == null) {
             // ViewModelの初期化 (イベント登録の関係から、CameraControl の方を先に初期化する必要あり...）
             AppSingleton.cameraControl.initialize(myLiveviewViewModel)
-            myLiveviewViewModel.initializeViewModel(applicationContext)
+            //myLiveviewViewModel.initializeViewModel(applicationContext)
             //myCameraStatusViewModel.initializeViewModel(applicationContext) // init {} に移行
             //mySelfTimerViewModel.initializeViewModel()
             //myPreferenceViewModel.initializeViewModel()
         }
 
-        // Composeのセットアップ
+        // 画面群のセットアップ
         val rootComponent = ViewRootComponent(applicationContext)
-        rootComponent.setViewModels(myLiveviewViewModel, myCameraStatusViewModel, mySelfTimerViewModel, myPreferenceViewModel)
+        rootComponent.setViewModels(
+            liveViewModel = myLiveviewViewModel,
+            cameraStatusViewModel = myCameraStatusViewModel,
+            selfTimerViewModel = mySelfTimerViewModel,
+            preferenceViewModel = myPreferenceViewModel,
+            contentListViewModel = myContentListViewModel)
 
         setContent {
             AirA01dTheme {

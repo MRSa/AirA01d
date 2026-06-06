@@ -42,19 +42,19 @@ class OmdsFileTransfer(
                             byteAccumulator.close()
                         }
 
-                        override fun onErrorOccurred(e: kotlin.Exception?) {
+                        override fun onErrorOccurred(e: Exception?) {
                             // --- エラー応答を返す
                             callback.onErrorOccurred(e)
                             byteAccumulator.close()
                         }
 
                         override fun onReceive(
-                            readBytes: Int,   // 現在までに送信されているバイト数
+                            readBytes: Int,   // 現在までに送信されてきたバイト数
                             length: Int,      // データの総バイト数
                             size: Int,        // 今回送ったデータのサイズ
                             data: ByteArray?  // データボディ
                         ) {
-                            // readBytes (累計) ではなく、今回届いた size が 0 より大きいかで判定する
+                            // --- readBytes (累計) ではなく、今回届いた size が 0 より大きいかで判定する
                             try
                             {
                                 if (data != null && size > 0) {

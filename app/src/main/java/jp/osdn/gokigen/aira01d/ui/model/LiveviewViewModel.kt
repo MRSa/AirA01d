@@ -1,5 +1,6 @@
 package jp.osdn.gokigen.aira01d.ui.model
 
+import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -9,11 +10,14 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
 import jp.osdn.gokigen.aira01d.AppSingleton
+import jp.osdn.gokigen.aira01d.preference.PreferenceRepository
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IGetRecordImage.RecordImageCallback
+class LiveviewViewModel(application: Application): ViewModel(), IImageDataReceiver, ICameraEventNotify, IGetRecordImage.RecordImageCallback
 {
     private val _liveViewBitmap = MutableStateFlow<Bitmap?>(null)
     val liveViewBitmap: StateFlow<Bitmap?> = _liveViewBitmap.asStateFlow()
@@ -54,9 +58,7 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
     //private val _consecutiveErrorCount = MutableLiveData<Int>()
     //val consecutiveErrorCount: LiveData<Int> = _consecutiveErrorCount
 
-    fun initializeViewModel(context: Context)
-    {
-        Log.v(TAG, "LiveviewViewModel::initializeViewModel()")
+    init {
         try
         {
             // ----- イベント受信を設定する
@@ -70,7 +72,7 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
 
                 // リソースからビットマップデータを生成する
                 val dummyBitmap = BitmapFactory.decodeResource(
-                    context.resources,
+                    application.resources,
                     jp.osdn.gokigen.aira01d.R.drawable.screen_background,
                     options
                 )
@@ -83,7 +85,7 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
                 }
                 // リソースからビットマップデータを生成する
                 val lastImageBitmap = BitmapFactory.decodeResource(
-                    context.resources,
+                    application.resources,
                     jp.osdn.gokigen.aira01d.R.drawable.outline_image_24,
                     options
                 )
@@ -427,5 +429,15 @@ class LiveviewViewModel: ViewModel(), IImageDataReceiver, ICameraEventNotify, IG
 
         private const val IMAGE_SCALE_X = 640.0f
         private const val IMAGE_SCALE_Y = 480.0f
+
+        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                // アプリケーションのContextを取得
+                val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
+
+                return LiveviewViewModel(application = application) as T
+            }
+        }
     }
 }
