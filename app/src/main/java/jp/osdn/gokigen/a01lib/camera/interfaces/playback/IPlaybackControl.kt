@@ -1,48 +1,44 @@
 package jp.osdn.gokigen.a01lib.camera.interfaces.playback
 
 import android.graphics.Bitmap
-import jp.osdn.gokigen.a01lib.camera.utils.communication.HttpBinaryResponse
 
 // -----   画像再生・取得用インタフェース
 interface IPlaybackControl
 {
+    // ----- RAWファイルの拡張子を応答する -----
+    fun getRawFileSuffix() : String?
 
-
+    // ----- 画像再生モードへ移行する ----
     fun enterPlaybackMode() : Boolean
+
+    // ----- 画像再生モードから離脱する -----
     fun leavePlaybackMode() : Boolean
 
+    // ----- 画像ファイルの一覧を取得する -----
     fun getImageFileList(directory: String): List<ICameraFileInfo.ImageFileInfo>
 
+    // ----- 動画ファイルの情報を取得する -----
     fun getMovieFileInfo(directory: String): ICameraFileInfo.MovieFileInfo
+
+    // ----- 静止画ファイルの情報を取得する -----
     fun getStillImageFileInfo(directory: String): IStillImageFileInfo.StillFileParameterInfo
 
-    fun getImageThumbnail(directory: String): HttpBinaryResponse?
-    fun getResizeImage(directory: String, size: Int): HttpBinaryResponse?
+    // ----- 画像ファイルのサムネイルを取得する -----
+    fun getImageThumbnail(directory: String): Bitmap?
+
+    // ----- サイズを調整した画像を取得する -----
+    fun getResizeImage(directory: String, size: Int): Bitmap?
+
+    // ----- 画面表示用の画像を取得する -----
     fun getImageScreennail(directory: String): Bitmap?
 
-    /*
-    fun getRawFileSuffix() : String?
-    fun downloadContentList(callback: ICameraContentListCallback)
-    fun updateCameraFileInfo(info: ICameraFileInfo?)
+    // ----- 画像ファイルを取得する -----
+    fun downloadContent(directory: String, callback: IDownloadContentCallback)
 
-    fun downloadContentScreennail(
-        path: String?,
-        name: String,
-        callback: IDownloadThumbnailImageCallback
-    )
-
-    fun downloadContentThumbnail(
-        path: String?,
-        name: String,
-        callback: IDownloadThumbnailImageCallback
-    )
-
-    fun downloadContent(
-        path: String?,
-        name: String,
-        isSmallSize: Boolean,
-        callback: IDownloadContentCallback
-    )
-*/
-
+    interface IDownloadContentCallback
+    {
+        fun onCompleted(downloadedContent: ByteArray?)
+        fun onErrorOccurred(e: Exception?)
+        fun onReceive(readBytes: Int, length: Int, size: Int)
+    }
 }

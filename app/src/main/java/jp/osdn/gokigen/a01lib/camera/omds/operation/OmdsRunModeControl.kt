@@ -11,7 +11,12 @@ class OmdsRunModeControl(private val liveViewQuality : String = "0640x0480", use
     private val headerMap: MutableMap<String, String> = HashMap()
     private val http = SimpleHttpClient()
     private var currentRunMode = "unknown"
-    private var useOpcProtocol = true
+    private var useOpcProtocol : Boolean = true
+
+    fun setUseOpcProtocol(isOpcProtocol: Boolean)
+    {
+        useOpcProtocol = isOpcProtocol
+    }
 
     fun changeRunMode(runMode: String, callback: IOperationCallback)
     {
@@ -19,12 +24,14 @@ class OmdsRunModeControl(private val liveViewQuality : String = "0640x0480", use
         {
             Log.v(TAG, " changeRunMode [$runMode]")
             val thread = Thread { // カメラとの接続確立を通知する
+
+                val command = if (useOpcProtocol) { CHANGE_MODE_COMMAND_OPC } else { CHANGE_MODE_COMMAND }
                 val changeModeUrl = when (runMode) {
                     "rec" -> {
-                        "$executeUrl/switch_cameramode.cgi?mode=$runMode&lvqty=$liveViewQuality"  // OI.Shareの場合は cammode
+                        "$executeUrl/$command?mode=$runMode&lvqty=$liveViewQuality"  // OI.Shareの場合は cammode
                     }
                     else -> {
-                        "$executeUrl/switch_cameramode.cgi?mode=$runMode"                        // OI.Shareの場合は cammode
+                        "$executeUrl/$command?mode=$runMode"                        // OI.Shareの場合は cammode
                     }
                 }
                 val response: String = http.httpGetWithHeader(changeModeUrl, headerMap, null, TIMEOUT_MS) ?: ""
@@ -65,11 +72,6 @@ class OmdsRunModeControl(private val liveViewQuality : String = "0640x0480", use
         return currentRunMode
     }
 
-    fun setUseOpcProtocol(isOpcProtocol: Boolean)
-    {
-        useOpcProtocol = isOpcProtocol
-    }
-
     init
     {
         headerMap["User-Agent"] = userAgent // "OlympusCameraKit" // "OI.Share"
@@ -79,6 +81,9 @@ class OmdsRunModeControl(private val liveViewQuality : String = "0640x0480", use
     companion object
     {
         private val TAG = OmdsRunModeControl::class.java.simpleName
+
+        private const val CHANGE_MODE_COMMAND = "switch_cammode.cgi"
+        private const val CHANGE_MODE_COMMAND_OPC = "switch_cameramode.cgi"
         private const val TIMEOUT_MS = 5000
     }
 }

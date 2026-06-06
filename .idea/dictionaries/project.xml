@@ -21,6 +21,7 @@
       <w>connectmode</w>
       <w>ctrldigizoom</w>
       <w>ctrlzoom</w>
+      <w>customwbbias</w>
       <w>denkyu</w>
       <w>desclist</w>
       <w>digizoomscope</w>
@@ -49,6 +50,7 @@
       <w>lvqty</w>
       <w>lvscale</w>
       <w>macrosetting</w>
+      <w>miniatureverticl</w>
       <w>monotonecolor</w>
       <w>monotonefilter</w>
       <w>movfileinfo</w>
@@ -66,6 +68,7 @@
       <w>newstopmovietake</w>
       <w>newstoptake</w>
       <w>partcolor</w>
+      <w>photostorydevidenumaspectratio</w>
       <w>popart</w>
       <w>proplist</w>
       <w>propname</w>
@@ -91,6 +94,9 @@
       <w>teleterm</w>
       <w>upperlimit</w>
       <w>utctimediff</w>
+      <w>wbautolightbulbcolorleaving</w>
+      <w>wbbiasa</w>
+      <w>wbbiasg</w>
       <w>wbvalue</w>
       <w>widefocallength</w>
       <w>widemove</w>

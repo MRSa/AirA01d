@@ -17,6 +17,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.interfaces.IOperationCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.IZoomLensControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
 import jp.osdn.gokigen.a01lib.camera.omds.connection.OmdsCameraConnection
 import jp.osdn.gokigen.a01lib.camera.omds.liveview.OmdsLiveViewControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCamIndStatus
@@ -225,6 +226,8 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
 
     override fun getCameraConnectionProtocol(): ICameraConnectionStatus.CameraProtocol { return cameraProtocol }
 
+    override fun getCameraPlaybackControl(): IPlaybackControl { return  playbackControl }
+
     override fun onStatusNotify(status: CameraConnectionStatus)
     {
         try
@@ -325,7 +328,6 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     {
         try
         {
-            //Log.v(TAG, "receivedCameraEvent() [subscriber: ${subscriberList.size}]")
             subscriberList.forEach { subscriber ->
                 try
                 {
@@ -340,7 +342,6 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         catch (e: Exception)
         {
             Log.e(TAG, "ERR>receivedOpcEvent(): ${e.localizedMessage}")
-            //e.printStackTrace()
         }
     }
 
@@ -349,7 +350,6 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         // ----- イベント(Polling)のエラー発生回数を受信する
         try
         {
-            //Log.v(TAG, "updateConsecutiveErrorCount() [subscriber: ${subscriberList.size}]")
             subscriberList.forEach { subscriber ->
                 try
                 {
@@ -364,7 +364,6 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         catch (e: Exception)
         {
             Log.e(TAG, "ERR>updateConsecutiveErrorCount($count): ${e.localizedMessage}")
-            //e.printStackTrace()
         }
     }
 

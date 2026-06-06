@@ -1,10 +1,12 @@
 package jp.osdn.gokigen.a01lib.camera.omds.playback
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl.IDownloadContentCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IStillImageFileInfo
-import jp.osdn.gokigen.a01lib.camera.utils.communication.HttpBinaryResponse
 
 class OmdsPlaybackControl(
     userAgent: String = "OlympusCameraKit",
@@ -17,6 +19,7 @@ class OmdsPlaybackControl(
     private val getThumbnail = OmdsGetThumbnail(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
     private val getScreennail = OmdsGetScreennail(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
     private val resizeImage = OmdsGetResizeImage(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
+    private val fileTransfer = OmdsFileTransfer(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
 
     fun setUseOpcProtocol(isOpcProtocol: Boolean)
     {
@@ -25,6 +28,12 @@ class OmdsPlaybackControl(
         getThumbnail.useOpcProtocol = isOpcProtocol
         getScreennail.useOpcProtocol = isOpcProtocol
         resizeImage.useOpcProtocol = isOpcProtocol
+        fileTransfer.useOpcProtocol = isOpcProtocol
+    }
+
+    override fun getRawFileSuffix(): String
+    {
+        return "ORF"
     }
 
     override fun enterPlaybackMode(): Boolean { return true }
@@ -45,19 +54,52 @@ class OmdsPlaybackControl(
         return fileInfoGetter.getStillImageFileInfo(directory)
     }
 
-    override fun getImageThumbnail(directory: String): HttpBinaryResponse?
+    override fun getImageThumbnail(directory: String): Bitmap?
     {
-        return getThumbnail.getImageThumbnail(directory)
+        try
+        {
+            val reply = getThumbnail.getImageThumbnail(directory)
+            if (reply?.body != null)
+            {
+                // ----- ヘッダの解釈をする場合は、ここで実行
+                return BitmapFactory.decodeByteArray(reply.body, 0, (reply.body).size)
+            }
+            Log.w(TAG, "FAIL> getImageThumbnail($directory)")
+        }
+        catch (t: Throwable)
+        {
+            Log.w(TAG, "ERR>get Thumbnail: $directory (${t.localizedMessage})")
+        }
+        return null
     }
 
-    override fun getResizeImage(directory: String, size: Int): HttpBinaryResponse?
+    override fun getResizeImage(directory: String, size: Int): Bitmap?
     {
-        return resizeImage.getResizeImage(directory, size)
+        try
+        {
+            val reply = resizeImage.getResizeImage(directory, size)
+            if (reply?.body != null)
+            {
+                // ----- ヘッダの解釈をする場合は、ここで実行
+                return BitmapFactory.decodeByteArray(reply.body, 0, (reply.body).size)
+            }
+            Log.w(TAG, "FAIL> getResizeImage($directory, $size)")
+        }
+        catch (t: Throwable)
+        {
+            Log.w(TAG, "ERR>get getResizeImage($directory, $size) : ${t.localizedMessage}")
+        }
+        return null
     }
 
     override fun getImageScreennail(directory: String): Bitmap?
     {
         return getScreennail.getImageScreennail(directory)
+    }
+
+    override fun downloadContent(directory: String, callback: IDownloadContentCallback)
+    {
+        fileTransfer.downloadContent(directory, callback)
     }
 
     companion object

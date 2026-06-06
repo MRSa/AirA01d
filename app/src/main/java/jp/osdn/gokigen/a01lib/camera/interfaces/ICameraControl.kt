@@ -2,6 +2,7 @@ package jp.osdn.gokigen.a01lib.camera.interfaces
 
 import android.content.Context
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
 
 interface ICameraControl
 {
@@ -32,4 +33,6 @@ interface ICameraControl
     fun getDigitalZoomControl() : IDigitalZoomControl?
     fun getCameraHardwareInformation() : ICameraHardwareInformation
     fun getCameraConnectionProtocol() : ICameraConnectionStatus.CameraProtocol
+
+    fun getCameraPlaybackControl() : IPlaybackControl
 }

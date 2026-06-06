@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 interface IStillImageFileInfo {
     /**
-     * Olympus オープンプラットフォームカメラ 通信仕様書(1.0) 準拠
+     * Olympus オープンプラットフォームカメラ 通信仕様書(1.0) 準拠 (ページ数)
      * 静止画情報パラメータリスト (Still File Info Parameter List)
      */
     @Serializable
