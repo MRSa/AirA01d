@@ -160,6 +160,8 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         }
     }
 
+    override fun getCameraProtocol(): ICameraConnectionStatus.CameraProtocol { return cameraProtocol }
+
     override fun getCameraConnectionStatus() : CameraConnectionStatus { return cameraConnectionStatus }
 
     override fun changeRunMode(runMode: String): Boolean

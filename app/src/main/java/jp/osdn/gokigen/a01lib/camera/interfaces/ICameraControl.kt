@@ -12,6 +12,7 @@ interface ICameraControl
     fun disconnectFromCamera()
     fun startCamera(context: Context)
     fun finishCamera(isPowerOff: Boolean)
+    fun getCameraProtocol(): ICameraConnectionStatus.CameraProtocol
 
     fun getCameraConnectionStatus(): ICameraConnectionStatus.CameraConnectionStatus
     fun subscribeCameraConnectionStatus(receiver: ICameraConnectionStatus)

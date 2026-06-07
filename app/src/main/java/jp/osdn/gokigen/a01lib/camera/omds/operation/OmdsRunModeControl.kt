@@ -38,7 +38,8 @@ class OmdsRunModeControl(private val liveViewQuality : String = "0640x0480", use
             var message = ""
             try
             {
-                if ((response.contains("OK"))||(response.contains("ok")))
+                if (((useOpcProtocol)&&(response.contains("OK"))||(response.contains("ok")))||
+                    ((!useOpcProtocol)&&(response.contains("200"))))
                 {
                     currentRunMode = runMode
                     isChange = true
