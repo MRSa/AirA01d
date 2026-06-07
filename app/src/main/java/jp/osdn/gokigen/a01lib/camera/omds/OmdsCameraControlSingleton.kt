@@ -163,22 +163,38 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
 
     override fun getCameraConnectionStatus() : CameraConnectionStatus { return cameraConnectionStatus }
 
-    override fun changeRunMode(runMode: String, callback: IOperationCallback)
+    override fun changeRunMode(runMode: String): Boolean
     {
         try
         {
             if (::runModeControl.isInitialized)
             {
-                runModeControl.changeRunMode(runMode, callback)
-                return
+                // runMode: rec, play, shutter, standalone, maintenance, playmaintenance , playstream, unknown
+                return runModeControl.changeRunMode(runMode)
             }
         }
         catch (e: Exception)
         {
             e.printStackTrace()
         }
-        callback.operationResult(false, "ERROR")
+        return false
     }
+
+    override fun getCurrentRunMode(): String
+    {
+        try {
+            if (::runModeControl.isInitialized) {
+                // runMode: rec, play, shutter, standalone, maintenance, playmaintenance , playstream, unknown
+                return runModeControl.getRunMode()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "ERR>get run mode failure ${e.localizedMessage}")
+        }
+        return "unknown"
+    }
+
+    override fun startLiveview() { liveviewControl.startLiveView() }
+    override fun stopLiveview() { liveviewControl.stopLiveView() }
 
     override fun subscribeCameraConnectionStatus(receiver: ICameraConnectionStatus)
     {

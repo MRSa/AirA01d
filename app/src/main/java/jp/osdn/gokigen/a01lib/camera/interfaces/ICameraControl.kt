@@ -21,7 +21,10 @@ interface ICameraControl
     fun subscribeCameraStatus(subscriber: ICameraStatusUpdateNotify)
     fun unsubscribeCameraStatus(subscriber: ICameraStatusUpdateNotify)
 
-    fun changeRunMode(runMode: String, callback: IOperationCallback)
+    fun changeRunMode(runMode: String) : Boolean
+    fun getCurrentRunMode() : String
+    fun startLiveview()
+    fun stopLiveview()
 
     fun needRotateImage() : Boolean
     fun getCameraStatus() : ICameraStatus?

@@ -37,7 +37,7 @@ fun ContentListScreenLandscape(
             Column(
                 modifier = modifier.safeDrawingPadding().padding(1.dp)
             ) {
-                ReturnToMainScreenRow(onBackClick = { navController.popBackStack() }, modifier = modifier)
+                ReturnToMainScreenRow(onBackClick = { navController.popBackStack() } )
                 HorizontalDivider()
             }
         }

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import jp.osdn.gokigen.aira01d.AppSingleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -26,12 +27,30 @@ class ContentListViewModel(application: Application) : ViewModel()
     fun changeRunModeToPlayback()
     {
         Log.v(TAG, "called changeRunModeToPlayback()")
+        val currentRunMode = AppSingleton.cameraControl.getCurrentRunMode()
+        if(currentRunMode == "play")
+        {
+            // ----- 既に再生モードだと判断し、何もせずに終了する
+            Log.v(TAG, "already PLAY mode")
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             try
             {
-                // ----- ここで Run Modeをplaybackに切り替える
-                //      切り替える前に、現在の Run Modeを知っておく必要はある。
-
+                AppSingleton.cameraControl.stopLiveview()
+                Thread.sleep(150L)
+                // ----- 動作モードが切り替えられるまで実行する
+                while (!AppSingleton.cameraControl.changeRunMode("standalone"))
+                {
+                    Log.v(TAG, "CHANGE RUN MODE(play -> standalone) : NG")
+                    Thread.sleep(500L)
+                }
+                while (!AppSingleton.cameraControl.changeRunMode("play"))
+                {
+                    Log.v(TAG, "CHANGE RUN MODE(standalone -> play) : NG")
+                    Thread.sleep(500L)
+                }
             }
             catch (e: Exception)
             {
@@ -42,6 +61,7 @@ class ContentListViewModel(application: Application) : ViewModel()
 
     fun changeRunModeToRecord(context: Context)
     {
+        // ----- 撮影モードに切り替える
         Log.v(TAG, "called changeRunModeToRecord()")
 
         val activity = context.findActivity()
@@ -51,16 +71,27 @@ class ContentListViewModel(application: Application) : ViewModel()
             return
         }
 
+        // ----- 動作モードが切り替えられるまで実行する
         viewModelScope.launch(Dispatchers.IO) {
-                try
+            try
+            {
+                while (!AppSingleton.cameraControl.changeRunMode("standalone"))
                 {
-                    // ----- ここで Run Modeをrecに切り替える
-
+                    Log.v(TAG, "CHANGE RUN MODE(play -> standalone) : NG")
+                    Thread.sleep(500L)
                 }
-                catch (e: Exception)
+                while (!AppSingleton.cameraControl.changeRunMode("rec"))
                 {
-                    Log.e(TAG, "ERR>Change RunMode to rec ${e.message}")
+                    Log.v(TAG, "CHANGE RUN MODE(standalone -> rec) : NG")
+                    Thread.sleep(500L)
                 }
+                Thread.sleep(150L)
+                AppSingleton.cameraControl.startLiveview()
+            }
+            catch (e: Exception)
+            {
+                Log.e(TAG, "ERR>Change RunMode to rec ${e.message}")
+            }
         }
     }
 

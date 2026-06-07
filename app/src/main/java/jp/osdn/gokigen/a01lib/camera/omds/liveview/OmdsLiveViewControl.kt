@@ -223,7 +223,7 @@ class OmdsLiveViewControl(
         private const val LIVEVIEW_STOP_REQUEST = "/exec_takemisc.cgi?com=stopliveview"
         private const val TIMEOUT_MAX = 3
         private const val RECEIVE_BUFFER_SIZE = 1024 * 1024 * 4 // 4MB
-        private const val TIMEOUT_MS = 1500
+        private const val TIMEOUT_MS = 5500
         private const val LIVEVIEW_PORT = 49152
     }
 }
