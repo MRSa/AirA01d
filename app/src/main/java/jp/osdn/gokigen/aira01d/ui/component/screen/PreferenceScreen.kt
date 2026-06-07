@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
@@ -34,8 +35,7 @@ import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.PreferenceViewModel
 
 /**
- * 呼び出し元から使うエントリーポイント
- * ViewModelやNavigationとの依存関係をここで解決します
+ *   アプリケーションの設定画面
  */
 @Composable
 fun PreferenceScreen(
@@ -65,13 +65,13 @@ fun PreferenceScreen(
             } catch (e: Exception) {
                 Log.e("PreferenceScreen", "Could not open URI: $url", e)
             }
-        }
+        },
+        modifier = Modifier.safeDrawingPadding().padding(1.dp)
     )
 }
 
 /**
- * UIの表示のみを担当する Stateless なコンポーザブル
- * プレビューやテストが容易になります
+ * 設定画面（メイン処理）
  */
 @Composable
 fun PreferenceScreenMain(
@@ -80,11 +80,14 @@ fun PreferenceScreenMain(
     onBackClick: () -> Unit,
     onAutoConnectChanged: (Boolean) -> Unit,
     onCommandIssueSingle: (Boolean) -> Unit,
-    onOpenUri: (String) -> Unit
+    onOpenUri: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
-            Column {
+            Column(
+                modifier = modifier
+            ) {
                 // 戻るボタン行
                 ReturnToMainScreenRow(onBackClick)
                 HorizontalDivider()
