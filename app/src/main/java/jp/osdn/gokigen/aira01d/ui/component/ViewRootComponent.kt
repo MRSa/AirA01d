@@ -13,10 +13,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import jp.osdn.gokigen.aira01d.ui.component.screen.CameraPreferenceScreen
-import jp.osdn.gokigen.aira01d.ui.component.screen.ContentListScreen
-import jp.osdn.gokigen.aira01d.ui.component.screen.LiveviewScreen
-import jp.osdn.gokigen.aira01d.ui.component.screen.PreferenceScreen
+import jp.osdn.gokigen.aira01d.ui.component.screen.preference.CameraPreferenceScreen
+import jp.osdn.gokigen.aira01d.ui.component.screen.playback.ContentListScreen
+import jp.osdn.gokigen.aira01d.ui.component.screen.liveview.LiveviewScreen
+import jp.osdn.gokigen.aira01d.ui.component.screen.preference.PreferenceScreen
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.ContentListViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel

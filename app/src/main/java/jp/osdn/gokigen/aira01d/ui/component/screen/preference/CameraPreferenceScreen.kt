@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.screen
+package jp.osdn.gokigen.aira01d.ui.component.screen.preference
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

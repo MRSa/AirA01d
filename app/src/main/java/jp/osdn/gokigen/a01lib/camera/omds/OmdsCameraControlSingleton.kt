@@ -14,7 +14,6 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraLiveviewMagnify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.IDigitalZoomControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
-import jp.osdn.gokigen.a01lib.camera.interfaces.IOperationCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.IZoomLensControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl

@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.screen
+package jp.osdn.gokigen.aira01d.ui.component.screen.preference
 
 import android.util.Log
 import androidx.compose.foundation.clickable

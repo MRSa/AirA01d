@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.screen
+package jp.osdn.gokigen.aira01d.ui.component.screen.playback
 
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.screen
+package jp.osdn.gokigen.aira01d.ui.component.screen.liveview
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

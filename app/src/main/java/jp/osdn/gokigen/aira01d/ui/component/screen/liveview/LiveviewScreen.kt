@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.screen
+package jp.osdn.gokigen.aira01d.ui.component.screen.liveview
 
 import android.content.res.Configuration
 import android.util.Log
@@ -47,9 +47,19 @@ fun LiveviewScreen(
     if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
     {
         // ----- 横向き
-        LiveviewScreenLandscape(navController, liveviewModel, cameraStatusViewModel, selfTimerViewModel)
+        LiveviewScreenLandscape(
+            navController,
+            liveviewModel,
+            cameraStatusViewModel,
+            selfTimerViewModel
+        )
     } else {
         // ----- 縦向き
-        LiveviewScreenPortrait(navController, liveviewModel, cameraStatusViewModel, selfTimerViewModel)
+        LiveviewScreenPortrait(
+            navController,
+            liveviewModel,
+            cameraStatusViewModel,
+            selfTimerViewModel
+        )
     }
 }
