@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
@@ -15,7 +16,8 @@ import jp.osdn.gokigen.aira01d.ui.model.ContentListViewModel
 @Composable
 fun ContentListScreen(
     navController: NavHostController,
-    viewModel: ContentListViewModel
+    viewModel: ContentListViewModel,
+    modifier: Modifier = Modifier
 ) {
     val configuration = LocalConfiguration.current
     val context = LocalContext.current

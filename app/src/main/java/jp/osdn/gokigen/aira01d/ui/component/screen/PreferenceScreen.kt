@@ -5,11 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
@@ -42,6 +48,7 @@ fun PreferenceScreen(
     navController: NavHostController,
     prefsModel: PreferenceViewModel
 ) {
+    val modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Start))
     val cameraAutoConnect by prefsModel.connectCameraAutomatically.collectAsStateWithLifecycle()
     val commandIssueSingle by prefsModel.commandIssueSingle.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
@@ -65,7 +72,8 @@ fun PreferenceScreen(
             } catch (e: Exception) {
                 Log.e("PreferenceScreen", "Could not open URI: $url", e)
             }
-        }
+        },
+        modifier = modifier
     )
 }
 
@@ -80,19 +88,22 @@ fun PreferenceScreenMain(
     onBackClick: () -> Unit,
     onAutoConnectChanged: (Boolean) -> Unit,
     onCommandIssueSingle: (Boolean) -> Unit,
-    onOpenUri: (String) -> Unit
+    onOpenUri: (String) -> Unit,
+    modifier: Modifier
 ) {
     Scaffold(
         topBar = {
-            Column {
+            Column(
+                modifier = modifier.safeDrawingPadding().padding(1.dp)
+            ) {
                 // 戻るボタン行
-                ReturnToMainScreenRow(onBackClick)
+                ReturnToMainScreenRow(onBackClick, modifier)
                 HorizontalDivider()
             }
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .padding(innerPadding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
@@ -138,9 +149,12 @@ fun PreferenceScreenMain(
 }
 
 @Composable
-fun ReturnToMainScreenRow(onBackClick: () -> Unit) {
+fun ReturnToMainScreenRow(
+    onBackClick: () -> Unit,
+    modifier: Modifier
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onBackClick, onClickLabel = "Return to main screen")
             .padding(16.dp),
