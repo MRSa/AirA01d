@@ -61,4 +61,6 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.tools.core)
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }

@@ -43,6 +43,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 import jp.osdn.gokigen.aira01d.ui.component.screen.preference.ReturnToMainScreenRow
 import jp.osdn.gokigen.aira01d.ui.model.ContentListViewModel
 import jp.osdn.gokigen.aira01d.R
+import jp.osdn.gokigen.aira01d.ui.component.widget.playback.OmdsFileItemCard
 
 @Composable
 fun ContentListScreenPortrait(
@@ -124,56 +125,9 @@ fun ContentListScreenPortrait(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 items(fileList) { file ->
-                    FileItemCard(file = file)
+                    OmdsFileItemCard(file = file)
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun FileItemCard(file: ICameraFileInfo.ImageFileInfo) {
-    Card(
-        modifier = Modifier.aspectRatio(1f),
-        // カードの背景にSurface（地色）を設定
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-        ),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Box(contentAlignment = Alignment.BottomStart) {
-            // ----- 代替アイコン
-            Icon(
-                imageVector = Icons.Outlined.Image,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp), // 少しアイコンを小さくして収まりを良く
-                // アイコンをコンテナに対して目立たない中間色に変更
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            )
-
-            // 写真の上にファイル名などを重ねる（Scrim: 遮光効果）
-            Text(
-                text = file.fileName,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                // 写真が明るくても文字が読めるよう、ここは固定の白（またはonSecondaryContainer）
-                color = Color.White, // MaterialTheme.colorScheme.onSecondaryContainer
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // M3のscrim（黒系）を80%から徐々に透明にするグラデーションにする
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f)
-                            )
-                        )
-                    )
-                    .padding(horizontal = 4.dp, vertical = 6.dp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
         }
     }
 }

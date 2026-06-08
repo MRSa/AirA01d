@@ -18,6 +18,7 @@ class AppSingleton : Application()
     {
         private val TAG = AppSingleton::class.java.simpleName
         private var _cameraControl: OmdsCameraControlSingleton? = null
+        const val CAMERA_BASE_URL = "http://192.168.0.10"
 
         // 外部公開用の変数は「絶対に Null ではない型」にする
         val cameraControl: OmdsCameraControlSingleton

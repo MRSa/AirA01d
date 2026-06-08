@@ -32,6 +32,7 @@
     <string name="receive_error">Recv.Err(Evt)</string>
     <string name="content_not_found">No data</string>
     <string name="content_count">Count: </string>
+    <string name="tap_to_retry">Tap to retry</string>
 
     <string name="label_return_to_liveview_screen">Back</string>
     <string name="label_switch_connect_camera_automatically">Auto-connect to Camera</string>
