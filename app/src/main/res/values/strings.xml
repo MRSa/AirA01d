@@ -33,6 +33,9 @@
     <string name="content_not_found">No data</string>
     <string name="content_count">Count: </string>
     <string name="tap_to_retry">Tap to retry</string>
+    <string name="get_image_failure">Image loading failed.</string>
+    <string name="stored_image_ok">Image stored: </string>
+    <string name="stored_image_ng">Failed to get image: </string>
 
     <string name="label_return_to_liveview_screen">Back</string>
     <string name="label_switch_connect_camera_automatically">Auto-connect to Camera</string>

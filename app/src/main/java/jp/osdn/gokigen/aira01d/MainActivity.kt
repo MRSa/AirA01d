@@ -107,12 +107,12 @@ class MainActivity : ComponentActivity()
 
     private fun checkAndRequestPermissions() {
         if (!allPermissionsGranted()) {
-            requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
+            requestPermissionLauncher.launch(getRequiredPermissions())
         }
     }
 
     private fun allPermissionsGranted(): Boolean {
-        return REQUIRED_PERMISSIONS.all { permission ->
+        return getRequiredPermissions().all { permission ->
             // ----- Android 17 (Cinnamon Bun / SDK 37) 以降の特定権限チェックにも対応
             if (permission == Manifest.permission.ACCESS_LOCAL_NETWORK && Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) {
                 true
@@ -150,12 +150,21 @@ class MainActivity : ComponentActivity()
     companion object
     {
         private val TAG = MainActivity::class.java.simpleName
-        private val REQUIRED_PERMISSIONS = arrayOf(
+        private val BASE_PERMISSIONS = arrayOf(
             Manifest.permission.VIBRATE,
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_NETWORK_STATE,
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.ACCESS_LOCAL_NETWORK,
         )
+        private fun getRequiredPermissions(): Array<String> {
+            return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                // Android 9 (Pie / API 28) 以前の場合のみ、ストレージ書き込み権限を追加する
+                BASE_PERMISSIONS + Manifest.permission.WRITE_EXTERNAL_STORAGE
+            } else {
+                // Android 10 (Q / API 29) 以降は既存の権限のみ
+                BASE_PERMISSIONS
+            }
+        }
     }
 }

@@ -32,7 +32,10 @@
     <string name="receive_error">受信失敗(Evt)</string>
     <string name="content_not_found">データがありません</string>
     <string name="content_count">ファイル数: </string>
-    <string name="tap_to_retry">タップして再試行</string>
+    <string name="tap_to_retry">タップして再取得</string>
+    <string name="get_image_failure">画像読込失敗</string>
+    <string name="stored_image_ok">画像を保存しました: </string>
+    <string name="stored_image_ng">保存に失敗しました: </string>
 
     <string name="label_return_to_liveview_screen">戻る</string>
     <string name="label_switch_connect_camera_automatically">カメラに自動接続</string>

@@ -26,6 +26,9 @@ class ContentListViewModel(application: Application) : ViewModel()
     private val _runMode = MutableLiveData<String>()
     val runMode: LiveData<String> = _runMode
 
+    private val _cameraProtocol = MutableLiveData<ICameraConnectionStatus.CameraProtocol>()
+    val cameraProtocol: LiveData<ICameraConnectionStatus.CameraProtocol> = _cameraProtocol
+
     var fileList by mutableStateOf<List<ICameraFileInfo.ImageFileInfo>>(emptyList())
         private set
 
@@ -37,6 +40,7 @@ class ContentListViewModel(application: Application) : ViewModel()
             Log.v(TAG, "initialize Exception: ${e.localizedMessage}")
         }
     }
+
     private fun Context.findActivity(): Activity? {
         var context = this
         while (context is ContextWrapper) {
@@ -74,6 +78,7 @@ class ContentListViewModel(application: Application) : ViewModel()
                         if (retryCount < 0) { break }
                     }
                 }
+                _cameraProtocol.postValue(cameraProtocol)
                 _runMode.postValue(AppSingleton.cameraControl.getCurrentRunMode())
 
                 retryCount = 10
@@ -124,6 +129,7 @@ class ContentListViewModel(application: Application) : ViewModel()
                         if (retryCount < 0) { break }
                     }
                 }
+                _cameraProtocol.postValue(cameraProtocol)
                 _runMode.postValue(AppSingleton.cameraControl.getCurrentRunMode())
                 retryCount = 10
                 while (!AppSingleton.cameraControl.changeRunMode("rec"))
@@ -151,7 +157,7 @@ class ContentListViewModel(application: Application) : ViewModel()
             {
                 Log.v(TAG, " - - - - - - getAllContentList() called")
                 val result = withContext(Dispatchers.IO) {
-                    getContentList(ROOT_DIRECTORY)
+                    getContentList()
                 }
                 // 結果の反映はMainスレッドで
                 fileList = result
@@ -164,7 +170,7 @@ class ContentListViewModel(application: Application) : ViewModel()
         }
     }
 
-    private fun getContentList(directory: String) : List<ICameraFileInfo.ImageFileInfo>
+    private fun getContentList(directory: String = ROOT_DIRECTORY) : List<ICameraFileInfo.ImageFileInfo>
     {
         val allItems = mutableListOf<ICameraFileInfo.ImageFileInfo>()
         fun walk(currentPath: String) {

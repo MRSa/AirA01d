@@ -41,7 +41,7 @@ import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 
 @Composable
-fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo)
+fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Unit)
 {
     val context = LocalContext.current
     val baseUrl = AppSingleton.CAMERA_BASE_URL
@@ -74,7 +74,9 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo)
         .build() // listener は不要になったので削除してシンプルに
 
     Card(
-        modifier = Modifier.aspectRatio(1f),
+        modifier = Modifier
+                    .aspectRatio(1f)
+                    .clickable { onItemClick() },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
         ),

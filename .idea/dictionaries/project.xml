@@ -4,6 +4,7 @@
       <w>Levelvial</w>
       <w>Telecon</w>
       <w>Thhmm</w>
+      <w>aira</w>
       <w>artfilter</w>
       <w>assignafframe</w>
       <w>cameramode</w>
@@ -22,6 +23,7 @@
       <w>ctrldigizoom</w>
       <w>ctrlzoom</w>
       <w>customwbbias</w>
+      <w>dcim</w>
       <w>denkyu</w>
       <w>desclist</w>
       <w>digizoomscope</w>
@@ -81,6 +83,7 @@
       <w>releaseafframe</w>
       <w>requestopceventwatch</w>
       <w>resizeimage</w>
+      <w>resizeimg</w>
       <w>shutspeedvalue</w>
       <w>startliveview</w>
       <w>startmovietake</w>
