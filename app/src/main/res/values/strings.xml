@@ -31,6 +31,9 @@
     <string name="capturing">Capturing…</string>
     <string name="receive_error">Recv.Err(Evt)</string>
     <string name="content_not_found">No data</string>
+    <string name="content_uninitialized">Uninitialized</string>
+    <string name="content_fetching">Now Fetching…</string>
+    <string name="mode_changing">Mode changing…</string>
     <string name="content_count">Count: </string>
     <string name="tap_to_retry">Tap to retry</string>
     <string name="get_image_failure">Image loading failed.</string>

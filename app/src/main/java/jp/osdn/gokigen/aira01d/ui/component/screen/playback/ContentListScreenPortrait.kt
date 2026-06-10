@@ -53,6 +53,7 @@ fun ContentListScreenPortrait(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val runMode = viewModel.runMode.observeAsState()
+    val contentStatus =viewModel.contentStatus.observeAsState()
     val cameraProtocol = viewModel.cameraProtocol.observeAsState()
     val fileList = viewModel.fileList
 
@@ -155,13 +156,19 @@ fun ContentListScreenPortrait(
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             if (fileList.isEmpty()) {
+                val emptyMessage = when (contentStatus.value) {
+                    ContentListViewModel.ContentLoadingStatus.Uninitialized -> stringResource(R.string.content_uninitialized)
+                    ContentListViewModel.ContentLoadingStatus.ChangingMode -> stringResource(R.string.mode_changing)
+                    ContentListViewModel.ContentLoadingStatus.Fetching -> stringResource(R.string.content_fetching)
+                    else -> stringResource(R.string.content_not_found)
+                }
                 // -----
                 Box(
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = stringResource(R.string.content_not_found),
+                        text = emptyMessage,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

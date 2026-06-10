@@ -31,6 +31,9 @@
     <string name="capturing">撮影中</string>
     <string name="receive_error">受信失敗(Evt)</string>
     <string name="content_not_found">データがありません</string>
+    <string name="content_uninitialized">(未初期化)</string>
+    <string name="content_fetching">データ取得中…</string>
+    <string name="mode_changing">モード切替中…</string>
     <string name="content_count">ファイル数: </string>
     <string name="tap_to_retry">タップして再取得</string>
     <string name="get_image_failure">画像読込失敗</string>

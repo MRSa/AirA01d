@@ -32,10 +32,14 @@ class ContentListViewModel(application: Application) : ViewModel()
     var fileList by mutableStateOf<List<ICameraFileInfo.ImageFileInfo>>(emptyList())
         private set
 
+    private val _contentStatus = MutableLiveData<ContentLoadingStatus>()
+    val contentStatus: LiveData<ContentLoadingStatus> = _contentStatus
+
     init
     {
         try {
             _runMode.value = "unknown"
+            _contentStatus.value = ContentLoadingStatus.Uninitialized
         } catch (e: Exception) {
             Log.v(TAG, "initialize Exception: ${e.localizedMessage}")
         }
@@ -152,15 +156,18 @@ class ContentListViewModel(application: Application) : ViewModel()
 
     fun getAllContentList()
     {
+        _contentStatus.postValue(ContentLoadingStatus.Fetching)
         viewModelScope.launch {
             try
             {
                 Log.v(TAG, " - - - - - - getAllContentList() called")
-                val result = withContext(Dispatchers.IO) {
-                    getContentList()
+                val sortedResult = withContext(Dispatchers.IO) {
+                    val result = getContentList()
+                    result.sortedByDescending { it.dateTime }  // 日付の新しい順に並べ替え
                 }
                 // 結果の反映はMainスレッドで
-                fileList = result
+                fileList = sortedResult
+                _contentStatus.postValue(ContentLoadingStatus.Ready)
                 Log.v(TAG, "number of contents : ${fileList.size}")
             }
             catch (e: Exception)
@@ -199,6 +206,10 @@ class ContentListViewModel(application: Application) : ViewModel()
         return allItems
     }
 
+
+    enum class ContentLoadingStatus {
+        Uninitialized, ChangingMode, Fetching, Ready
+    }
     enum class DisplayMode {
         Grid, List
     }
