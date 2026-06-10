@@ -71,7 +71,7 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
                 diskCachePolicy(CachePolicy.WRITE_ONLY)
             }
         }
-        .build() // listener は不要になったので削除してシンプルに
+        .build()
 
     Card(
         modifier = Modifier
@@ -84,6 +84,7 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
     ) {
         Box(contentAlignment = Alignment.BottomStart) {
 
+            //----- サムネイル画像の表示
             SubcomposeAsyncImage(
                 model = imageRequest,
                 contentDescription = "Thumbnail for ${file.fileName}",

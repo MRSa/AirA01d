@@ -3,6 +3,13 @@ package jp.osdn.gokigen.aira01d
 import android.app.Application
 import android.util.Log
 import jp.osdn.gokigen.a01lib.camera.omds.OmdsCameraControlSingleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+
+object AppScope {
+    val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+}
 
 class AppSingleton : Application()
 {

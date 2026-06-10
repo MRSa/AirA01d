@@ -199,6 +199,9 @@ class ContentListViewModel(application: Application) : ViewModel()
         return allItems
     }
 
+    enum class DisplayMode {
+        Grid, List
+    }
     companion object {
         private val TAG = ContentListViewModel::class.java.simpleName
         private const val ROOT_DIRECTORY = "/DCIM"

@@ -50,9 +50,9 @@ fun ContentListScreen(
     if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
     {
         // ----- 横向き
-        ContentListScreenLandscape(navController, viewModel)
+        ContentListScreenLandscape(navController, viewModel, modifier)
     } else {
         // ----- 縦向き
-        ContentListScreenPortrait(navController, viewModel)
+        ContentListScreenPortrait(navController, viewModel, modifier)
     }
 }

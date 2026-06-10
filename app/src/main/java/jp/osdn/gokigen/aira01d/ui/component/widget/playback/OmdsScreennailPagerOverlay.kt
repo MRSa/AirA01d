@@ -89,7 +89,7 @@ fun OmdsScreennailPagerOverlay(
             .fillMaxSize()
             .background(Color.Black) // 写真が映えるように黒背景
     ) {
-        // 左右スワイプ可能なコンポーネント
+        // ----- 左右スワイプ可能なコンポーネント
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
@@ -145,13 +145,13 @@ fun OmdsScreennailPagerOverlay(
             }
         }
 
-        // 💡 上部のヘッダーコンテナ（「閉じる」ボタン）
+        // --- 上部のヘッダーコンテナ（「閉じる」ボタン）
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
                 .safeDrawingPadding()
-                .height(56.dp) // 💡 一般的なツールバーの高さ
+                .height(56.dp) // --- 一般的なツールバーの高さ
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.End, // 右寄せ
             verticalAlignment = Alignment.CenterVertically // 上下中央
@@ -226,8 +226,9 @@ fun OmdsScreennailPagerOverlay(
  * 💡 画像をダウンロードして DCIM/AirA01d に MediaStore 経由で保存する関数
  */
 private suspend fun downloadAndSaveImage(context: Context, url: String, fileName: String): Boolean = withContext(Dispatchers.IO) {
-    try {
-        // --- 1. Coilで画像を取得 (ここは共通) ---
+    try
+    {
+        // --- Coilで画像を取得 ---
         val imageLoader = ImageLoader(context)
         val request = ImageRequest.Builder(context).data(url).allowHardware(false).build()
         val result = imageLoader.execute(request)
@@ -236,7 +237,8 @@ private suspend fun downloadAndSaveImage(context: Context, url: String, fileName
 
         val resolver = context.contentResolver
 
-        // --- 2. OSのバージョンによって保存処理を完全に分ける ---
+        // ----- 保存処理 -----
+        // ----- OSのバージョンによって保存処理を完全に分ける -----
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // Android 10 (API 29) 以降の保存方法
             val contentValues = ContentValues().apply {
@@ -258,7 +260,7 @@ private suspend fun downloadAndSaveImage(context: Context, url: String, fileName
             resolver.update(imageUri, contentValues, null, null)
 
         } else {
-            // --- Android 7, 8, 9 (API 24〜28) のレガシーな保存方法
+            // ------ Android 7, 8, 9 (API 24〜28) のレガシーな保存方法
             val dcimDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
             val targetFolder = File(dcimDir, "AirA01d")
             if (!targetFolder.exists()) targetFolder.mkdirs() // 物理的にフォルダ作成
@@ -268,13 +270,15 @@ private suspend fun downloadAndSaveImage(context: Context, url: String, fileName
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
             }
 
-            // 💡 7,8,9はこれを開かないと他のギャラリーアプリに画像が出てこない
+            // ----- 7,8,9はこれを開かないと他のギャラリーアプリに画像が出てこない
             @Suppress("DEPRECATION")
             MediaScannerConnection.scanFile(context, arrayOf(targetFile.toString()), null, null)
         }
 
         true
-    } catch (e: Exception) {
+    }
+    catch (e: Exception)
+    {
         e.printStackTrace()
         false
     }
