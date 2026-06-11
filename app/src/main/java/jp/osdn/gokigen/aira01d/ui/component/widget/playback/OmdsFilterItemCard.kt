@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -22,11 +26,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -116,6 +122,44 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
                 }
             )
 
+            // 拡張子に応じたアイコンの表示（画像の上に重ねる）
+            val isMovie = file.fileName.endsWith(".MOV", ignoreCase = true)
+            val isRaw = file.fileName.endsWith(".ORF", ignoreCase = true)
+            if (isMovie || isRaw)
+            {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp), // カードの縁から少し内側に配置
+                    contentAlignment = Alignment.TopEnd // 右上に配置（お好みで左上 Alignment.TopStart などに変更してください）
+                ) {
+                    if (isMovie) {
+                        // ムービーアイコン（例: 再生やビデオのアイコン）
+                        Icon(
+                            imageVector = Icons.Default.PlayCircle, // ※適宜プロジェクトに合ったアイコンに変更してください
+                            contentDescription = "Movie",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .shadow(2.dp, shape = CircleShape)
+                        )
+                    }
+                    if (isRaw) {
+                        // RAWファイルを示すアイコン（テキストバッジの例）
+                        Text(
+                            text = "RAW",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White,
+                            modifier = Modifier
+                                .background(
+                                    color = Color.Black.copy(alpha = 0.6f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
             // 写真の上にファイル名を重ねる
             Text(
                 text = file.fileName,
