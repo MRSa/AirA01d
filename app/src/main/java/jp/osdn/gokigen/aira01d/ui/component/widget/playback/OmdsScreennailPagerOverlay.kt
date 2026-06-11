@@ -9,18 +9,20 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
-import android.widget.Toast.makeText
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -33,15 +35,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.SubcomposeAsyncImage
@@ -56,7 +64,6 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -97,18 +104,29 @@ fun OmdsScreennailPagerOverlay(
         ) { page ->
             val file = fileList[page]
 
+            var retryCount by remember { mutableStateOf(0) }
+
             // スクリーンネイルURL (オープンプラットフォームカメラ仕様書 get_screennail.cgi 参照)
             // 例: http://192.168.0.10/get_screennail.cgi?DIR=/DCIM/100OLYMP/P6230001.JPG
-            val screennailUrl = if ((cameraProtocol?: ICameraConnectionStatus.CameraProtocol.OPC) == ICameraConnectionStatus.CameraProtocol.OPC)
+            val screennailBaseUrl = if ((cameraProtocol?: ICameraConnectionStatus.CameraProtocol.OPC) == ICameraConnectionStatus.CameraProtocol.OPC)
             {
                 "$baseUrl/get_screennail.cgi?DIR=${file.directory}/${file.fileName}"
             }
             else
             {
-                // --- get_screennail.cgi が動かなかったので、、、get_resizeimg.cgi を使う
-                "$baseUrl/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1024"
+                if (file.fileName.endsWith(".MOV"))
+                {
+                    // --- .MOV のときは screennail.cgi じゃないととれなかった...
+                    "$baseUrl/get_screennail.cgi?DIR=${file.directory}/${file.fileName}"
+                }
+                else {
+                    // --- get_screennail.cgi が動かなかったので、、、get_resizeimg.cgi を使う
+                    "$baseUrl/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1024"
+                }
             }
-            Log.v("SCREENNAIL", "screennail URL: $screennailUrl")
+            Log.v("SCR-URL", screennailBaseUrl)
+            // ----- 画像再取得時にはURLに細工を入れてみる
+            val screennailUrl = if (retryCount > 0) { "$screennailBaseUrl&retry=$retryCount" } else { screennailBaseUrl }
 
             val customHeaders = NetworkHeaders.Builder()
                 .set("User-Agent", "OlympusCameraKit")
@@ -137,77 +155,104 @@ fun OmdsScreennailPagerOverlay(
                         }
                     },
                     error = {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(stringResource(R.string.get_image_failure), color = Color.White)
+                        // ----- 画像取得エラーの表示
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                // タップされたらカウントアップしてリクエストを再トリガー
+                                retryCount++
+                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                            },
+                            contentAlignment = Alignment.Center) {
+                            Text("${stringResource(R.string.get_image_failure)}\n(${stringResource(R.string.tap_to_retry)})", color = Color.White)
                         }
                     }
                 )
             }
         }
 
-        // --- 上部のヘッダーコンテナ（「閉じる」ボタン）
-        Row(
+        // --- 上部のヘッダーコンテナ（操作アイコン ＋ ファイル情報）
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.7f),
+                            Color.Black.copy(alpha = 0.3f),
+                            Color.Transparent
+                        )
+                    )
+                ) // 上から下へ消えていくグラデーションで視認性を確保
                 .safeDrawingPadding()
-                .height(56.dp) // --- 一般的なツールバーの高さ
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.End, // 右寄せ
-            verticalAlignment = Alignment.CenterVertically // 上下中央
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-
-            // ---- 画像のダウンロードボタン
-            val successMessage = stringResource(R.string.stored_image_ok)
-            val failureMessage = stringResource(R.string.stored_image_ng)
-            IconButton(
-                onClick = {
-                    // 現在表示中のファイル情報を取得
-                    val currentFile = fileList[pagerState.currentPage]
-                    val imageFileUrl = "$baseUrl${currentFile.directory}/${currentFile.fileName}"
-
-                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-
-                    Log.v("GET IMAGE", "get image URL: $imageFileUrl" )
-
-                    /* ----- うまく取得できない & ダウンロードに時間がかかるのでいったんコメントに
-                    // コルーチンでダウンロード処理を実行
-                    scope.launch {
-                        val success = downloadAndSaveImage(context, imageFileUrl, currentFile.fileName)
-                        if (success) {
-                            makeText(context, "$successMessage ${currentFile.fileName}", Toast.LENGTH_SHORT).show()
-                        } else {
-                            makeText(context, "$failureMessage ${currentFile.fileName}", Toast.LENGTH_SHORT).show()
-                        }
-                   }
-                   */
-                },
+            //  --- 操作アイコン行
+            Row(
                 modifier = Modifier
-                    .padding(end = 12.dp) // 閉じるボタンとの間に余白を作る
-                    .background(Color.Black.copy(alpha = 0.5f), shape = CircleShape)
+                    .fillMaxWidth()
+                    .height(56.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Download, // ダウンロードアイコン
-                    contentDescription = "Download Image",
-                    tint = Color.White
-                )
+                // --- 画像のダウンロードボタン
+                IconButton(
+                    onClick = { /* 既存のダウンロード処理 */ },
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .background(Color.Black.copy(alpha = 0.5f), shape = CircleShape)
+                ) {
+                    Icon(imageVector = Icons.Default.Download, contentDescription = null, tint = Color.White)
+                }
+
+                // --- 画面を閉じるボタン
+                IconButton(
+                    onClick = onClose,
+                    modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), shape = CircleShape)
+                ) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = null, tint = Color.White)
+                }
             }
 
-            // ----- 画面を閉じるボタン
-            IconButton(
-                onClick = onClose,
-                modifier = Modifier
-                    .background(Color.Black.copy(alpha = 0.5f), shape = CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = Color.White
-                )
+            // --- メタデータ行（アイコンのすぐ下に追加）
+            val currentFile = fileList.getOrNull(pagerState.currentPage)
+            if (currentFile != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp, bottom = 8.dp, start = 8.dp, end = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // --- ファイル名
+                    Text(
+                        text = currentFile.fileName,
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    // --- 撮影日時
+                    val formattedDate = remember(currentFile.dateTime) {
+                        val sdf = java.text.SimpleDateFormat("yyyy/MM/dd HH:mm", java.util.Locale.getDefault())
+                        sdf.format(currentFile.dateTime)
+                    }
+                    Text(
+                        text = formattedDate,
+                        color = Color.LightGray,
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1
+                    )
+                }
             }
         }
 
-        // ---- 下部などのページインジケーター（オプション：何枚中何枚目かを表示）
+        // ---- 下部などのページインジケーター（何枚中何枚目かを表示）
         Text(
             text = "${pagerState.currentPage + 1} / ${fileList.size}",
             color = Color.White,

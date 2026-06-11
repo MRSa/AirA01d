@@ -1,11 +1,9 @@
 package jp.osdn.gokigen.aira01d.ui.component.screen.playback
 
-import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -19,7 +17,6 @@ fun ContentListScreen(
     viewModel: ContentListViewModel,
     modifier: Modifier = Modifier
 ) {
-    val configuration = LocalConfiguration.current
     val context = LocalContext.current
     val lifecycleOwner = navController.currentBackStackEntry ?: LocalLifecycleOwner.current
 
@@ -46,16 +43,6 @@ fun ContentListScreen(
         }
     }
 
-    // ----- 撮影画像一覧画面
+    // ----- 撮影画像一覧画面を開く
     ContentListScreenImpl(navController, viewModel, modifier)
-
-    // 画面の向きによって表示するコンポーネントを切り替える ... と思ったが、ひとつでよさそう
-    //if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-    //{
-    //    // ----- 横向き
-    //    ContentListScreenImpl(navController, viewModel, modifier)
-    //} else {
-    //    // ----- 縦向き
-    //    ContentListScreenImpl(navController, viewModel, modifier)
-    //}
 }
