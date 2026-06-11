@@ -45,7 +45,7 @@ import jp.osdn.gokigen.aira01d.ui.component.widget.playback.OmdsVerticalGridView
 import kotlinx.coroutines.launch
 
 @Composable
-fun ContentListScreenPortrait(
+fun ContentListScreenImpl(
     navController: NavHostController,
     viewModel: ContentListViewModel,
     modifier: Modifier = Modifier

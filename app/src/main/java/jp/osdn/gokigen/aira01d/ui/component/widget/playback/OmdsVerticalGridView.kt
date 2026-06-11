@@ -18,7 +18,7 @@ fun OmdsVerticalGridView(
 )
 {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+        columns = GridCells.Adaptive(minSize = 110.dp),
         modifier = modifier,
         contentPadding = PaddingValues(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),

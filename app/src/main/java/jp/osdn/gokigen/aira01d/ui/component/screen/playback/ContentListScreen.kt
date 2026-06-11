@@ -46,13 +46,16 @@ fun ContentListScreen(
         }
     }
 
-    // 画面の向きによって表示するコンポーネントを切り替える
-    if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-    {
-        // ----- 横向き
-        ContentListScreenLandscape(navController, viewModel, modifier)
-    } else {
-        // ----- 縦向き
-        ContentListScreenPortrait(navController, viewModel, modifier)
-    }
+    // ----- 撮影画像一覧画面
+    ContentListScreenImpl(navController, viewModel, modifier)
+
+    // 画面の向きによって表示するコンポーネントを切り替える ... と思ったが、ひとつでよさそう
+    //if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+    //{
+    //    // ----- 横向き
+    //    ContentListScreenImpl(navController, viewModel, modifier)
+    //} else {
+    //    // ----- 縦向き
+    //    ContentListScreenImpl(navController, viewModel, modifier)
+    //}
 }
