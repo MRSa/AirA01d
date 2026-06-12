@@ -156,6 +156,16 @@ fun ContentListScreenImpl(
                             modifier = Modifier.weight(1f)
                         )
 
+                        // --- カメラの動作モードが期待したモードではない場合は、画面表示する
+                        if (runMode.value != "play")
+                        {
+                            Text(
+                                text = " ${runMode.value} ",
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+                            )
+                        }
+
                         // --- 件数の表示
                         Text(
                             text = "${stringResource(R.string.content_count)}${filteredFileList.size}/${rawFileList.size}",
