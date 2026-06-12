@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.widget.playback
+package jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds
 
 import android.content.ContentValues
 import android.content.Context
@@ -67,6 +67,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun OmdsScreennailPagerOverlay(
@@ -239,7 +241,7 @@ fun OmdsScreennailPagerOverlay(
 
                     // --- 撮影日時
                     val formattedDate = remember(currentFile.dateTime) {
-                        val sdf = java.text.SimpleDateFormat("yyyy/MM/dd HH:mm", java.util.Locale.getDefault())
+                        val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
                         sdf.format(currentFile.dateTime)
                     }
                     Text(

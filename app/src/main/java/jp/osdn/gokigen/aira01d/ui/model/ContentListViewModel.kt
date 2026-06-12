@@ -213,6 +213,34 @@ class ContentListViewModel(application: Application) : ViewModel()
     enum class DisplayMode {
         Grid, List
     }
+
+    // ソート順の定義
+    enum class SortOrder {
+        NEWEST, // 最新から
+        OLDEST  // 最古から
+    }
+
+    // 拡張子の定義
+    enum class ExtensionFilter{
+        ALL,
+        JPEG,
+        RAW,
+        MOV,
+        OTHER;
+
+        // ファイル名から該当するか判定するヘルパー
+        fun matches(fileName: String): Boolean {
+            val ext = fileName.substringAfterLast('.', "").uppercase()
+            return when (this) {
+                ALL -> true
+                JPEG -> ext == "JPG" || ext == "JPEG"
+                RAW -> ext == "ORF"
+                MOV -> ext == "MOV"
+                OTHER -> ext != "JPG" && ext != "JPEG" && ext != "ORF" && ext != "MOV"
+            }
+        }
+    }
+
     companion object {
         private val TAG = ContentListViewModel::class.java.simpleName
         private const val ROOT_DIRECTORY = "/DCIM"

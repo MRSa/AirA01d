@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.widget.playback
+package jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

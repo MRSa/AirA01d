@@ -1,5 +1,6 @@
-package jp.osdn.gokigen.aira01d.ui.component.widget.playback
+package jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds
 
+import android.text.format.Formatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -77,7 +78,7 @@ fun OmdsFileItemRow(
 
     // --- ファイルサイズのフォーマット
     val formattedSize = remember(file.fileSize) {
-        android.text.format.Formatter.formatShortFileSize(context, file.fileSize)
+        Formatter.formatShortFileSize(context, file.fileSize)
     }
 
     // --- 日時のフォーマット

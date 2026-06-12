@@ -6,6 +6,7 @@
     <string name="dialog_title_confirm_power_off">アプリ終了</string>
     <string name="dialog_message_power_off">カメラの電源を切り、アプリケーションを終了します。</string>
     <string name="button_power_off_confirm">OK(終了)</string>
+    <string name="button_ok_select">選択</string>
     <string name="button_cancel">キャンセル</string>
     <string name="button_detail">詳細…</string>
     <string name="button_close">閉じる</string>
@@ -30,6 +31,7 @@
     <string name="media_busy">書き込み中</string>
     <string name="capturing">撮影中</string>
     <string name="receive_error">受信失敗(Evt)</string>
+    <string name="content_not_matched">該当するファイルがありません</string>
     <string name="content_not_found">データがありません</string>
     <string name="content_uninitialized">(未初期化)</string>
     <string name="content_fetching">データ取得中…</string>
@@ -39,6 +41,16 @@
     <string name="get_image_failure">画像読込失敗</string>
     <string name="stored_image_ok">画像を保存しました: </string>
     <string name="stored_image_ng">保存に失敗しました: </string>
+
+    <string name="sort_order_newest">最新から</string>
+    <string name="sort_order_oldest">最古から</string>
+    <string name="file_ext_all">全て</string>
+    <string name="file_ext_other">その他</string>
+    <string name="file_ext_jpeg">JPEG</string>
+    <string name="file_ext_raw">RAW</string>
+    <string name="file_ext_movie">動画</string>
+    <string name="specify_start_date">開始日</string>
+    <string name="specify_end_date">終了日</string>
 
     <string name="label_return_to_liveview_screen">戻る</string>
     <string name="label_switch_connect_camera_automatically">カメラに自動接続</string>

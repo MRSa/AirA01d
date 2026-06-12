@@ -1,5 +1,10 @@
 package jp.osdn.gokigen.aira01d.ui.component.screen.playback
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +16,8 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.FilterListOff
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.HorizontalDivider
@@ -21,9 +28,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,9 +48,10 @@ import jp.osdn.gokigen.aira01d.AppScope
 import jp.osdn.gokigen.aira01d.ui.component.screen.preference.ReturnToMainScreenRow
 import jp.osdn.gokigen.aira01d.ui.model.ContentListViewModel
 import jp.osdn.gokigen.aira01d.R
-import jp.osdn.gokigen.aira01d.ui.component.widget.playback.OmdsColumnView
-import jp.osdn.gokigen.aira01d.ui.component.widget.playback.OmdsScreennailPagerOverlay
-import jp.osdn.gokigen.aira01d.ui.component.widget.playback.OmdsVerticalGridView
+import jp.osdn.gokigen.aira01d.ui.component.widget.playback.FilterChipsRow
+import jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds.OmdsColumnView
+import jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds.OmdsScreennailPagerOverlay
+import jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds.OmdsVerticalGridView
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,7 +65,52 @@ fun ContentListScreenImpl(
     val runMode = viewModel.runMode.observeAsState()
     val contentStatus =viewModel.contentStatus.observeAsState()
     val cameraProtocol = viewModel.cameraProtocol.observeAsState()
-    val fileList = viewModel.fileList
+    val rawFileList = viewModel.fileList
+
+    // --- フィルタ条件の開閉状態
+    var isFilterExpanded by rememberSaveable { mutableStateOf(false) }
+
+    // ----------------------------------------------------
+    // フィルタ条件の状態管理
+    // ----------------------------------------------------
+    var sortOrder by rememberSaveable { mutableStateOf(ContentListViewModel.SortOrder.NEWEST) }
+    var startDate by rememberSaveable { mutableStateOf<Long?>(null) }
+    var endDate by rememberSaveable { mutableStateOf<Long?>(null) }
+    var extensionFilter by rememberSaveable { mutableStateOf(ContentListViewModel.ExtensionFilter.ALL) }
+
+    val filteredFileList by remember(rawFileList, sortOrder, startDate, endDate, extensionFilter) {
+        derivedStateOf {
+            var result = rawFileList
+
+            // --- 拡張子フィルタ
+            if (extensionFilter != ContentListViewModel.ExtensionFilter.ALL) {
+                result = result.filter { extensionFilter.matches(it.fileName) }
+            }
+
+            // --- 日付フィルター
+            val sDate = startDate
+            if (sDate != null) {
+                // UTC 0時 を 日本時間（ローカル時間）の 0時に合わせる補正
+                // ※ 簡易的には UTCタイムスタンプに時差分（9時間）を引く、またはTimeZoneを考慮して比較します
+                val startLocalDate = sDate - java.util.TimeZone.getDefault().getOffset(sDate)
+                result = result.filter { it.dateTime.time >= startLocalDate }
+            }
+            val eDate = endDate
+            if (eDate != null) {
+                // 終了日も同様にローカル時間に補正し、さらに「その日の終わり（+24時間）」までを含める
+                val endLocalDate = eDate - java.util.TimeZone.getDefault().getOffset(eDate)
+                val endOfSelectDay = endLocalDate + 24 * 60 * 60 * 1000L
+                result = result.filter { it.dateTime.time < endOfSelectDay }
+            }
+
+            // --- ソート順
+            result = when (sortOrder) {
+                ContentListViewModel.SortOrder.NEWEST -> result.sortedByDescending { it.dateTime }
+                ContentListViewModel.SortOrder.OLDEST -> result.sortedBy { it.dateTime }
+            }
+            result
+        }
+    }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -103,7 +158,7 @@ fun ContentListScreenImpl(
 
                         // --- 件数の表示
                         Text(
-                            text = "${stringResource(R.string.content_count)}${fileList.size}",
+                            text = "${stringResource(R.string.content_count)}${filteredFileList.size}/${rawFileList.size}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(end = 4.dp)
@@ -134,6 +189,31 @@ fun ContentListScreenImpl(
                             )
                         }
 
+                        // --- フィルター条件が設定済かどうか
+                        val isFilterActive = extensionFilter != ContentListViewModel.ExtensionFilter.ALL ||
+                                startDate != null ||
+                                endDate != null
+
+                        // --- フィルター開閉ボタン
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                isFilterExpanded = !isFilterExpanded // 開閉を反転
+                            },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                // 開閉状態に応じてアイコンを切り替える
+                                imageVector = if (isFilterExpanded) Icons.Default.FilterListOff else Icons.Default.FilterList,
+                                contentDescription = "Toggle filter visibility",
+                                tint = if ((isFilterExpanded)||(isFilterActive)) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+                        }
+
                         // --- コンテンツリロードボタン
                         IconButton(
                             onClick = {
@@ -149,18 +229,40 @@ fun ContentListScreenImpl(
                             )
                         }
                     }
+
+                    AnimatedVisibility(
+                        visible = isFilterExpanded,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        FilterChipsRow(
+                            currentSort = sortOrder,
+                            onSortChange = { sortOrder = it },
+                            currentExt = extensionFilter,
+                            onExtChange = { extensionFilter = it },
+                            startDate = startDate,
+                            onStartDateChange = { startDate = it },
+                            endDate = endDate,
+                            onEndDateChange = { endDate = it }
+                        )
+                    }
+
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
             }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            if (fileList.isEmpty()) {
-                val emptyMessage = when (contentStatus.value) {
-                    ContentListViewModel.ContentLoadingStatus.Uninitialized -> stringResource(R.string.content_uninitialized)
-                    ContentListViewModel.ContentLoadingStatus.ChangingMode -> stringResource(R.string.mode_changing)
-                    ContentListViewModel.ContentLoadingStatus.Fetching -> stringResource(R.string.content_fetching)
-                    else -> stringResource(R.string.content_not_found)
+            if (filteredFileList.isEmpty()) {
+                val emptyMessage = if (rawFileList.isNotEmpty() && filteredFileList.isEmpty()) {
+                    stringResource(R.string.content_not_matched)
+                } else {
+                    when (contentStatus.value) {
+                        ContentListViewModel.ContentLoadingStatus.Uninitialized -> stringResource(R.string.content_uninitialized)
+                        ContentListViewModel.ContentLoadingStatus.ChangingMode -> stringResource(R.string.mode_changing)
+                        ContentListViewModel.ContentLoadingStatus.Fetching -> stringResource(R.string.content_fetching)
+                        else -> stringResource(R.string.content_not_found)
+                    }
                 }
                 // -----
                 Box(
@@ -178,7 +280,7 @@ fun ContentListScreenImpl(
                     // ----- グリッド表示
                     ContentListViewModel.DisplayMode.Grid -> {
                         OmdsVerticalGridView(
-                            fileList = fileList,
+                            fileList = filteredFileList,
                             modifier = Modifier.fillMaxSize().padding(innerPadding),
                             onItemClick = { index ->
                                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -189,7 +291,7 @@ fun ContentListScreenImpl(
                     // ----- リスト表示
                     ContentListViewModel.DisplayMode.List -> {
                         OmdsColumnView(
-                            fileList = fileList,
+                            fileList = filteredFileList,
                             modifier = Modifier.fillMaxSize().padding(innerPadding),
                             onItemClick = { index ->
                                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -203,7 +305,7 @@ fun ContentListScreenImpl(
             // --- Screennail画像 左右スワイプ表示部分 (オーバーレイ) ---
             selectedIndex?.let { index ->
                 OmdsScreennailPagerOverlay(
-                    fileList = fileList,
+                    fileList = filteredFileList,
                     initialIndex = index,
                     cameraProtocol = cameraProtocol.value,
                     onClose = {
