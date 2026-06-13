@@ -161,12 +161,12 @@ class ContentListViewModel(application: Application) : ViewModel()
             try
             {
                 Log.v(TAG, " - - - - - - getAllContentList() called")
-                val sortedResult = withContext(Dispatchers.IO) {
-                    val result = getContentList()
-                    result.sortedByDescending { it.dateTime }  // 日付の新しい順に並べ替え
-                }
+
+                // --- ファイル名の一覧
+                val result = withContext(Dispatchers.IO) { getContentList() }
+
                 // 結果の反映はMainスレッドで
-                fileList = sortedResult
+                fileList = result
                 _contentStatus.postValue(ContentLoadingStatus.Ready)
                 Log.v(TAG, "number of contents : ${fileList.size}")
             }
@@ -221,7 +221,7 @@ class ContentListViewModel(application: Application) : ViewModel()
     }
 
     // 拡張子の定義
-    enum class ExtensionFilter{
+    enum class ExtensionFilter {
         ALL,
         JPEG,
         RAW,
@@ -239,6 +239,17 @@ class ContentListViewModel(application: Application) : ViewModel()
                 OTHER -> ext != "JPG" && ext != "JPEG" && ext != "ORF" && ext != "MOV"
             }
         }
+    }
+
+    enum class GetImageSize {
+        ORIGINAL,
+        WIDTH_640_PX,
+        WIDTH_1024_PX,
+        WIDTH_1280_PX,
+        WIDTH_1600_PX,
+        WIDTH_1920_PX,
+        WIDTH_2048_PX,
+        WIDTH_2560_PX,
     }
 
     companion object {

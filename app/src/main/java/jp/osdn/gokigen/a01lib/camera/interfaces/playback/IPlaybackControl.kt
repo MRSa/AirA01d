@@ -32,13 +32,23 @@ interface IPlaybackControl
     // ----- 画面表示用の画像を取得する -----
     fun getImageScreennail(directory: String): Bitmap?
 
-    // ----- 画像ファイルを取得する -----
+    // ----- 画像ファイルデータを(一括)取得する -----
     fun downloadContent(directory: String, callback: IDownloadContentCallback)
+
+    // ----- 画像ファイルデータをを逐次取得する -----
+    fun downloadContent(directory: String, callback: IContentTransferCallback)
 
     interface IDownloadContentCallback
     {
         fun onCompleted(downloadedContent: ByteArray?)
         fun onErrorOccurred(e: Exception?)
         fun onReceive(readBytes: Int, length: Int, size: Int)
+    }
+
+    interface IContentTransferCallback
+    {
+        fun onCompleted()
+        fun onErrorOccurred(e: Exception?)
+        fun onReceive(readBytes: Int, length: Int, size: Int, data: ByteArray?)
     }
 }

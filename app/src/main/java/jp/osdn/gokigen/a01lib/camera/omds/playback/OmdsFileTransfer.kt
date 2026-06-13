@@ -1,6 +1,7 @@
 package jp.osdn.gokigen.a01lib.camera.omds.playback
 
 import android.util.Log
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl.IContentTransferCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl.IDownloadContentCallback
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient.IReceivedMessageCallback
@@ -71,6 +72,53 @@ class OmdsFileTransfer(
                                 e.printStackTrace()
                             }
 
+                        }
+                    }
+                )
+            }.start()
+        }
+        catch (e: Exception)
+        {
+            Log.e(TAG, "ERR> GET FILE($directory): ${e.localizedMessage}", e)
+        }
+    }
+
+    fun downloadContent(directory: String, callback: IContentTransferCallback)
+    {
+        try
+        {
+            Thread {
+                http.httpGetBytes(
+                    url = executeUrl + directory,
+                    headerMap = headerMap,
+                    contentType = null,
+                    timeoutMs = timeoutMs,
+                    callback = object : IReceivedMessageCallback {
+                        override fun onCompleted() {
+                            // ---- データ受信応答を返す
+                            callback.onCompleted()
+                        }
+
+                        override fun onErrorOccurred(e: Exception?) {
+                            // --- エラー応答を返す
+                            callback.onErrorOccurred(e)
+                        }
+
+                        override fun onReceive(
+                            readBytes: Int,   // 現在までに送信されてきたバイト数
+                            length: Int,      // データの総バイト数
+                            size: Int,        // 今回送ったデータのサイズ
+                            data: ByteArray?  // データボディ
+                        ) {
+                            // --- readBytes (累計) ではなく、今回届いた size が 0 より大きいかで判定する
+                            try
+                            {
+                                callback.onReceive(readBytes, length, size, data)
+                            }
+                            catch (e: Exception)
+                            {
+                                e.printStackTrace()
+                            }
                         }
                     }
                 )

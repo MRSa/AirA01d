@@ -315,6 +315,7 @@ fun ContentListScreenImpl(
             // --- Screennail画像 左右スワイプ表示部分 (オーバーレイ) ---
             selectedIndex?.let { index ->
                 OmdsScreennailPagerOverlay(
+                    viewModel = viewModel,
                     fileList = filteredFileList,
                     initialIndex = index,
                     cameraProtocol = cameraProtocol.value,

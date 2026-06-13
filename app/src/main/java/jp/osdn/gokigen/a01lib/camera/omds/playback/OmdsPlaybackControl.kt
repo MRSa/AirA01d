@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl.IContentTransferCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl.IDownloadContentCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IStillImageFileInfo
 
@@ -98,6 +99,11 @@ class OmdsPlaybackControl(
     }
 
     override fun downloadContent(directory: String, callback: IDownloadContentCallback)
+    {
+        fileTransfer.downloadContent(directory, callback)
+    }
+
+    override fun downloadContent(directory: String, callback: IContentTransferCallback)
     {
         fileTransfer.downloadContent(directory, callback)
     }

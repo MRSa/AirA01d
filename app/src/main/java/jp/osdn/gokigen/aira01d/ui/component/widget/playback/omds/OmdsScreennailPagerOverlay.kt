@@ -1,14 +1,6 @@
 package jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds
 
-import android.content.ContentValues
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.media.MediaScannerConnection
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,13 +21,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,29 +47,32 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.ImageLoader
 import coil3.compose.SubcomposeAsyncImage
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.ImageRequest
-import coil3.request.SuccessResult
-import coil3.request.allowHardware
 import coil3.request.crossfade
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
+import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsFileTransfer
+import jp.osdn.gokigen.a01lib.camera.utils.storage.MediaStoreStreamSaveHelper
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
+import jp.osdn.gokigen.aira01d.ui.model.ContentListViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @Composable
 fun OmdsScreennailPagerOverlay(
+    viewModel: ContentListViewModel,
     fileList: List<ICameraFileInfo.ImageFileInfo>,
     initialIndex: Int,
     cameraProtocol: ICameraConnectionStatus.CameraProtocol?,
@@ -81,7 +82,8 @@ fun OmdsScreennailPagerOverlay(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val baseUrl = AppSingleton.CAMERA_BASE_URL
-    
+    val fileTransfer = remember(baseUrl) { OmdsFileTransfer(executeUrl = baseUrl) }
+
     // Pagerの状態を初期インデックスで初期化
     val pagerState = rememberPagerState(
         initialPage = initialIndex,
@@ -89,6 +91,107 @@ fun OmdsScreennailPagerOverlay(
     )
 
     val scope = rememberCoroutineScope()
+
+    // --- 日付・時刻のフォーマッタのインスタンス
+    val dateFormatter = remember {
+        SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
+    }
+
+    // --- ダウンロードダイアログの状態管理
+    var showDownloadDialog by remember { mutableStateOf(false) }
+    var downloadProgress by remember { mutableFloatStateOf(0.0f) }
+    var downloadStatusText by remember { mutableStateOf("") }
+    var downloadFileName by remember { mutableStateOf("") }
+
+    // --- サイズ選択ダイアログの状態管理
+    var showSizeDialog by remember { mutableStateOf(false) }
+    var sizeOptions by remember { mutableStateOf<List<ContentListViewModel.GetImageSize>>(emptyList()) }
+    var selectedSize by remember { mutableStateOf(ContentListViewModel.GetImageSize.ORIGINAL) }
+
+    // --- カメラプロトコル情報
+    val protocol = viewModel.cameraProtocol.observeAsState()
+
+    // --- ダウンロード処理で使用するメッセージ
+    val downloadMessage = stringResource(R.string.now_downloading)
+    val storeOKMessage = stringResource(R.string.stored_image_ok)
+    val storeNGMessage = stringResource(R.string.stored_image_ng)
+    val storeErrorMessage = stringResource(R.string.stored_image_error)
+
+    // --- ダウンロード処理を関数として抽出
+    val executeDownload: (ICameraFileInfo.ImageFileInfo, ContentListViewModel.GetImageSize) -> Unit = { file, selectedSize ->
+        val storeFileName = createTimestampedFileName(file.fileName)
+
+        showDownloadDialog = true
+        downloadProgress = 0.0f
+        downloadStatusText = downloadMessage
+        downloadFileName = file.fileName
+
+        // --- 選択された画像サイズに応じて、リクエストパスやパラメータを調整する
+        val downloadPath = when (selectedSize) {
+            ContentListViewModel.GetImageSize.WIDTH_640_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=0640"
+            ContentListViewModel.GetImageSize.WIDTH_1024_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1024"
+            ContentListViewModel.GetImageSize.WIDTH_1280_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1280"
+            ContentListViewModel.GetImageSize.WIDTH_1600_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1600"
+            ContentListViewModel.GetImageSize.WIDTH_1920_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1920"
+            ContentListViewModel.GetImageSize.WIDTH_2048_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2048"
+            ContentListViewModel.GetImageSize.WIDTH_2560_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2560"
+            ContentListViewModel.GetImageSize.ORIGINAL -> "${file.directory}/${file.fileName}"
+        }
+
+        val streamSaver = MediaStoreStreamSaveHelper(context, storeFileName)
+        scope.launch(Dispatchers.IO) {
+            val isReady = streamSaver.open()
+            if (!isReady) {
+                withContext(Dispatchers.Main) {
+                    showDownloadDialog = false
+                    downloadFileName = ""
+                    Toast.makeText(context, storeNGMessage, Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
+
+            fileTransfer.downloadContent(
+                directory = downloadPath,
+                callback = object : IPlaybackControl.IContentTransferCallback {
+                    override fun onReceive(readBytes: Int, length: Int, size: Int, data: ByteArray?) {
+                        if (data != null && data.isNotEmpty()) {
+                            streamSaver.write(data)
+                        }
+                        if (length > 0) {
+                            val pct = readBytes.toFloat() / length.toFloat()
+                            downloadProgress = pct
+                        }
+                    }
+
+                    override fun onCompleted() {
+                        streamSaver.close(success = true)
+                        scope.launch(Dispatchers.Main) {
+                            showDownloadDialog = false
+                            downloadFileName = ""
+                            Toast.makeText(
+                                context,
+                                "$storeOKMessage:${file.fileName}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    override fun onErrorOccurred(e: Exception?) {
+                        streamSaver.close(success = false)
+                        scope.launch(Dispatchers.Main) {
+                            showDownloadDialog = false
+                            downloadFileName = ""
+                            Toast.makeText(
+                                context,
+                                "$storeErrorMessage: ${e?.localizedMessage}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            )
+        }
+    }
 
     // 全画面を黒背景のコンテナにする（BackHandlerで戻るボタンにも対応）
     BackHandler(onBack = onClose)
@@ -102,11 +205,11 @@ fun OmdsScreennailPagerOverlay(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
-            pageSpacing = 16.dp // ページ間の余白
+            pageSpacing = 16.dp, // ページ間の余白
+            userScrollEnabled = !showDownloadDialog && !showSizeDialog // ダイアログ表示中はページ変更を禁止する
         ) { page ->
             val file = fileList[page]
-
-            var retryCount by remember { mutableStateOf(0) }
+            var retryCount by remember { mutableIntStateOf(0) }
 
             // スクリーンネイルURL (オープンプラットフォームカメラ仕様書 get_screennail.cgi 参照)
             // 例: http://192.168.0.10/get_screennail.cgi?DIR=/DCIM/100OLYMP/P6230001.JPG
@@ -126,7 +229,6 @@ fun OmdsScreennailPagerOverlay(
                     "$baseUrl/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1024"
                 }
             }
-            Log.v("SCR-URL", screennailBaseUrl)
             // ----- 画像再取得時にはURLに細工を入れてみる
             val screennailUrl = if (retryCount > 0) { "$screennailBaseUrl&retry=$retryCount" } else { screennailBaseUrl }
 
@@ -200,7 +302,49 @@ fun OmdsScreennailPagerOverlay(
             ) {
                 // --- 画像のダウンロードボタン
                 IconButton(
-                    onClick = { /* 既存のダウンロード処理 */ },
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        val currentFile = fileList.getOrNull(pagerState.currentPage)
+                        if (currentFile != null && !showDownloadDialog && !showSizeDialog) {
+                            val lowerName = currentFile.fileName.lowercase()
+
+                            // 拡張子に応じてダイアログの選択肢を切り替える
+                            sizeOptions = if (lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg")) {
+                                if (protocol.value == ICameraConnectionStatus.CameraProtocol.OPC)
+                                {
+                                    // --- OPC機
+                                    listOf(
+                                        ContentListViewModel.GetImageSize.ORIGINAL,
+                                        ContentListViewModel.GetImageSize.WIDTH_640_PX,
+                                        ContentListViewModel.GetImageSize.WIDTH_1024_PX,
+                                        ContentListViewModel.GetImageSize.WIDTH_1280_PX,
+                                        ContentListViewModel.GetImageSize.WIDTH_1600_PX,
+                                        ContentListViewModel.GetImageSize.WIDTH_1920_PX,
+                                        ContentListViewModel.GetImageSize.WIDTH_2048_PX,
+                                        ContentListViewModel.GetImageSize.WIDTH_2560_PX,
+                                    )
+                                }
+                                else {
+                                    // --- OMDS機
+                                    listOf(
+                                        ContentListViewModel.GetImageSize.ORIGINAL,
+                                        ContentListViewModel.GetImageSize.WIDTH_1024_PX,
+                                        ContentListViewModel.GetImageSize.WIDTH_1600_PX,
+                                        ContentListViewModel.GetImageSize.WIDTH_1920_PX,
+                                        ContentListViewModel.GetImageSize.WIDTH_2048_PX,
+                                    )
+                                }
+                            } else {
+                                listOf(ContentListViewModel.GetImageSize.ORIGINAL)
+                            }
+
+                            // デフォルトの選択肢はオリジナルにする
+                            selectedSize = ContentListViewModel.GetImageSize.ORIGINAL
+
+                            // サイズ選択ダイアログを表示
+                            showSizeDialog = true
+                        }
+                    },
                     modifier = Modifier
                         .padding(end = 12.dp)
                         .background(Color.Black.copy(alpha = 0.5f), shape = CircleShape)
@@ -241,9 +385,9 @@ fun OmdsScreennailPagerOverlay(
 
                     // --- 撮影日時
                     val formattedDate = remember(currentFile.dateTime) {
-                        val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
-                        sdf.format(currentFile.dateTime)
+                        dateFormatter.format(currentFile.dateTime)
                     }
+
                     Text(
                         text = formattedDate,
                         color = Color.LightGray,
@@ -267,66 +411,127 @@ fun OmdsScreennailPagerOverlay(
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         )
     }
+
+    // --- ダウンロード開始ダイアログ（取得サイズ選択ダイアログ）
+    if (showSizeDialog)
+    {
+        val currentFile = fileList.getOrNull(pagerState.currentPage)
+        AlertDialog(
+            onDismissRequest = { showSizeDialog = false },
+            title = { Text(text = "${stringResource(R.string.title_now_downloading)} : ${currentFile?.fileName}") },
+            text = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    sizeOptions.forEach { size ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    // ここではダイアログを閉じず、選択状態の変更のみにする
+                                    selectedSize = size
+                                }
+                                .padding(vertical = 12.dp, horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // デフォルトとして指定されている「オリジナル」を太字にするなど視認性を上げる
+                            Text(
+                                text =
+                                    when (size)
+                                    {
+                                        ContentListViewModel.GetImageSize.WIDTH_640_PX -> stringResource(R.string.image_size_640)
+                                        ContentListViewModel.GetImageSize.WIDTH_1024_PX -> stringResource(R.string.image_size_1024)
+                                        ContentListViewModel.GetImageSize.WIDTH_1280_PX -> stringResource(R.string.image_size_1280)
+                                        ContentListViewModel.GetImageSize.WIDTH_1600_PX -> stringResource(R.string.image_size_1600)
+                                        ContentListViewModel.GetImageSize.WIDTH_1920_PX -> stringResource(R.string.image_size_1920)
+                                        ContentListViewModel.GetImageSize.WIDTH_2048_PX -> stringResource(R.string.image_size_2048)
+                                        ContentListViewModel.GetImageSize.WIDTH_2560_PX -> stringResource(R.string.image_size_2560)
+                                        ContentListViewModel.GetImageSize.ORIGINAL -> stringResource(R.string.image_size_original)
+                                    },
+                                style = if (size == selectedSize) {
+                                    // ---- 選択しているアイテムを太字にする
+                                    MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                                } else {
+                                    MaterialTheme.typography.bodyLarge
+                                },
+                                color = if (size == selectedSize) {
+                                    // ---- 選択しているアイテムの色を変える
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSizeDialog = false
+                    if (currentFile != null) {
+                        executeDownload(currentFile, selectedSize)
+                    }
+                }) {
+                    Text(stringResource(R.string.button_ok_start))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSizeDialog = false }) {
+                    Text(stringResource(R.string.button_cancel))
+                }
+            }
+        )
+    }
+
+    if (showDownloadDialog) {
+        AlertDialog(
+            onDismissRequest = {  }, // ダイアログは閉じない
+            title = { Text(text = downloadFileName) },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = downloadStatusText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    // --- 確定進捗バー (0.0 〜 1.0 を渡す)
+                    LinearProgressIndicator(
+                        progress = { downloadProgress },
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // --- パーセンテージのテキスト表示
+                    Text(
+                        text = "${(downloadProgress * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            },
+            // ボタンは配置せず、完了時に自動で閉じる
+            confirmButton = {},
+            dismissButton = {}
+        )
+    }
 }
 
-/**
- * 💡 画像をダウンロードして DCIM/AirA01d に MediaStore 経由で保存する関数
- */
-private suspend fun downloadAndSaveImage(context: Context, url: String, fileName: String): Boolean = withContext(Dispatchers.IO) {
-    try
-    {
-        // --- Coilで画像を取得 ---
-        val imageLoader = ImageLoader(context)
-        val request = ImageRequest.Builder(context).data(url).allowHardware(false).build()
-        val result = imageLoader.execute(request)
-        if (result !is SuccessResult) return@withContext false
-        val bitmap = (result.image as? BitmapDrawable)?.bitmap ?: return@withContext false
+// --- ファイル名に現在のタイムスタンプを付与する関数  例: "R101010.JPG" -> "R101010_20261213123400.JPG"
+private fun createTimestampedFileName(originalFileName: String): String {
+    val dotIndex = originalFileName.lastIndexOf('.')
+    val timestamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
 
-        val resolver = context.contentResolver
-
-        // ----- 保存処理 -----
-        // ----- OSのバージョンによって保存処理を完全に分ける -----
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android 10 (API 29) 以降の保存方法
-            val contentValues = ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-                put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_DCIM}/AirA01d") // Q以降のみ有効
-                put(MediaStore.Images.Media.IS_PENDING, 1)
-            }
-            val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-            val imageUri = resolver.insert(collection, contentValues) ?: return@withContext false
-
-            resolver.openOutputStream(imageUri).use { out ->
-                if (out == null) return@withContext false
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
-            }
-
-            contentValues.clear()
-            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
-            resolver.update(imageUri, contentValues, null, null)
-
-        } else {
-            // ------ Android 7, 8, 9 (API 24〜28) のレガシーな保存方法
-            val dcimDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-            val targetFolder = File(dcimDir, "AirA01d")
-            if (!targetFolder.exists()) targetFolder.mkdirs() // 物理的にフォルダ作成
-
-            val targetFile = File(targetFolder, fileName)
-            FileOutputStream(targetFile).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
-            }
-
-            // ----- 7,8,9はこれを開かないと他のギャラリーアプリに画像が出てこない
-            @Suppress("DEPRECATION")
-            MediaScannerConnection.scanFile(context, arrayOf(targetFile.toString()), null, null)
-        }
-
-        true
-    }
-    catch (e: Exception)
-    {
-        e.printStackTrace()
-        false
+    return if (dotIndex != -1) {
+        // ---拡張子がある場合 (base = R101010, ext = .JPG)
+        val baseName = originalFileName.substring(0, dotIndex)
+        val extension = originalFileName.substring(dotIndex)
+        "${baseName}_$timestamp$extension"
+    } else {
+        // --- 拡張子がない場合
+        "${originalFileName}_$timestamp"
     }
 }
