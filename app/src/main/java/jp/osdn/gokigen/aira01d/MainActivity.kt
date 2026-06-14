@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity()
                 controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
-            // API 29以前の古いデバイス向けで画面を広げる
+            // --- API 29以前の古いデバイス向けで画面を広げる
             @Suppress("DEPRECATION")
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -76,14 +76,21 @@ class MainActivity : ComponentActivity()
         // ----- 画面の常時点灯設定
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // 初期化処理
+        // カメラ制御クラスの初期化処理
         if (savedInstanceState == null) {
-            // ViewModelの初期化 (イベント登録の関係から、CameraControl の方を先に初期化する必要あり...）
+            // --- イベント登録の関係から、CameraControl の方を先に初期化する必要あり...
             AppSingleton.cameraControl.initialize(myLiveviewViewModel)
-            //myLiveviewViewModel.initializeViewModel(applicationContext)
-            //myCameraStatusViewModel.initializeViewModel(applicationContext) // init {} に移行
-            //mySelfTimerViewModel.initializeViewModel()
-            //myPreferenceViewModel.initializeViewModel()
+        }
+
+        // --- イベント受信の登録設定(cameraControlの初期化後に実行する)
+        try
+        {
+            myLiveviewViewModel.subscribeEvents()
+            myCameraStatusViewModel.subscribeEvents()
+        }
+        catch (e: Exception)
+        {
+            Log.w(TAG, "Failed Event Entry... (${e.localizedMessage})")
         }
 
         // 画面群のセットアップ

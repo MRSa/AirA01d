@@ -67,7 +67,7 @@ class OmdsCameraConnectSequence(private val cameraStatusReceiver: ICameraConnect
                     ) ?: ""
                     Log.v(TAG, " $switchOpcCameraModeUrl?mode=standalone ($response3)")
                     if (response3.length > 5) {
-                        Log.v(TAG, " -=-=-=-=-=- DETECTED OPC CAMERA -=-=-=-=-=-")
+                        Log.v(TAG, " -=-=-=-=-=- START OPC EVENT RECEIVE -=-=-=-=-=-")
                         communicationInfo.startReceiveOpcEvent()
                     }
 

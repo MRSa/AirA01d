@@ -64,7 +64,7 @@ fun RecordImageButton(
                     {
                         // ----- 長押し : ボタンに表示するために撮影した画像を取得する
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        liveviewViewModel.getLadtRecordImage()
+                        liveviewViewModel.getLastRecordImage()
                     }
                 }
             ),

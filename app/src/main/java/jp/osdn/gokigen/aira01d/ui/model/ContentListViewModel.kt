@@ -144,6 +144,12 @@ class ContentListViewModel(application: Application) : ViewModel()
                     if (retryCount < 0) { break }
                 }
                 Thread.sleep(150L)
+                if (cameraProtocol == ICameraConnectionStatus.CameraProtocol.OPC)
+                {
+                    // ----- 受信イベントのウォッチを行う
+                    AppSingleton.cameraControl.startEventReceive()
+                }
+                Thread.sleep(150L)
                 AppSingleton.cameraControl.startLiveview()
                 _runMode.postValue(AppSingleton.cameraControl.getCurrentRunMode())
             }

@@ -249,7 +249,6 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     {
         try
         {
-            // ----- TODO： Run mode を加味してライブビューの制御を行う必要があるかも
             if ((cameraConnectionStatus != CameraConnectionStatus.CONNECTED)&&(status == CameraConnectionStatus.CONNECTED))
             {
                 // ----- カメラとの接続ができた... Liveview を開始する
@@ -306,6 +305,8 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
             playbackControl.setUseOpcProtocol(isOpcProtocol)
         }
     }
+
+    override fun startEventReceive() { statusWatcher.startReceiveOpcEvent() }
 
     override fun subscribeEventReceiver(subscriber: ICameraEventNotify)
     {

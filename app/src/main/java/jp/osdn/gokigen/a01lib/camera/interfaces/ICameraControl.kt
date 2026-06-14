@@ -26,6 +26,7 @@ interface ICameraControl
     fun getCurrentRunMode() : String
     fun startLiveview()
     fun stopLiveview()
+    fun startEventReceive()
 
     fun needRotateImage() : Boolean
     fun getCameraStatus() : ICameraStatus?

@@ -28,7 +28,7 @@ fun FocusFrameDrawer(
     focusFrameStatus: LiveviewViewModel.FocusFrameStatus?,
     focusFrameRectangle: RectF?,
     modifier: Modifier = Modifier,
-    strokeWidth: Dp = 4.dp,
+    strokeWidth: Dp = 2.dp,
     bracketLength: Dp = 16.dp,
     centerDotRadius: Dp = 2.dp
 ) {

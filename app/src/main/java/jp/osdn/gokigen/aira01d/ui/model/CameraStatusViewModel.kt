@@ -211,12 +211,8 @@ class CameraStatusViewModel(
             // ----- UIスレッドの初期化なので .value を使用する
             _cameraConnectionStatus.value = AppSingleton.cameraControl.getCameraConnectionStatus()
             _cameraProtocol.value = AppSingleton.cameraControl.getCameraConnectionProtocol()
-            AppSingleton.cameraControl.subscribeCameraConnectionStatus(this)
-            AppSingleton.cameraControl.subscribeEventReceiver(this)
-            AppSingleton.cameraControl.subscribeCameraStatus(this)
 
             cameraStatus = AppSingleton.cameraControl.getCameraStatus()
-
 
             _isConnectError.value = false
             _isCaptureActivated.value = false
@@ -252,6 +248,14 @@ class CameraStatusViewModel(
         {
             e.printStackTrace()
         }
+    }
+
+    fun subscribeEvents()
+    {
+        // ----- イベント受信を設定する
+        AppSingleton.cameraControl.subscribeCameraConnectionStatus(this)
+        AppSingleton.cameraControl.subscribeEventReceiver(this)
+        AppSingleton.cameraControl.subscribeCameraStatus(this)
     }
 
     override fun onStatusNotify(status: CameraConnectionStatus)

@@ -78,6 +78,7 @@
       <w>propname</w>
       <w>pushevent</w>
       <w>pwoff</w>
+      <w>receivedopcevent</w>
       <w>recview</w>
       <w>releaseaelock</w>
       <w>releaseafframe</w>

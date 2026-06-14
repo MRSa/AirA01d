@@ -42,9 +42,10 @@ class OpcPushEventWatcher(
 
     fun eventReceiverThread(portNumber: Int)
     {
+        //Log.v(TAG, ":::::::::: eventReceiverThread(portNumber = $portNumber)")
         if (whileEventReceive)
         {
-            Log.v(TAG, "startReceiveStream() : already starting.")
+            Log.v(TAG, "eventReceiverThread() : already starting.")
             return
         }
         try

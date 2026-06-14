@@ -1,7 +1,6 @@
 package jp.osdn.gokigen.aira01d.ui.model
 
 import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -17,7 +16,6 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraEventNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
 import jp.osdn.gokigen.aira01d.AppSingleton
-import jp.osdn.gokigen.aira01d.preference.PreferenceRepository
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,16 +53,10 @@ class LiveviewViewModel(application: Application): ViewModel(), IImageDataReceiv
     private val _focusFrameRectangle: MutableLiveData<RectF> by lazy { MutableLiveData<RectF>() }
     val focusFrameRectangle : LiveData<RectF> = _focusFrameRectangle
 
-    //private val _consecutiveErrorCount = MutableLiveData<Int>()
-    //val consecutiveErrorCount: LiveData<Int> = _consecutiveErrorCount
-
     init {
         try
         {
-            // ----- イベント受信を設定する
-            AppSingleton.cameraControl.subscribeEventReceiver(this)
-
-            // バックグラウンドスレッドでデコード処理を実行
+            // ----- バックグラウンドスレッドでデコード処理を実行
             viewModelScope.launch(Dispatchers.Default) {
                 val options = BitmapFactory.Options().apply {
                     inMutable = true
@@ -96,18 +88,25 @@ class LiveviewViewModel(application: Application): ViewModel(), IImageDataReceiv
                     _lastCapturedImage.value = lastImageBitmap
                 }
             }
+
+            // ----- データの初期化
             _receiveCount.postValue(0)
             _isMirrorMode.postValue(false)
             _isLvActivated.postValue(false)
             _isGridOn.postValue(false)
             _isShowFocusFrame.postValue(false)
-            //_consecutiveErrorCount.postValue(0)
             _focusFrameStatus.postValue(FocusFrameStatus.None)
         }
         catch (t: Throwable)
         {
             t.printStackTrace()
         }
+    }
+
+    fun subscribeEvents()
+    {
+        // ----- イベント受信を設定する
+        AppSingleton.cameraControl.subscribeEventReceiver(this)
     }
 
     // ----- ライブビューが動作中かどうか
@@ -275,7 +274,7 @@ class LiveviewViewModel(application: Application): ViewModel(), IImageDataReceiv
         val event = (eventMessage[1].toInt() and 0xFF).toByte() // eventMessage[1]
         val length = ((eventMessage[2].toInt() and 0xFF) shl 8) or (eventMessage[3].toInt() and 0xFF)
         val dataBody = String(eventMessage, 4, eventMessage.size - 4, Charsets.UTF_8)
-        // Log.v(TAG, "receivedCameraEvent(LiveviewViewModel) : $appId [evt:$event] len:$length  $dataBody ")
+        //Log.v(TAG, "receivedCameraEvent(LiveviewViewModel) : $appId [evt:$event] len:$length  $dataBody ")
 
         when (checkCameraEvent(appId, event, length))
         {
@@ -294,7 +293,7 @@ class LiveviewViewModel(application: Application): ViewModel(), IImageDataReceiv
         //_consecutiveErrorCount.postValue(count)
     }
 
-    fun getLadtRecordImage()
+    fun getLastRecordImage()
     {
         getLastCapturedImage()
     }
