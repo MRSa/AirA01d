@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +37,7 @@ fun RecordImageButton(
 ) {
     val haptic = LocalHapticFeedback.current
     val bitmap by liveviewViewModel.lastCapturedImage.collectAsStateWithLifecycle()
+    val isLvActivated = liveviewViewModel.isLvActivated.observeAsState()
 
     val imageBitmap = bitmap?.asImageBitmap()
     val iconId = R.drawable.outline_image_24
@@ -47,13 +49,23 @@ fun RecordImageButton(
             .clip(CircleShape) // 独自のリップルエフェクトの形を定義
             .combinedClickable(
                 onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress) // 例
-                    // 通常クリックの処理  (撮影一覧画面へ遷移する)
+                    if (isLvActivated.value == true)
+                    {
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        // 通常クリックの処理  (撮影画像一覧画面へ遷移する)
+                        navController.navigate("ContentListScreen") {
+                            // ボタン連打による画面の重複スタックを防止
+                            launchSingleTop = true
+                        }
+                    }
                 },
                 onLongClick = {
-                    // ----- 長押し :
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    liveviewViewModel.getLadtRecordImage()
+                    if (isLvActivated.value == true)
+                    {
+                        // ----- 長押し : ボタンに表示するために撮影した画像を取得する
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        liveviewViewModel.getLastRecordImage()
+                    }
                 }
             ),
         contentAlignment = Alignment.Center

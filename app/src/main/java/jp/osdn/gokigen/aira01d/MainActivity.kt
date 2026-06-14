@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import jp.osdn.gokigen.aira01d.ui.component.ViewRootComponent
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
+import jp.osdn.gokigen.aira01d.ui.model.ContentListViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 import jp.osdn.gokigen.aira01d.ui.model.PreferenceViewModel
 import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
@@ -26,10 +27,12 @@ import jp.osdn.gokigen.aira01d.ui.theme.AirA01dTheme
 
 class MainActivity : ComponentActivity()
 {
-    private val myLiveviewViewModel: LiveviewViewModel by viewModels()
+    // ----- ビューモデルの生成
+    private val myLiveviewViewModel: LiveviewViewModel by viewModels() { LiveviewViewModel.Factory }
     private val myCameraStatusViewModel: CameraStatusViewModel by viewModels { CameraStatusViewModel.Factory }
     private val mySelfTimerViewModel: SelfTimerViewModel by viewModels()
     private val myPreferenceViewModel: PreferenceViewModel by viewModels { PreferenceViewModel.Factory }
+    private val myContentListViewModel: ContentListViewModel by viewModels { ContentListViewModel.Factory }
 
     // 権限リクエストのランチャーは、onCreateの直下（またはプロパティ初期化時）で登録する
     private val requestPermissionLauncher = registerForActivityResult(
@@ -61,7 +64,7 @@ class MainActivity : ComponentActivity()
                 controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
-            // API 29以前の古いデバイス向けで画面を広げる
+            // --- API 29以前の古いデバイス向けで画面を広げる
             @Suppress("DEPRECATION")
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -73,19 +76,31 @@ class MainActivity : ComponentActivity()
         // ----- 画面の常時点灯設定
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // 初期化処理
+        // カメラ制御クラスの初期化処理
         if (savedInstanceState == null) {
-            // ViewModelの初期化 (イベント登録の関係から、CameraControl の方を先に初期化する必要あり...）
+            // --- イベント登録の関係から、CameraControl の方を先に初期化する必要あり...
             AppSingleton.cameraControl.initialize(myLiveviewViewModel)
-            myLiveviewViewModel.initializeViewModel(applicationContext)
-            //myCameraStatusViewModel.initializeViewModel(applicationContext) // init {} に移行
-            //mySelfTimerViewModel.initializeViewModel()
-            //myPreferenceViewModel.initializeViewModel()
         }
 
-        // Composeのセットアップ
+        // --- イベント受信の登録設定(cameraControlの初期化後に実行する)
+        try
+        {
+            myLiveviewViewModel.subscribeEvents()
+            myCameraStatusViewModel.subscribeEvents()
+        }
+        catch (e: Exception)
+        {
+            Log.w(TAG, "Failed Event Entry... (${e.localizedMessage})")
+        }
+
+        // 画面群のセットアップ
         val rootComponent = ViewRootComponent(applicationContext)
-        rootComponent.setViewModels(myLiveviewViewModel, myCameraStatusViewModel, mySelfTimerViewModel, myPreferenceViewModel)
+        rootComponent.setViewModels(
+            liveViewModel = myLiveviewViewModel,
+            cameraStatusViewModel = myCameraStatusViewModel,
+            selfTimerViewModel = mySelfTimerViewModel,
+            preferenceViewModel = myPreferenceViewModel,
+            contentListViewModel = myContentListViewModel)
 
         setContent {
             AirA01dTheme {
@@ -99,12 +114,12 @@ class MainActivity : ComponentActivity()
 
     private fun checkAndRequestPermissions() {
         if (!allPermissionsGranted()) {
-            requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
+            requestPermissionLauncher.launch(getRequiredPermissions())
         }
     }
 
     private fun allPermissionsGranted(): Boolean {
-        return REQUIRED_PERMISSIONS.all { permission ->
+        return getRequiredPermissions().all { permission ->
             // ----- Android 17 (Cinnamon Bun / SDK 37) 以降の特定権限チェックにも対応
             if (permission == Manifest.permission.ACCESS_LOCAL_NETWORK && Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN) {
                 true
@@ -142,12 +157,21 @@ class MainActivity : ComponentActivity()
     companion object
     {
         private val TAG = MainActivity::class.java.simpleName
-        private val REQUIRED_PERMISSIONS = arrayOf(
+        private val BASE_PERMISSIONS = arrayOf(
             Manifest.permission.VIBRATE,
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_NETWORK_STATE,
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.ACCESS_LOCAL_NETWORK,
         )
+        private fun getRequiredPermissions(): Array<String> {
+            return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                // Android 9 (Pie / API 28) 以前の場合のみ、ストレージ書き込み権限を追加する
+                BASE_PERMISSIONS + Manifest.permission.WRITE_EXTERNAL_STORAGE
+            } else {
+                // Android 10 (Q / API 29) 以降は既存の権限のみ
+                BASE_PERMISSIONS
+            }
+        }
     }
 }

@@ -14,9 +14,9 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraLiveviewMagnify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.IDigitalZoomControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.IGetRecordImage
-import jp.osdn.gokigen.a01lib.camera.interfaces.IOperationCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.IZoomLensControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
 import jp.osdn.gokigen.a01lib.camera.omds.connection.OmdsCameraConnection
 import jp.osdn.gokigen.a01lib.camera.omds.liveview.OmdsLiveViewControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsCamIndStatus
@@ -32,6 +32,7 @@ import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsPostCommand
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsRunModeControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsTimeSync
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsZoomLensControl
+import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsPlaybackControl
 import jp.osdn.gokigen.a01lib.camera.omds.status.OmdsCameraStatusWatcher
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsCaptureControl
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsFocusControl
@@ -61,6 +62,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     private lateinit var liveviewMagnify: OmdsOpcLiveviewMagnifyControl
     private lateinit var zoomLensControl: OmdsZoomLensControl
     private lateinit var digitalZoomControl: OmdsDigitalZoomControl
+    private lateinit var playbackControl: OmdsPlaybackControl
 
     private var isInitialized  = false
     private var cameraProtocol: ICameraConnectionStatus.CameraProtocol = ICameraConnectionStatus.CameraProtocol.OPC
@@ -87,6 +89,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
                 this.liveviewMagnify = OmdsOpcLiveviewMagnifyControl()
                 this.zoomLensControl = OmdsZoomLensControl()
                 this.digitalZoomControl = OmdsDigitalZoomControl()
+                this.playbackControl = OmdsPlaybackControl()
                 this.subscriberList.clear()
                 this.connectionStatusReceiverList.clear()
 
@@ -157,24 +160,42 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         }
     }
 
+    override fun getCameraProtocol(): ICameraConnectionStatus.CameraProtocol { return cameraProtocol }
+
     override fun getCameraConnectionStatus() : CameraConnectionStatus { return cameraConnectionStatus }
 
-    override fun changeRunMode(runMode: String, callback: IOperationCallback)
+    override fun changeRunMode(runMode: String): Boolean
     {
         try
         {
             if (::runModeControl.isInitialized)
             {
-                runModeControl.changeRunMode(runMode, callback)
-                return
+                // runMode: rec, play, shutter, standalone, maintenance, playmaintenance , playstream, unknown
+                return runModeControl.changeRunMode(runMode)
             }
         }
         catch (e: Exception)
         {
             e.printStackTrace()
         }
-        callback.operationResult(false, "ERROR")
+        return false
     }
+
+    override fun getCurrentRunMode(): String
+    {
+        try {
+            if (::runModeControl.isInitialized) {
+                // runMode: rec, play, shutter, standalone, maintenance, playmaintenance , playstream, unknown
+                return runModeControl.getRunMode()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "ERR>get run mode failure ${e.localizedMessage}")
+        }
+        return "unknown"
+    }
+
+    override fun startLiveview() { liveviewControl.startLiveView() }
+    override fun stopLiveview() { liveviewControl.stopLiveView() }
 
     override fun subscribeCameraConnectionStatus(receiver: ICameraConnectionStatus)
     {
@@ -222,11 +243,12 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
 
     override fun getCameraConnectionProtocol(): ICameraConnectionStatus.CameraProtocol { return cameraProtocol }
 
+    override fun getCameraPlaybackControl(): IPlaybackControl { return  playbackControl }
+
     override fun onStatusNotify(status: CameraConnectionStatus)
     {
         try
         {
-            // ----- TODO： Run mode を加味してライブビューの制御を行う必要があるかも
             if ((cameraConnectionStatus != CameraConnectionStatus.CONNECTED)&&(status == CameraConnectionStatus.CONNECTED))
             {
                 // ----- カメラとの接続ができた... Liveview を開始する
@@ -280,8 +302,11 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
             liveviewMagnify.setUseOpcProtocol(isOpcProtocol)
             zoomLensControl.setUseOpcProtocol(isOpcProtocol)
             digitalZoomControl.setUseOpcProtocol(isOpcProtocol)
+            playbackControl.setUseOpcProtocol(isOpcProtocol)
         }
     }
+
+    override fun startEventReceive() { statusWatcher.startReceiveOpcEvent() }
 
     override fun subscribeEventReceiver(subscriber: ICameraEventNotify)
     {
@@ -321,7 +346,6 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
     {
         try
         {
-            //Log.v(TAG, "receivedCameraEvent() [subscriber: ${subscriberList.size}]")
             subscriberList.forEach { subscriber ->
                 try
                 {
@@ -336,7 +360,6 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         catch (e: Exception)
         {
             Log.e(TAG, "ERR>receivedOpcEvent(): ${e.localizedMessage}")
-            //e.printStackTrace()
         }
     }
 
@@ -345,7 +368,6 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         // ----- イベント(Polling)のエラー発生回数を受信する
         try
         {
-            //Log.v(TAG, "updateConsecutiveErrorCount() [subscriber: ${subscriberList.size}]")
             subscriberList.forEach { subscriber ->
                 try
                 {
@@ -360,7 +382,6 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         catch (e: Exception)
         {
             Log.e(TAG, "ERR>updateConsecutiveErrorCount($count): ${e.localizedMessage}")
-            //e.printStackTrace()
         }
     }
 

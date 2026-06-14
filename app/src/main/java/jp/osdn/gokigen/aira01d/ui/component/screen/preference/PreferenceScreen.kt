@@ -1,4 +1,4 @@
-package jp.osdn.gokigen.aira01d.ui.component.screen
+package jp.osdn.gokigen.aira01d.ui.component.screen.preference
 
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -141,12 +141,12 @@ fun PreferenceScreenMain(
 }
 
 @Composable
-fun ReturnToMainScreenRow(onBackClick: () -> Unit) {
+fun ReturnToMainScreenRow(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onBackClick, onClickLabel = "Return to main screen")
-            .padding(16.dp),
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

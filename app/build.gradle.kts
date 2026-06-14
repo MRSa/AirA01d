@@ -16,8 +16,8 @@ android {
         applicationId = "jp.osdn.gokigen.aira01d"
         minSdk = 24
         targetSdk = 37
-        versionCode = 100101
-        versionName = "1.1.1"
+        versionCode = 100500
+        versionName = "1.5.0"
     }
 
     buildTypes {
@@ -61,4 +61,6 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.tools.core)
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }

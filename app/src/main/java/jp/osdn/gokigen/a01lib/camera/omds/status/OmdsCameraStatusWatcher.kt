@@ -6,6 +6,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatus.CameraProperty
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusUpdateNotify
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraStatusWatcher
 import jp.osdn.gokigen.a01lib.camera.omds.liveview.ILiveviewRtpHeaderReceiver
+import jp.osdn.gokigen.aira01d.AppSingleton
 import kotlin.Exception
 
 class OmdsCameraStatusWatcher(
@@ -130,26 +131,35 @@ class OmdsCameraStatusWatcher(
                 while (isWatchingEvent)
                 {
                     val waitTimeMs = ((consecutiveErrorCount * SLEEP_EVENT_TIME_MS) * 0.25).toInt()
-                    // ----- EVENT POLLING
-                    val result = if (!useOpcProtocol)
+                    val runMode = (AppSingleton.cameraControl.getCurrentRunMode()).lowercase()
+                    if (!runMode.contains("play"))
                     {
-                        omdsEventWatcher.watchOmdsStatus(waitTimeMs)
+                        // ----- EVENT POLLING (playモード以外...)
+                        val result = if (!useOpcProtocol) {
+                            omdsEventWatcher.watchOmdsStatus(waitTimeMs)
+                        } else {
+                            opcEventWatcher.watchOpcStatus(waitTimeMs)
+                        }
+                        // ----- 連続エラーカウントの更新
+                        if (result) {
+                            consecutiveErrorCount = 0
+                        } else {
+                            consecutiveErrorCount++
+                            Log.w(TAG, "RECV ERR : $consecutiveErrorCount")
+                        }
+                        statusWatcherStatusReceiver?.updateConsecutiveErrorCount(
+                            consecutiveErrorCount
+                        )
                     }
                     else
                     {
-                        opcEventWatcher.watchOpcStatus(waitTimeMs)
+                        // ----- 再生モードの時は、イベントポーリングは実行しない
+                        if (consecutiveErrorCount != 0)
+                        {
+                            // ----- 連続エラー発生中の時は、（見かけ上）連続エラー発生中の表示を消す
+                            statusWatcherStatusReceiver?.updateConsecutiveErrorCount(0)
+                        }
                     }
-                    // ----- 連続エラーカウントの更新
-                    if (result)
-                    {
-                        consecutiveErrorCount = 0
-                    }
-                    else
-                    {
-                        consecutiveErrorCount++
-                        Log.w(TAG, "RECV ERR : $consecutiveErrorCount")
-                    }
-                    statusWatcherStatusReceiver?.updateConsecutiveErrorCount(consecutiveErrorCount)
                     Thread.sleep(SLEEP_EVENT_TIME_MS + (consecutiveErrorCount * SLEEP_EVENT_TIME_MS * 0.25).toInt())
                 }
             }

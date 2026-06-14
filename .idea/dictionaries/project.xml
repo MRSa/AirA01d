@@ -2,6 +2,9 @@
   <dictionary name="project">
     <words>
       <w>Levelvial</w>
+      <w>Telecon</w>
+      <w>Thhmm</w>
+      <w>aira</w>
       <w>artfilter</w>
       <w>assignafframe</w>
       <w>cameramode</w>
@@ -19,6 +22,8 @@
       <w>connectmode</w>
       <w>ctrldigizoom</w>
       <w>ctrlzoom</w>
+      <w>customwbbias</w>
+      <w>dcim</w>
       <w>denkyu</w>
       <w>desclist</w>
       <w>digizoomscope</w>
@@ -35,8 +40,11 @@
       <w>getlist</w>
       <w>getrecview</w>
       <w>highkey</w>
+      <w>imageinfo</w>
+      <w>imagelist</w>
       <w>imagesize</w>
       <w>imagingstate</w>
+      <w>imglist</w>
       <w>isospeedvalue</w>
       <w>lensmountstatus</w>
       <w>locationinfo</w>
@@ -44,8 +52,10 @@
       <w>lvqty</w>
       <w>lvscale</w>
       <w>macrosetting</w>
+      <w>miniatureverticl</w>
       <w>monotonecolor</w>
       <w>monotonefilter</w>
+      <w>movfileinfo</w>
       <w>newassignafframe</w>
       <w>newctrldigizoom</w>
       <w>newctrlzoom</w>
@@ -60,14 +70,21 @@
       <w>newstopmovietake</w>
       <w>newstoptake</w>
       <w>partcolor</w>
+      <w>photostorydevidenumaspectratio</w>
+      <w>playmaintenance</w>
+      <w>playstream</w>
       <w>popart</w>
       <w>proplist</w>
       <w>propname</w>
       <w>pushevent</w>
       <w>pwoff</w>
+      <w>receivedopcevent</w>
       <w>recview</w>
       <w>releaseaelock</w>
       <w>releaseafframe</w>
+      <w>requestopceventwatch</w>
+      <w>resizeimage</w>
+      <w>resizeimg</w>
       <w>shutspeedvalue</w>
       <w>startliveview</w>
       <w>startmovietake</w>
@@ -84,10 +101,14 @@
       <w>teleterm</w>
       <w>upperlimit</w>
       <w>utctimediff</w>
+      <w>wbautolightbulbcolorleaving</w>
+      <w>wbbiasa</w>
+      <w>wbbiasg</w>
       <w>wbvalue</w>
       <w>widefocallength</w>
       <w>widemove</w>
       <w>wideterm</w>
+      <w>カメラのベースurl</w>
     </words>
   </dictionary>
 </component>

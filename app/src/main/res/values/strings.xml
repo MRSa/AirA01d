@@ -6,6 +6,8 @@
     <string name="dialog_title_confirm_power_off">Exit Application</string>
     <string name="dialog_message_power_off">Turn off the camera and exit the application.</string>
     <string name="button_power_off_confirm">OK(Exit)</string>
+    <string name="button_ok_select">OK</string>
+    <string name="button_ok_start">Start</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_detail">Detail…</string>
     <string name="button_close">Close</string>
@@ -30,6 +32,41 @@
     <string name="media_busy">Media Busy</string>
     <string name="capturing">Capturing…</string>
     <string name="receive_error">Recv.Err(Evt)</string>
+    <string name="content_not_matched">No matching files found</string>
+    <string name="content_not_found">No data</string>
+    <string name="content_uninitialized">Uninitialized</string>
+    <string name="content_fetching">Now Fetching…</string>
+    <string name="mode_changing">Mode changing…</string>
+    <string name="content_count">Count: </string>
+    <string name="tap_to_retry">Tap to retry</string>
+    <string name="get_image_failure">Image loading failed.</string>
+    <string name="stored_image_ok">Image stored: </string>
+    <string name="stored_image_ng">Failed to get image: </string>
+    <string name="stored_image_empty">Data is nothing…</string>
+    <string name="stored_image_error">Error… </string>
+
+    <string name="sort_order_newest">Newest</string>
+    <string name="sort_order_oldest">Oldest</string>
+    <string name="file_ext_all">All</string>
+    <string name="file_ext_other">Other</string>
+    <string name="file_ext_jpeg">JPEG</string>
+    <string name="file_ext_raw">RAW</string>
+    <string name="file_ext_movie">Movie</string>
+    <string name="specify_start_date">Start Date</string>
+    <string name="specify_end_date">End Date</string>
+
+    <string name="title_now_downloading">Download</string>
+    <string name="now_downloading">Downloading…</string>
+    <string name="now_saving">Saving…</string>
+
+    <string name="image_size_original">Original</string>
+    <string name="image_size_640">w:640px</string>
+    <string name="image_size_1024">w:1024px</string>
+    <string name="image_size_1280">w:1280px</string>
+    <string name="image_size_1600">w:1600px</string>
+    <string name="image_size_1920">w:1920px</string>
+    <string name="image_size_2048">w:2048px</string>
+    <string name="image_size_2560">w:2560px</string>
 
     <string name="label_return_to_liveview_screen">Back</string>
     <string name="label_switch_connect_camera_automatically">Auto-connect to Camera</string>

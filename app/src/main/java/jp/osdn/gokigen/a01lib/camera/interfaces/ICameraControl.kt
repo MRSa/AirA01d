@@ -2,6 +2,7 @@ package jp.osdn.gokigen.a01lib.camera.interfaces
 
 import android.content.Context
 import jp.osdn.gokigen.a01lib.camera.interfaces.liveview.IImageDataReceiver
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
 
 interface ICameraControl
 {
@@ -11,6 +12,7 @@ interface ICameraControl
     fun disconnectFromCamera()
     fun startCamera(context: Context)
     fun finishCamera(isPowerOff: Boolean)
+    fun getCameraProtocol(): ICameraConnectionStatus.CameraProtocol
 
     fun getCameraConnectionStatus(): ICameraConnectionStatus.CameraConnectionStatus
     fun subscribeCameraConnectionStatus(receiver: ICameraConnectionStatus)
@@ -20,7 +22,11 @@ interface ICameraControl
     fun subscribeCameraStatus(subscriber: ICameraStatusUpdateNotify)
     fun unsubscribeCameraStatus(subscriber: ICameraStatusUpdateNotify)
 
-    fun changeRunMode(runMode: String, callback: IOperationCallback)
+    fun changeRunMode(runMode: String) : Boolean
+    fun getCurrentRunMode() : String
+    fun startLiveview()
+    fun stopLiveview()
+    fun startEventReceive()
 
     fun needRotateImage() : Boolean
     fun getCameraStatus() : ICameraStatus?
@@ -32,4 +38,6 @@ interface ICameraControl
     fun getDigitalZoomControl() : IDigitalZoomControl?
     fun getCameraHardwareInformation() : ICameraHardwareInformation
     fun getCameraConnectionProtocol() : ICameraConnectionStatus.CameraProtocol
+
+    fun getCameraPlaybackControl() : IPlaybackControl
 }
