@@ -416,11 +416,6 @@ class LiveviewViewModel(application: Application): ViewModel(), IImageDataReceiv
         Running, Focused, Failed, Errored, None
     }
 
-    // --- 撮影状態
-    enum class ShootingStatus {
-        Unknown, Starting, Started, Stopping, Stopped
-    }
-
     companion object
     {
         private val TAG = LiveviewViewModel::class.java.simpleName
