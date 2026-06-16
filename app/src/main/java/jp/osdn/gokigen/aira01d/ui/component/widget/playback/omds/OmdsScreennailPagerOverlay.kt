@@ -1,6 +1,5 @@
 package jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,11 +35,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,17 +58,10 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
-import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
-import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsFileTransfer
-import jp.osdn.gokigen.a01lib.camera.utils.storage.MediaStoreStreamSaveHelper
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.ContentListViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -86,7 +76,6 @@ fun OmdsScreennailPagerOverlay(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val baseUrl = AppSingleton.CAMERA_BASE_URL
-    val fileTransfer = remember(baseUrl) { OmdsFileTransfer(executeUrl = baseUrl) }
 
     // Pagerの状態を初期インデックスで初期化
     val pagerState = rememberPagerState(
@@ -94,18 +83,11 @@ fun OmdsScreennailPagerOverlay(
         pageCount = { fileList.size }
     )
 
-    val scope = rememberCoroutineScope()
-
     // --- 日付・時刻のフォーマッタのインスタンス
     val dateFormatter = remember {
         SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
     }
 
-    // --- ダウンロードダイアログの状態管理
-    var showDownloadDialog by remember { mutableStateOf(false) }
-    var downloadProgress by remember { mutableFloatStateOf(0.0f) }
-    var downloadStatusText by remember { mutableStateOf("") }
-    var downloadFileName by remember { mutableStateOf("") }
 
     // --- サイズ選択ダイアログの状態管理
     var showSizeDialog by remember { mutableStateOf(false) }
@@ -121,82 +103,6 @@ fun OmdsScreennailPagerOverlay(
     val storeNGMessage = stringResource(R.string.stored_image_ng)
     val storeErrorMessage = stringResource(R.string.stored_image_error)
 
-    // --- ダウンロード処理を関数として抽出
-    val executeDownload: (ICameraFileInfo.ImageFileInfo, ContentListViewModel.GetImageSize) -> Unit = { file, selectedSize ->
-        val storeFileName = createTimestampedFileName(file.fileName)
-
-        showDownloadDialog = true
-        downloadProgress = 0.0f
-        downloadStatusText = downloadMessage
-        downloadFileName = file.fileName
-
-        // --- 選択された画像サイズに応じて、リクエストパスやパラメータを調整する
-        val downloadPath = when (selectedSize) {
-            ContentListViewModel.GetImageSize.WIDTH_640_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=0640"
-            ContentListViewModel.GetImageSize.WIDTH_1024_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1024"
-            ContentListViewModel.GetImageSize.WIDTH_1280_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1280"
-            ContentListViewModel.GetImageSize.WIDTH_1600_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1600"
-            ContentListViewModel.GetImageSize.WIDTH_1920_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1920"
-            ContentListViewModel.GetImageSize.WIDTH_2048_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2048"
-            ContentListViewModel.GetImageSize.WIDTH_2560_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2560"
-            ContentListViewModel.GetImageSize.ORIGINAL -> "${file.directory}/${file.fileName}"
-        }
-
-        val streamSaver = MediaStoreStreamSaveHelper(context, storeFileName)
-        scope.launch(Dispatchers.IO) {
-            val isReady = streamSaver.open()
-            if (!isReady) {
-                withContext(Dispatchers.Main) {
-                    showDownloadDialog = false
-                    downloadFileName = ""
-                    Toast.makeText(context, storeNGMessage, Toast.LENGTH_SHORT).show()
-                }
-                return@launch
-            }
-
-            fileTransfer.downloadContent(
-                directory = downloadPath,
-                callback = object : IPlaybackControl.IContentTransferCallback {
-                    override fun onReceive(readBytes: Int, length: Int, size: Int, data: ByteArray?) {
-                        if (data != null && data.isNotEmpty()) {
-                            streamSaver.write(data)
-                        }
-                        if (length > 0) {
-                            val pct = readBytes.toFloat() / length.toFloat()
-                            downloadProgress = pct
-                        }
-                    }
-
-                    override fun onCompleted() {
-                        streamSaver.close(success = true)
-                        scope.launch(Dispatchers.Main) {
-                            showDownloadDialog = false
-                            downloadFileName = ""
-                            Toast.makeText(
-                                context,
-                                "$storeOKMessage:${file.fileName}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-
-                    override fun onErrorOccurred(e: Exception?) {
-                        streamSaver.close(success = false)
-                        scope.launch(Dispatchers.Main) {
-                            showDownloadDialog = false
-                            downloadFileName = ""
-                            Toast.makeText(
-                                context,
-                                "$storeErrorMessage: ${e?.localizedMessage}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                }
-            )
-        }
-    }
-
     // 全画面を黒背景のコンテナにする（BackHandlerで戻るボタンにも対応）
     BackHandler(onBack = onClose)
 
@@ -210,7 +116,7 @@ fun OmdsScreennailPagerOverlay(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
             pageSpacing = 16.dp, // ページ間の余白
-            userScrollEnabled = !showDownloadDialog && !showSizeDialog // ダイアログ表示中はページ変更を禁止する
+            userScrollEnabled = !viewModel.isDownloading && !showSizeDialog // ダイアログ表示中はページ変更を禁止する
         ) { page ->
             val file = fileList[page]
             var retryCount by remember { mutableIntStateOf(0) }
@@ -309,7 +215,7 @@ fun OmdsScreennailPagerOverlay(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                         val currentFile = fileList.getOrNull(pagerState.currentPage)
-                        if (currentFile != null && !showDownloadDialog && !showSizeDialog) {
+                        if (currentFile != null && !viewModel.isDownloading && !showSizeDialog) {
                             val lowerName = currentFile.fileName.lowercase()
 
                             // 拡張子に応じてダイアログの選択肢を切り替える
@@ -480,7 +386,16 @@ fun OmdsScreennailPagerOverlay(
                 TextButton(onClick = {
                     showSizeDialog = false
                     if (currentFile != null) {
-                        executeDownload(currentFile, selectedSize)
+                        // ----- ViewModel の関数を呼び出す
+                        viewModel.executeDownload(
+                            context = context,
+                            file = currentFile,
+                            selectedSize = selectedSize,
+                            downloadMessage = downloadMessage,
+                            storeOKMessage = storeOKMessage,
+                            storeNGMessage = storeNGMessage,
+                            storeErrorMessage = storeErrorMessage
+                        )
                     }
                 }) {
                     Text(stringResource(R.string.button_ok_start))
@@ -494,24 +409,23 @@ fun OmdsScreennailPagerOverlay(
         )
     }
 
-    if (showDownloadDialog) {
+    if (viewModel.isDownloading) {
         AlertDialog(
-            onDismissRequest = {  }, // ダイアログは閉じない
-            title = { Text(text = downloadFileName) },
+            onDismissRequest = { },
+            title = { Text(text = viewModel.downloadFileName) },
             text = {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = downloadStatusText,
+                        text = viewModel.downloadStatusText,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // --- 確定進捗バー (0.0 〜 1.0 を渡す)
                     LinearProgressIndicator(
-                        progress = { downloadProgress },
+                        progress = { viewModel.downloadProgress },
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant
@@ -519,32 +433,14 @@ fun OmdsScreennailPagerOverlay(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // --- パーセンテージのテキスト表示
                     Text(
-                        text = "${(downloadProgress * 100).toInt()}%",
+                        text = "${(viewModel.downloadProgress * 100).toInt()}%",
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
             },
-            // ボタンは配置せず、完了時に自動で閉じる
             confirmButton = {},
             dismissButton = {}
         )
-    }
-}
-
-// --- ファイル名に現在のタイムスタンプを付与する関数  例: "R101010.JPG" -> "R101010_20261213123400.JPG"
-private fun createTimestampedFileName(originalFileName: String): String {
-    val dotIndex = originalFileName.lastIndexOf('.')
-    val timestamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
-
-    return if (dotIndex != -1) {
-        // ---拡張子がある場合 (base = R101010, ext = .JPG)
-        val baseName = originalFileName.substring(0, dotIndex)
-        val extension = originalFileName.substring(dotIndex)
-        "${baseName}_$timestamp$extension"
-    } else {
-        // --- 拡張子がない場合
-        "${originalFileName}_$timestamp"
     }
 }
