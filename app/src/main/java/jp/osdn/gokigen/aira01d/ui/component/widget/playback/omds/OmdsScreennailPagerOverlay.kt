@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
@@ -28,6 +30,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -420,19 +424,28 @@ fun OmdsScreennailPagerOverlay(
             onDismissRequest = { showSizeDialog = false },
             title = { Text(text = "${stringResource(R.string.title_now_downloading)} : ${currentFile?.fileName}") },
             text = {
-                Column(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
                     sizeOptions.forEach { size ->
+                        val isSelected = (size == selectedSize)
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    // ここではダイアログを閉じず、選択状態の変更のみにする
+                                    // ここではダイアログを閉じず、選択状態の変更のみ
                                     selectedSize = size
                                 }
-                                .padding(vertical = 12.dp, horizontal = 8.dp),
+                                .padding(vertical = 8.dp, horizontal = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // デフォルトとして指定されている「オリジナル」を太字にするなど視認性を上げる
+                            RadioButton(
+                                selected = isSelected,
+                                onClick = null,
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = MaterialTheme.colorScheme.primary,
+                                    unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text =
                                     when (size)
