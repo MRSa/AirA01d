@@ -5,7 +5,9 @@ import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
@@ -16,10 +18,16 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
+import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsFileTransfer
+import jp.osdn.gokigen.a01lib.camera.utils.storage.MediaStoreStreamSaveHelper
 import jp.osdn.gokigen.aira01d.AppSingleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ContentListViewModel(application: Application) : ViewModel()
 {
@@ -34,6 +42,16 @@ class ContentListViewModel(application: Application) : ViewModel()
 
     private val _contentStatus = MutableLiveData<ContentLoadingStatus>()
     val contentStatus: LiveData<ContentLoadingStatus> = _contentStatus
+
+    // --- ダウンロードの状態管理用 State (Compose の mutableStateOf を使用)
+    var isDownloading by mutableStateOf(false)
+        private set
+    var downloadProgress by mutableFloatStateOf(0.0f)
+        private set
+    var downloadStatusText by mutableStateOf("")
+        private set
+    var downloadFileName by mutableStateOf("")
+        private set
 
     init
     {
@@ -212,6 +230,110 @@ class ContentListViewModel(application: Application) : ViewModel()
         return allItems
     }
 
+    fun executeDownload(
+        context: Context,
+        file: ICameraFileInfo.ImageFileInfo,
+        selectedSize: GetImageSize,
+        downloadMessage: String,
+        storeOKMessage: String,
+        storeNGMessage: String,
+        storeErrorMessage: String
+    ) {
+        val baseUrl = AppSingleton.CAMERA_BASE_URL
+        val fileTransfer = OmdsFileTransfer(executeUrl = baseUrl)
+        val storeFileName = createTimestampedFileName(file.fileName)
+
+        // 状態の初期化
+        isDownloading = true
+        downloadProgress = 0.0f
+        downloadStatusText = downloadMessage
+        downloadFileName = file.fileName
+
+        // --- 選択された画像サイズに応じてリクエストパスを調整
+        val downloadPath = when (selectedSize) {
+            GetImageSize.WIDTH_640_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=0640"
+            GetImageSize.WIDTH_1024_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1024"
+            GetImageSize.WIDTH_1280_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1280"
+            GetImageSize.WIDTH_1600_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1600"
+            GetImageSize.WIDTH_1920_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1920"
+            GetImageSize.WIDTH_2048_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2048"
+            GetImageSize.WIDTH_2560_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2560"
+            GetImageSize.ORIGINAL -> "${file.directory}/${file.fileName}"
+        }
+
+        val streamSaver = MediaStoreStreamSaveHelper(context, storeFileName)
+
+        // ★重要: viewModelScope で実行することで画面回転に耐える
+        viewModelScope.launch(Dispatchers.IO) {
+            val isReady = streamSaver.open()
+            if (!isReady) {
+                withContext(Dispatchers.Main) {
+                    isDownloading = false
+                    downloadFileName = ""
+                    Toast.makeText(context, storeNGMessage, Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
+
+            fileTransfer.downloadContent(
+                directory = downloadPath,
+                callback = object : IPlaybackControl.IContentTransferCallback {
+                    override fun onReceive(readBytes: Int, length: Int, size: Int, data: ByteArray?) {
+                        if (data != null && data.isNotEmpty()) {
+                            streamSaver.write(data)
+                        }
+                        if (length > 0) {
+                            val pct = readBytes.toFloat() / length.toFloat()
+                            // Mainスレッド（または Compose Stateの変更が安全な場所）で更新
+                            downloadProgress = pct
+                        }
+                    }
+
+                    override fun onCompleted() {
+                        streamSaver.close(success = true)
+                        viewModelScope.launch(Dispatchers.Main) {
+                            isDownloading = false
+                            downloadFileName = ""
+                            Toast.makeText(
+                                context,
+                                "$storeOKMessage:${file.fileName}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    override fun onErrorOccurred(e: Exception?) {
+                        streamSaver.close(success = false)
+                        viewModelScope.launch(Dispatchers.Main) {
+                            isDownloading = false
+                            downloadFileName = ""
+                            Toast.makeText(
+                                context,
+                                "$storeErrorMessage: ${e?.localizedMessage}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    // --- ファイル名に現在のタイムスタンプを付与する関数  例: "R101010.JPG" -> "R101010_20261213123400.JPG"
+    private fun createTimestampedFileName(originalFileName: String): String {
+        val dotIndex = originalFileName.lastIndexOf('.')
+        val timestamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
+
+        return if (dotIndex != -1) {
+            // ---拡張子がある場合 (base = R101010, ext = .JPG)
+            val baseName = originalFileName.substring(0, dotIndex)
+            val extension = originalFileName.substring(dotIndex)
+            "${baseName}_$timestamp$extension"
+        } else {
+            // --- 拡張子がない場合
+            "${originalFileName}_$timestamp"
+        }
+    }
 
     enum class ContentLoadingStatus {
         Uninitialized, ChangingMode, Fetching, Ready
