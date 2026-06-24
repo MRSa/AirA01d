@@ -1,5 +1,9 @@
 package jp.osdn.gokigen.aira01d.ui.component.widget.drawer
 
+import android.graphics.RenderEffect
+import android.graphics.RuntimeShader
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -24,7 +28,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -50,6 +56,8 @@ fun LiveviewWidget(
     val isShowFocusFrame = viewModel.isShowFocusFrame.observeAsState()
     val focusFrameStatus = viewModel.focusFrameStatus.observeAsState()
     val focusFrameRectangle = viewModel.focusFrameRectangle.observeAsState()
+    val isFocusAssist = viewModel.isFocusAssist.observeAsState()
+
 
     // SelfTimerViewModel の監視
     val isTimerActivated by selfTimer.isTimerActivated.collectAsStateWithLifecycle()
@@ -105,7 +113,19 @@ fun LiveviewWidget(
                     contentDescription = "Live View Bitmap",
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(1.dp),
+                        .padding(1.dp)
+                        .let { baseModifier ->
+                            // --- フォーカスアシストモード かつ Android 13 (API 33) 以上の時だけ輪郭強調を適用
+                            if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)&&(isFocusAssist.value == true)) {
+                                baseModifier.contourHighlight(
+                                    enabled = true, // ViewModel等から状態を取って切り替えてもOK
+                                    highlightColor = androidx.compose.ui.graphics.Color.White, // ハイライトの色
+                                    threshold = 0.05f // 感度（小さくするほど微細な輪郭も拾う）
+                                )
+                            } else {
+                                baseModifier
+                            }
+                        },
                     contentScale = ContentScale.Fit
                 )
 
@@ -166,4 +186,51 @@ fun LiveviewWidget(
             }
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+fun Modifier.contourHighlight(
+    enabled: Boolean = true,
+    highlightColor: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Red,
+    threshold: Float = 0.05f
+): Modifier = if (!enabled) this else this.graphicsLayer {
+    // 描画領域のサイズが確定していない場合はスキップ
+    if (size.width <= 0f || size.height <= 0f) return@graphicsLayer
+
+    // AGSLによるシェーダーコード
+    val shaderCode = """
+        uniform shader inputShader;
+        uniform vec4 uColor;
+        uniform float uThreshold;
+
+        half4 main(vec2 fragCoord) {
+            half4 center = inputShader.eval(fragCoord);
+            
+            // 画面上の1ピクセル隣のRGBを取得
+            half4 left   = inputShader.eval(fragCoord + vec2(-1.0, 0.0));
+            half4 right  = inputShader.eval(fragCoord + vec2(1.0, 0.0));
+            half4 top    = inputShader.eval(fragCoord + vec2(0.0, -1.0));
+            half4 bottom = inputShader.eval(fragCoord + vec2(0.0, 1.0));
+
+            // ラプラシアンフィルタによるエッジ抽出
+            half4 edge = abs(left + right + top + bottom - (center * 4.0));
+            float intensity = (edge.r + edge.g + edge.b) / 3.0;
+
+            // 輝度の変化量がしきい値を超えたら指定色でハイライト
+            if (intensity > uThreshold) {
+                return half4(uColor.r, uColor.g, uColor.b, 1.0);
+            }
+            return center;
+        }
+    """.trimIndent()
+
+    val shader = RuntimeShader(shaderCode)
+
+    // パラメータをシェーダーに転送
+    shader.setColorUniform("uColor", highlightColor.value.toLong())
+    shader.setFloatUniform("uThreshold", threshold)
+
+    // RenderEffectを生成してComposeのgraphicsLayerに適用
+    // renderEffect = RenderEffect.createShaderEffect(shader, "inputShader").asComposeRenderEffect()
+    renderEffect = RenderEffect.createShaderEffect(shader).asComposeRenderEffect()
 }

@@ -16,8 +16,8 @@ android {
         applicationId = "jp.osdn.gokigen.aira01d"
         minSdk = 24
         targetSdk = 37
-        versionCode = 100500
-        versionName = "1.5.0"
+        versionCode = 100501
+        versionName = "1.5.1"
     }
 
     buildTypes {
