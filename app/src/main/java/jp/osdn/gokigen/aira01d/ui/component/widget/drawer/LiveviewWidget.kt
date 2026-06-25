@@ -120,7 +120,7 @@ fun LiveviewWidget(
                                 baseModifier.contourHighlight(
                                     enabled = true, // ViewModel等から状態を取って切り替えてもOK
                                     highlightColor = androidx.compose.ui.graphics.Color.White, // ハイライトの色
-                                    threshold = 0.05f // 感度（小さくするほど微細な輪郭も拾う）
+                                    threshold = 0.12f // 感度（小さくするほど微細な輪郭も拾う）
                                 )
                             } else {
                                 baseModifier
@@ -197,10 +197,10 @@ fun Modifier.contourHighlight(
     // 描画領域のサイズが確定していない場合はスキップ
     if (size.width <= 0f || size.height <= 0f) return@graphicsLayer
 
-    // AGSLによるシェーダーコード
+    // ----- AGSL（Android Graphics Shading Language）によるシェーダーコード
     val shaderCode = """
         uniform shader inputShader;
-        uniform vec4 uColor;
+        layout(color) uniform vec4 uColor;
         uniform float uThreshold;
 
         half4 main(vec2 fragCoord) {
@@ -231,6 +231,5 @@ fun Modifier.contourHighlight(
     shader.setFloatUniform("uThreshold", threshold)
 
     // RenderEffectを生成してComposeのgraphicsLayerに適用
-    // renderEffect = RenderEffect.createShaderEffect(shader, "inputShader").asComposeRenderEffect()
-    renderEffect = RenderEffect.createShaderEffect(shader).asComposeRenderEffect()
+    renderEffect = RenderEffect.createRuntimeShaderEffect(shader, "inputShader").asComposeRenderEffect()
 }

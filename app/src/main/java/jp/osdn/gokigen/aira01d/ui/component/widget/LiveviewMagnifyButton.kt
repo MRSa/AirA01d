@@ -1,5 +1,6 @@
 package jp.osdn.gokigen.aira01d.ui.component.widget
 
+import android.os.Build
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -69,7 +70,7 @@ fun LiveviewMagnifyButton(
                     }
                 },
                 onLongClick = {
-                    if (isLvActivated.value == true) {
+                    if ((isLvActivated.value == true)&&(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)) {
                         // 長押し時に触覚フィードバック（ブルッという振動）を与えて、ユーザーに入力を知らせる
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         // ViewModel のフォーカスアシスト状態変更（トグル処理）を呼び出す
