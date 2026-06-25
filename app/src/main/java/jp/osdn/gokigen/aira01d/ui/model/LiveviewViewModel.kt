@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.RectF
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -50,6 +51,9 @@ class LiveviewViewModel(application: Application): ViewModel(), IImageDataReceiv
     private val _focusFrameStatus: MutableLiveData<FocusFrameStatus> by lazy { MutableLiveData<FocusFrameStatus>() }
     val focusFrameStatus : LiveData<FocusFrameStatus> = _focusFrameStatus
 
+    private val _isFocusAssist : MutableLiveData<Boolean> by lazy { MutableLiveData<Boolean>() }
+    val isFocusAssist : LiveData<Boolean> = _isFocusAssist
+
     private val _focusFrameRectangle: MutableLiveData<RectF> by lazy { MutableLiveData<RectF>() }
     val focusFrameRectangle : LiveData<RectF> = _focusFrameRectangle
 
@@ -94,6 +98,7 @@ class LiveviewViewModel(application: Application): ViewModel(), IImageDataReceiv
             _isMirrorMode.postValue(false)
             _isLvActivated.postValue(false)
             _isGridOn.postValue(false)
+            _isFocusAssist.postValue(false)
             _isShowFocusFrame.postValue(false)
             _focusFrameStatus.postValue(FocusFrameStatus.None)
         }
@@ -113,6 +118,20 @@ class LiveviewViewModel(application: Application): ViewModel(), IImageDataReceiv
     fun isLiveViewActivated() : Boolean
     {
         return (_isLvActivated.value ?: false)
+    }
+
+    // ----- フォーカスアシストが有効か無効化を切り替える。
+    fun toggleFocusAssist()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            // --- Android 13 (API 33) 以上の時だけ輪郭強調機能を有効化
+            _isFocusAssist.postValue(_isFocusAssist.value != true)
+        }
+        else
+        {
+            _isFocusAssist.postValue(false)
+        }
     }
 
     // ----- ライブビューの画像を受信した

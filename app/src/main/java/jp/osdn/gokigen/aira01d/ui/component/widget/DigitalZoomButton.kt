@@ -1,8 +1,10 @@
 package jp.osdn.gokigen.aira01d.ui.component.widget
 
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,7 +12,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -41,14 +45,19 @@ fun DigitalZoomButton(
     val iconId = if (isZoomed) R.drawable.digital_zooming else R.drawable.d_zoom
     val iconColor = if (isZoomed) AirA01dTheme.customColors.warning else MaterialTheme.colorScheme.primary
 
-    IconButton(
-        onClick = {
-            if (isLvActivated) {
-                // デジタルズーム可否のチェックを確認する （デジタルズーム可能な場合には、ダイアログを表示する）
-                controlModel.checkDigitalZoomScale()
-            }
-        },
-        modifier = modifier.size(48.dp)
+    Box(
+        modifier = modifier
+            .size(48.dp)
+            .clip(CircleShape) // ---- IconButtonと同様のリップルエフェクト（波紋）の形状を円形に制限
+            .combinedClickable(
+                onClick = {
+                    if (isLvActivated) {
+                        controlModel.checkDigitalZoomScale()
+                    }
+                },
+                onLongClick = { } // 長押しは将来の拡張用
+            ),
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             painter = painterResource(iconId),
