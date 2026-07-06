@@ -68,6 +68,10 @@
     <string name="image_size_2048">幅2048px</string>
     <string name="image_size_2560">幅2560px</string>
 
+    <string name="exif_f_value">F </string>
+    <string name="exif_ss_value">シャッター速度:</string>
+    <string name="exif_iso_value">ISO:</string>
+
     <string name="label_return_to_liveview_screen">戻る</string>
     <string name="label_switch_connect_camera_automatically">カメラに自動接続</string>
     <string name="description_switch_connect_camera_automatically">Wi-Fi接続を確立後、自動的にカメラと接続し撮影状態へ移行します。</string>

@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -23,6 +24,9 @@ import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsFileTransfer
 import jp.osdn.gokigen.a01lib.camera.utils.storage.MediaStoreStreamSaveHelper
 import jp.osdn.gokigen.aira01d.AppSingleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -42,6 +46,9 @@ class ContentListViewModel(application: Application) : ViewModel()
 
     private val _contentStatus = MutableLiveData<ContentLoadingStatus>()
     val contentStatus: LiveData<ContentLoadingStatus> = _contentStatus
+
+    private val _currentExif = MutableStateFlow<ExifDataToDisplay?>(null)
+    val currentExif: StateFlow<ExifDataToDisplay?> = _currentExif.asStateFlow()
 
     // --- ダウンロードの状態管理用 State (Compose の mutableStateOf を使用)
     var isDownloading by mutableStateOf(false)
@@ -316,6 +323,41 @@ class ContentListViewModel(application: Application) : ViewModel()
                     }
                 }
             )
+        }
+    }
+
+    fun updateExifInfo(path: String, fileName: String, cacheFilePath: String)
+    {
+        _currentExif.value = null  // 新しい画像の読み込みが始まったら、一旦古いEXIF情報をクリア
+        viewModelScope.launch {
+            try {
+                val exifDataToDisplay = withContext(Dispatchers.IO) {
+                    // --- 絞り値(F値)やシャッタースピード、ISOなどを取得
+                    val exif = ExifInterface(cacheFilePath)
+                    val fNumber = exif.getAttribute(ExifInterface.TAG_F_NUMBER)
+                    val exposureTime = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)
+                    val iso = exif.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)
+
+                    // --- 表示するためにここで表示フォーマットに加工する
+
+
+
+
+                    // --- 取得した値を表示
+                    Log.v(TAG, "Read EXIF: $path/$fileName $cacheFilePath (SS:$exposureTime, F$fNumber, ISO$iso)")
+
+                    // データクラスにして返す
+                    ExifDataToDisplay(
+                        fNumber = fNumber,
+                        exposureTime = exposureTime,
+                        iso = iso
+                    )
+                }
+                _currentExif.value = exifDataToDisplay
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _currentExif.value = null
+            }
         }
     }
 

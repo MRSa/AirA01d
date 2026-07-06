@@ -18,10 +18,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
@@ -51,7 +53,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.SubcomposeAsyncImage
+import coil3.imageLoader
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.ImageRequest
@@ -88,11 +92,14 @@ fun OmdsScreennailPagerOverlay(
         SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
     }
 
-
     // --- サイズ選択ダイアログの状態管理
     var showSizeDialog by remember { mutableStateOf(false) }
     var sizeOptions by remember { mutableStateOf<List<ContentListViewModel.GetImageSize>>(emptyList()) }
     var selectedSize by remember { mutableStateOf(ContentListViewModel.GetImageSize.ORIGINAL) }
+
+    // --- EXIF情報の表示 ON/OFF管理
+    var showExif by remember { mutableStateOf(false) }
+    val exifData by viewModel.currentExif.collectAsStateWithLifecycle()
 
     // --- カメラプロトコル情報
     val protocol = viewModel.cameraProtocol.observeAsState()
@@ -151,9 +158,32 @@ fun OmdsScreennailPagerOverlay(
                 .data(screennailUrl)
                 .httpHeaders(customHeaders)
                 .crossfade(true)
+                .listener(
+                    onSuccess = { request, result ->
+                        // ===== ディスクキャッシュ読み込みなので実質一瞬(のはず)
+                        try {
+                            // ----- Coil 3 のディスクキャッシュから保存されたファイルのパスを取得
+                            val diskCache = request.context.imageLoader.diskCache
+                            val cacheKey = result.diskCacheKey // 成功結果からキャッシュキーを取得
+
+                            if (diskCache != null && cacheKey != null) {
+                                diskCache.openSnapshot(cacheKey)?.use { snapshot ->
+                                    // ------ キャッシュファイルへのパスを viewModelに渡して更新する
+                                    viewModel.updateExifInfo(
+                                        path = file.directory,
+                                        fileName = file.fileName,
+                                        cacheFilePath = snapshot.data.toString()
+                                    )
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                )
                 .build()
 
-            // 1枚の画像表示
+            // ----- 1枚の画像表示
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -182,6 +212,21 @@ fun OmdsScreennailPagerOverlay(
                         }
                     }
                 )
+                if (showExif) {
+                    if (exifData != null) {
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart) // ---- 左下に配置（インジケーターと被らないようマージン調整）
+                                .padding(start = 16.dp, bottom = 80.dp, end = 16.dp)
+                                .background(Color.Black.copy(alpha = 0.6f), shape = RoundedCornerShape(8.dp))
+                                .padding(12.dp)
+                        ) {
+                            Text(text = "${stringResource(R.string.exif_ss_value)} ${exifData?.exposureTime ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "${stringResource(R.string.exif_f_value)} ${exifData?.fNumber ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "${stringResource(R.string.exif_iso_value)} ${exifData?.iso ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
             }
         }
 
@@ -210,6 +255,26 @@ fun OmdsScreennailPagerOverlay(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // ---EXIFトグルボタン
+                IconButton(
+                    onClick = {
+                        showExif = !showExif
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    },
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .background(
+                            // ONの時は主色、OFFの時は半透明黒にする
+                            if (showExif) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.5f),
+                            shape = CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info, // 情報アイコン
+                        contentDescription = "Toggle EXIF",
+                        tint = Color.White
+                    )
+                }
                 // --- 画像のダウンロードボタン
                 IconButton(
                     onClick = {

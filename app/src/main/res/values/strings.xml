@@ -68,6 +68,10 @@
     <string name="image_size_2048">w:2048px</string>
     <string name="image_size_2560">w:2560px</string>
 
+    <string name="exif_f_value">F </string>
+    <string name="exif_ss_value">Shutter:</string>
+    <string name="exif_iso_value">ISO:</string>
+
     <string name="label_return_to_liveview_screen">Back</string>
     <string name="label_switch_connect_camera_automatically">Auto-connect to Camera</string>
     <string name="description_switch_connect_camera_automatically">After Wi-Fi connection is established, the app automatically enters shooting mode.</string>
