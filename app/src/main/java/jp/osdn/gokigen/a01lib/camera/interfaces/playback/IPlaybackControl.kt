@@ -1,6 +1,7 @@
 package jp.osdn.gokigen.a01lib.camera.interfaces.playback
 
 import android.graphics.Bitmap
+import androidx.exifinterface.media.ExifInterface
 
 // -----   画像再生・取得用インタフェース
 interface IPlaybackControl
@@ -28,6 +29,9 @@ interface IPlaybackControl
 
     // ----- サイズを調整した画像を取得する -----
     fun getResizeImage(directory: String, size: Int): Bitmap?
+
+    // ----- 指定した
+    fun getExif(directory: String): ExifInterface?
 
     // ----- 画面表示用の画像を取得する -----
     fun getImageScreennail(directory: String): Bitmap?

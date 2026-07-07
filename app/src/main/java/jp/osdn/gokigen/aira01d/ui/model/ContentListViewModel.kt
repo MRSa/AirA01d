@@ -332,22 +332,31 @@ class ContentListViewModel(application: Application) : ViewModel()
         viewModelScope.launch {
             try {
                 val exifDataToDisplay = withContext(Dispatchers.IO) {
+
+                    val exif = if (_cameraProtocol.value == ICameraConnectionStatus.CameraProtocol.OPC)
+                    {
+                        // ----- OPC機の場合は、Exifをカメラから転送して取得
+                        AppSingleton.cameraControl.getCameraPlaybackControl().getExif("$path/$fileName")
+                    }
+                    else
+                    {
+                        // ----- OMDS機の場合は、キャッシュファイルから取得
+                        ExifInterface(cacheFilePath)
+                    }
+
                     // --- 絞り値(F値)やシャッタースピード、ISOなどを取得
-                    val exif = ExifInterface(cacheFilePath)
-                    val fNumber = exif.getAttribute(ExifInterface.TAG_F_NUMBER)
-                    val exposureTime = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)
-                    val iso = exif.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)
+                    val fNumber = exif?.getAttribute(ExifInterface.TAG_F_NUMBER)
+                    val exposureTime = exif?.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)
+                    val iso = exif?.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)
 
                     // --- 表示するためにここで表示フォーマットに加工する
 
-
-
-
-                    // --- 取得した値を表示
+                    // --- 取得した値を表示(仮)
                     Log.v(TAG, "Read EXIF: $path/$fileName $cacheFilePath (SS:$exposureTime, F$fNumber, ISO$iso)")
 
                     // データクラスにして返す
                     ExifDataToDisplay(
+                        fileName = fileName,
                         fNumber = fNumber,
                         exposureTime = exposureTime,
                         iso = iso
@@ -359,6 +368,11 @@ class ContentListViewModel(application: Application) : ViewModel()
                 _currentExif.value = null
             }
         }
+    }
+
+    fun clearExifInfo()
+    {
+        _currentExif.value = null  // 新しい画像の読み込みが始まったら、一旦古いEXIF情報をクリア
     }
 
     // --- ファイル名に現在のタイムスタンプを付与する関数  例: "R101010.JPG" -> "R101010_20261213123400.JPG"

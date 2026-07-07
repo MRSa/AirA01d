@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,6 +36,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -113,6 +115,45 @@ fun OmdsScreennailPagerOverlay(
     // 全画面を黒背景のコンテナにする（BackHandlerで戻るボタンにも対応）
     BackHandler(onBack = onClose)
 
+    // ----- Exifのデータ取得処理
+    LaunchedEffect(pagerState.currentPage) {
+        val currentFile = fileList.getOrNull(pagerState.currentPage)
+        if (currentFile != null)
+        {
+            val targetUrl = if ((cameraProtocol ?: ICameraConnectionStatus.CameraProtocol.OPC) == ICameraConnectionStatus.CameraProtocol.OPC) {
+                "$baseUrl/get_screennail.cgi?DIR=${currentFile.directory}/${currentFile.fileName}"
+            } else {
+                if (currentFile.fileName.endsWith(".MOV")) {
+                    "$baseUrl/get_screennail.cgi?DIR=${currentFile.directory}/${currentFile.fileName}"
+                } else {
+                    "$baseUrl/get_resizeimg.cgi?DIR=${currentFile.directory}/${currentFile.fileName}&size=1024"
+                }
+            }
+
+            try
+            {
+                val imageLoader = context.imageLoader
+                val diskCache = imageLoader.diskCache
+                val cacheKey = targetUrl
+                if (diskCache != null)
+                {
+                    diskCache.openSnapshot(cacheKey)?.use { snapshot ->
+                        viewModel.updateExifInfo(
+                            path = currentFile.directory,
+                            fileName = currentFile.fileName,
+                            cacheFilePath = snapshot.data.toString()
+                        )
+                    } ?: run {
+                        // キャッシュがまだない（ダウンロード中など）場合はExif情報はクリアする
+                        viewModel.clearExifInfo()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -158,6 +199,8 @@ fun OmdsScreennailPagerOverlay(
                 .data(screennailUrl)
                 .httpHeaders(customHeaders)
                 .crossfade(true)
+/*
+                // ----- ここだと、キャッシュ先読みをするパターンで Exifの情報がずれてしまう
                 .listener(
                     onSuccess = { request, result ->
                         // ===== ディスクキャッシュ読み込みなので実質一瞬(のはず)
@@ -181,6 +224,7 @@ fun OmdsScreennailPagerOverlay(
                         }
                     }
                 )
+*/
                 .build()
 
             // ----- 1枚の画像表示
@@ -212,8 +256,9 @@ fun OmdsScreennailPagerOverlay(
                         }
                     }
                 )
-                if (showExif) {
-                    if (exifData != null) {
+                if (showExif)
+                {
+                    if ((exifData != null)&&(exifData?.fileName == file.fileName)){
                         Column(
                             modifier = Modifier
                                 .align(Alignment.BottomStart) // ---- 左下に配置（インジケーターと被らないようマージン調整）
@@ -270,7 +315,7 @@ fun OmdsScreennailPagerOverlay(
                         )
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Info, // 情報アイコン
+                        imageVector = if (showExif) { Icons.Filled.Info } else { Icons.Outlined.Info }, // 情報アイコン
                         contentDescription = "Toggle EXIF",
                         tint = Color.White
                     )
