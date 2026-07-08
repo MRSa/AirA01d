@@ -68,7 +68,12 @@
     <string name="image_size_2048">幅2048px</string>
     <string name="image_size_2560">幅2560px</string>
 
-    <string name="exif_f_value">F </string>
+    <string name="exif_model">モデル:</string>
+    <string name="exif_focal_length">焦点距離:</string>
+    <string name="exif_focal_length_equiv">35mm換算:</string>
+    <string name="exif_exposure_program">露出:</string>
+    <string name="exif_metering_program">測光:</string>
+    <string name="exif_f_value">絞り値: F</string>
     <string name="exif_ss_value">シャッター速度:</string>
     <string name="exif_iso_value">ISO:</string>
 

@@ -134,10 +134,9 @@ fun OmdsScreennailPagerOverlay(
             {
                 val imageLoader = context.imageLoader
                 val diskCache = imageLoader.diskCache
-                val cacheKey = targetUrl
                 if (diskCache != null)
                 {
-                    diskCache.openSnapshot(cacheKey)?.use { snapshot ->
+                    diskCache.openSnapshot(targetUrl)?.use { snapshot ->
                         viewModel.updateExifInfo(
                             path = currentFile.directory,
                             fileName = currentFile.fileName,
@@ -259,6 +258,7 @@ fun OmdsScreennailPagerOverlay(
                 if (showExif)
                 {
                     if ((exifData != null)&&(exifData?.fileName == file.fileName)){
+                        val focalLengthStr = String.format(Locale.US, "%.1f mm", exifData?.focalLength) //"%.1f mm".format(exifData?.focalLength ?: 0.0)
                         Column(
                             modifier = Modifier
                                 .align(Alignment.BottomStart) // ---- 左下に配置（インジケーターと被らないようマージン調整）
@@ -266,9 +266,13 @@ fun OmdsScreennailPagerOverlay(
                                 .background(Color.Black.copy(alpha = 0.6f), shape = RoundedCornerShape(8.dp))
                                 .padding(12.dp)
                         ) {
+                            Text(text = "${stringResource(R.string.exif_model)} ${exifData?.model ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "${stringResource(R.string.exif_focal_length)} $focalLengthStr", color = Color.White, style = MaterialTheme.typography.bodyMedium)
                             Text(text = "${stringResource(R.string.exif_ss_value)} ${exifData?.exposureTime ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
-                            Text(text = "${stringResource(R.string.exif_f_value)} ${exifData?.fNumber ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "${stringResource(R.string.exif_f_value)} ${exifData?.aperture ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
                             Text(text = "${stringResource(R.string.exif_iso_value)} ${exifData?.iso ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "${stringResource(R.string.exif_exposure_program)} ${exifData?.programMode ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "${stringResource(R.string.exif_metering_program)} ${exifData?.meteringMode ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }
@@ -308,11 +312,11 @@ fun OmdsScreennailPagerOverlay(
                     },
                     modifier = Modifier
                         .padding(end = 12.dp)
-                        .background(
-                            // ONの時は主色、OFFの時は半透明黒にする
-                            if (showExif) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.5f),
-                            shape = CircleShape
-                        )
+                        //.background(
+                        //    // ONの時は主色、OFFの時は半透明黒にする
+                        //    if (showExif) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.5f),
+                        //    shape = CircleShape
+                        //)
                 ) {
                     Icon(
                         imageVector = if (showExif) { Icons.Filled.Info } else { Icons.Outlined.Info }, // 情報アイコン

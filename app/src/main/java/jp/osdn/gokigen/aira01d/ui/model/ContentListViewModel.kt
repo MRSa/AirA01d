@@ -23,6 +23,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
 import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsFileTransfer
 import jp.osdn.gokigen.a01lib.camera.utils.storage.MediaStoreStreamSaveHelper
 import jp.osdn.gokigen.aira01d.AppSingleton
+import jp.osdn.gokigen.aira01d.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +34,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ContentListViewModel(application: Application) : ViewModel()
+class ContentListViewModel(val application: Application) : ViewModel()
 {
     private val _runMode = MutableLiveData<String>()
     val runMode: LiveData<String> = _runMode
@@ -344,22 +345,69 @@ class ContentListViewModel(application: Application) : ViewModel()
                         ExifInterface(cacheFilePath)
                     }
 
-                    // --- 絞り値(F値)やシャッタースピード、ISOなどを取得
+                    // 絞り値
                     val fNumber = exif?.getAttribute(ExifInterface.TAG_F_NUMBER)
-                    val exposureTime = exif?.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)
+
+                    // ISO感度
                     val iso = exif?.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)
 
-                    // --- 表示するためにここで表示フォーマットに加工する
+                    // 焦点距離
+                    val focalLengthDouble = exif?.getAttributeDouble(ExifInterface.TAG_FOCAL_LENGTH, 0.0) ?: 0.0
+
+                    // モデル
+                    val model = exif?.getAttribute(ExifInterface.TAG_MODEL)
+
+                    // GPS情報があるかどうか
+                    val latitude = exif?.getAttribute(ExifInterface.TAG_GPS_LATITUDE)
+                    val haGpsInfo = !latitude.isNullOrEmpty()
+
+                    // プログラムモード
+                    val programModeIndex = exif?.getAttributeInt(ExifInterface.TAG_EXPOSURE_PROGRAM, 0) ?: 0
+                    val exposurePrograms = application.applicationContext.resources.getStringArray(R.array.exif_exposure_program_value)
+                    val programModeStr = exposurePrograms.getOrNull(programModeIndex) ?: exposurePrograms[0]
+
+                    // 測光モード
+                    val meteringModeRaw = exif?.getAttributeInt(ExifInterface.TAG_METERING_MODE, 0) ?: 0
+                    val meteringModeIndex = when (meteringModeRaw) {
+                        in 0..6 -> meteringModeRaw // 0〜6（Unknown〜Partial）はそのまま
+                        255 -> 7                   // 255（Other）なら、配列の7番目を指定
+                        else -> 0                  // 規格外の値が来たら 0（Unknown）にする
+                    }
+                    val meteringModes = application.applicationContext.resources.getStringArray(R.array.exif_metering_mode_value)
+                    val meteringModeStr = meteringModes.getOrNull(meteringModeIndex) ?: meteringModes[0]
+
+                    // シャッタースピード
+                    val exposureTimeStr = exif?.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)
+                    val value = exposureTimeStr?.toFloatOrNull() ?: 0.0f
+                    val exposureTime = if (value in 0.0f..0.5f) { // 0.0より大きく0.5未満 (1/value が 2.0 以上になる条件)
+                        // シャッター速度を分数で表示する (例: 1/250 s)
+                        val inv = 1.0f / value
+                        var intValue = inv.toInt()
+
+                        // 割り切れない数値の丸め処理 (4や9で終わる場合の補正)
+                        if (intValue % 10 in listOf(4, 9)) {
+                            intValue++
+                        }
+                        " 1/$intValue"
+                    } else {
+                        // シャッター速度を数値（秒数）で表示する (例: 1.5s / 0s)
+                        " ${exposureTimeStr ?: "0"} s"
+                    }
 
                     // --- 取得した値を表示(仮)
-                    Log.v(TAG, "Read EXIF: $path/$fileName $cacheFilePath (SS:$exposureTime, F$fNumber, ISO$iso)")
+                    Log.v(TAG, "Read EXIF: $path/$fileName $cacheFilePath (SS:$exposureTime, F$fNumber, ISO$iso) $focalLengthDouble mm")
 
                     // データクラスにして返す
                     ExifDataToDisplay(
                         fileName = fileName,
-                        fNumber = fNumber,
+                        aperture = fNumber,
                         exposureTime = exposureTime,
-                        iso = iso
+                        focalLength = focalLengthDouble,
+                        programMode = programModeStr,
+                        meteringMode = meteringModeStr,
+                        iso = iso,
+                        model = model,
+                        hasGpsInfo = haGpsInfo
                     )
                 }
                 _currentExif.value = exifDataToDisplay

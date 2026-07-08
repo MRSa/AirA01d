@@ -68,7 +68,12 @@
     <string name="image_size_2048">w:2048px</string>
     <string name="image_size_2560">w:2560px</string>
 
-    <string name="exif_f_value">F </string>
+    <string name="exif_model">Model:</string>
+    <string name="exif_focal_length">Focal Length:</string>
+    <string name="exif_focal_length_equiv">35mm Equiv.:</string>
+    <string name="exif_exposure_program">Exposure:</string>
+    <string name="exif_metering_program">Metering:</string>
+    <string name="exif_f_value">Aperture: F</string>
     <string name="exif_ss_value">Shutter:</string>
     <string name="exif_iso_value">ISO:</string>
 
