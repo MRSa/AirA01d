@@ -55,6 +55,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.SubcomposeAsyncImage
 import coil3.imageLoader
@@ -198,32 +199,6 @@ fun OmdsScreennailPagerOverlay(
                 .data(screennailUrl)
                 .httpHeaders(customHeaders)
                 .crossfade(true)
-/*
-                // ----- ここだと、キャッシュ先読みをするパターンで Exifの情報がずれてしまう
-                .listener(
-                    onSuccess = { request, result ->
-                        // ===== ディスクキャッシュ読み込みなので実質一瞬(のはず)
-                        try {
-                            // ----- Coil 3 のディスクキャッシュから保存されたファイルのパスを取得
-                            val diskCache = request.context.imageLoader.diskCache
-                            val cacheKey = result.diskCacheKey // 成功結果からキャッシュキーを取得
-
-                            if (diskCache != null && cacheKey != null) {
-                                diskCache.openSnapshot(cacheKey)?.use { snapshot ->
-                                    // ------ キャッシュファイルへのパスを viewModelに渡して更新する
-                                    viewModel.updateExifInfo(
-                                        path = file.directory,
-                                        fileName = file.fileName,
-                                        cacheFilePath = snapshot.data.toString()
-                                    )
-                                }
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-                )
-*/
                 .build()
 
             // ----- 1枚の画像表示
@@ -554,7 +529,11 @@ fun OmdsScreennailPagerOverlay(
                 }
             },
             confirmButton = {},
-            dismissButton = {}
+            dismissButton = {},
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
         )
     }
 }

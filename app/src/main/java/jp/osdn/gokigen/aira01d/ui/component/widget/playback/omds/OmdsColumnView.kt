@@ -12,7 +12,10 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 @Composable
 fun OmdsColumnView(
     fileList: List<ICameraFileInfo.ImageFileInfo>,
+    selectedFiles: Set<ICameraFileInfo.ImageFileInfo>,
+    isSelectMode: Boolean,
     onItemClick: (Int) -> Unit,
+    onItemLongClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 )
 {
@@ -24,7 +27,10 @@ fun OmdsColumnView(
         itemsIndexed(fileList) { index, file ->
             OmdsFileItemRow(
                 file = file,
-                onItemClick = { onItemClick(index) }
+                isSelected = selectedFiles.contains(file),
+                isSelectMode = isSelectMode,
+                onItemClick = { onItemClick(index) },
+                onItemLongClick = { onItemLongClick(index) }
             )
         }
     }

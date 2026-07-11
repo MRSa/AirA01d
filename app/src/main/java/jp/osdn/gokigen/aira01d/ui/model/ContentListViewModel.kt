@@ -25,14 +25,18 @@ import jp.osdn.gokigen.a01lib.camera.utils.storage.MediaStoreStreamSaveHelper
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 
 class ContentListViewModel(val application: Application) : ViewModel()
 {
@@ -271,7 +275,7 @@ class ContentListViewModel(val application: Application) : ViewModel()
 
         val streamSaver = MediaStoreStreamSaveHelper(context, storeFileName)
 
-        // ★重要: viewModelScope で実行することで画面回転に耐える
+        // viewModelScope で実行することで画面回転に耐える
         viewModelScope.launch(Dispatchers.IO) {
             val isReady = streamSaver.open()
             if (!isReady) {
@@ -414,6 +418,120 @@ class ContentListViewModel(val application: Application) : ViewModel()
             } catch (e: Exception) {
                 e.printStackTrace()
                 _currentExif.value = null
+            }
+        }
+    }
+
+    fun downloadMultipleFiles(files: List<ICameraFileInfo.ImageFileInfo>, imageSize: GetImageSize, context: Context)
+    {
+        isDownloading = true
+
+        viewModelScope.launch(Dispatchers.IO)
+        {
+            val baseUrl = AppSingleton.CAMERA_BASE_URL
+            val fileTransfer = OmdsFileTransfer(executeUrl = baseUrl)
+
+            var downloadCount = 0
+            var successCount = 0
+
+            for (file in files)
+            {
+                // ----- JPEGファイルの時には、指定された画像サイズでダウンロードする
+                val selectedSize = if (file.fileName.endsWith(suffix = "JPG", ignoreCase = true)) {
+                    imageSize
+                } else {
+                    GetImageSize.ORIGINAL
+                }
+
+                // ----- 保存するファイル名
+                val storeFileName = createTimestampedFileName(file.fileName)
+
+                // 状態の初期化
+                downloadCount++ // 画像取得数
+                isDownloading = true
+                downloadProgress = 0.0f
+                downloadStatusText = "${context.getString(R.string.now_downloading)} : $downloadCount/${files.size}"
+                downloadFileName = file.fileName
+
+                // --- 選択された画像サイズに応じてリクエストパスを調整
+                val downloadPath = when (selectedSize) {
+                    GetImageSize.WIDTH_640_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=0640"
+                    GetImageSize.WIDTH_1024_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1024"
+                    GetImageSize.WIDTH_1280_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1280"
+                    GetImageSize.WIDTH_1600_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1600"
+                    GetImageSize.WIDTH_1920_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1920"
+                    GetImageSize.WIDTH_2048_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2048"
+                    GetImageSize.WIDTH_2560_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2560"
+                    GetImageSize.ORIGINAL -> "${file.directory}/${file.fileName}"
+                }
+
+                val streamSaver = MediaStoreStreamSaveHelper(context, storeFileName)
+                val isReady = streamSaver.open()
+                if (!isReady)
+                {
+                    withContext(Dispatchers.Main) {
+                        isDownloading = false
+                        downloadFileName = ""
+                        Toast.makeText(context, context.getString(R.string.stored_image_ng), Toast.LENGTH_SHORT).show()
+                    }
+                    continue // 次のファイルのダウンロードへ
+                }
+
+                // --- ファイル取得実処理 (コールバックが完了するまで処理を一時停止する)
+                val isSuccess = suspendCancellableCoroutine { continuation ->
+                    fileTransfer.downloadContent(
+                        directory = downloadPath,
+                        callback = object : IPlaybackControl.IContentTransferCallback {
+                            override fun onReceive(readBytes: Int, length: Int, size: Int, data: ByteArray?) {
+                                if (data != null && data.isNotEmpty()) {
+                                    streamSaver.write(data)
+                                }
+                                if (length > 0) {
+                                    val percent = readBytes.toFloat() / length.toFloat()
+                                    downloadProgress = percent
+                                }
+                            }
+
+                            override fun onCompleted() {
+                                streamSaver.close(success = true)
+                                // コルーチン再開: 戻り値として true を返す
+                                if (continuation.isActive) continuation.resume(true)
+                            }
+
+                            override fun onErrorOccurred(e: Exception?) {
+                                streamSaver.close(success = false)
+                                // コルーチン再開: 戻り値として false を返す
+                                if (continuation.isActive) continuation.resume(false)
+                            }
+                        }
+                    )
+                    // コルーチンがキャンセルされた場合の処理
+                    continuation.invokeOnCancellation {
+                        streamSaver.close(success = false)
+                    }
+                }
+
+                // 一時停止が解除され、ここに流れてくる（UI更新と次のアイテムへの移行）
+                if (isSuccess)
+                {
+                    // --- ダウンロード成功
+                    successCount++
+                }
+                withContext(Dispatchers.Main) {
+                    downloadFileName = ""
+                }
+
+                // 1つのファイル処理が終わったら少し間隔をあける
+                delay(150.milliseconds)
+            }
+
+            // 一括ダウンロードの完了表示
+            val finishString = "${context.getString(R.string.finish_bulk_downloading_head)} $successCount/$downloadCount ${context.getString(R.string.finish_bulk_downloading_foot)}"
+            withContext(Dispatchers.Main) {
+                isDownloading = false
+                downloadFileName = ""
+                downloadProgress = 0.0f
+                Toast.makeText(context, finishString, Toast.LENGTH_LONG).show()
             }
         }
     }

@@ -13,7 +13,10 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 @Composable
 fun OmdsVerticalGridView(
     fileList: List<ICameraFileInfo.ImageFileInfo>,
+    selectedFiles: Set<ICameraFileInfo.ImageFileInfo>,
+    isSelectMode: Boolean,
     onItemClick: (Int) -> Unit,
+    onItemLongClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 )
 {
@@ -27,7 +30,10 @@ fun OmdsVerticalGridView(
         itemsIndexed(fileList) { index, file ->
             OmdsFileItemCard(
                 file = file,
-                onItemClick = { onItemClick(index) }
+                isSelected = selectedFiles.contains(file),
+                isSelectMode = isSelectMode,
+                onItemClick = { onItemClick(index) },
+                onItemLongClick = { onItemLongClick(index) }
             )
         }
     }

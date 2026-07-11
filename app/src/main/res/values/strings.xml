@@ -12,6 +12,15 @@
     <string name="button_detail">Detail…</string>
     <string name="button_close">Close</string>
 
+    <string name="selected_count"> items.</string>
+    <string name="deselect_all">Deselect All</string>
+    <string name="select_all">Select All</string>
+    <string name="title_start_bulk_download">Bulk Download</string>
+    <string name="start_bulk_downloading_head">Start download:</string>
+    <string name="start_bulk_downloading_foot">item(s).</string>
+    <string name="finish_bulk_downloading_head">Finish download:</string>
+    <string name="finish_bulk_downloading_foot">item(s).</string>
+
     <string name="dialog_title_connect_failed">Connect failed.</string>
     <string name="dialog_button_retry">Retry</string>
     <string name="dialog_button_network_settings">WiFi Settings</string>
