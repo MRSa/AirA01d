@@ -331,8 +331,10 @@ class ContentListViewModel(val application: Application) : ViewModel()
         }
     }
 
-    fun updateExifInfo(path: String, fileName: String, cacheFilePath: String)
+    fun updateExifInfo(path: String, fileName: String, cacheFilePath: String?)
     {
+        // --- 画像のExif情報を取得する
+        // Log.v(TAG, "updateExifInfo: $fileName")
         _currentExif.value = null  // 新しい画像の読み込みが始まったら、一旦古いEXIF情報をクリア
         viewModelScope.launch {
             try {
@@ -346,7 +348,15 @@ class ContentListViewModel(val application: Application) : ViewModel()
                     else
                     {
                         // ----- OMDS機の場合は、キャッシュファイルから取得
-                        ExifInterface(cacheFilePath)
+                        if (cacheFilePath != null)
+                        {
+                            ExifInterface(cacheFilePath)
+                        }
+                        else
+                        {
+                            // ----- キャッシュファイルがない(特定できない)場合は、Exifをカメラから転送して取得する
+                            AppSingleton.cameraControl.getCameraPlaybackControl().getExif("$path/$fileName")
+                        }
                     }
 
                     // 絞り値
@@ -415,8 +425,11 @@ class ContentListViewModel(val application: Application) : ViewModel()
                     )
                 }
                 _currentExif.value = exifDataToDisplay
-            } catch (e: Exception) {
-                e.printStackTrace()
+            }
+            catch (e: Exception)
+            {
+                Log.e(TAG, "updateExifInfo : $fileName (${e.localizedMessage})")
+                //e.printStackTrace()
                 _currentExif.value = null
             }
         }

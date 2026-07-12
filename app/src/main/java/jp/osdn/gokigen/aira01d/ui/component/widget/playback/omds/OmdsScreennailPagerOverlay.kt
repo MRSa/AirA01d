@@ -146,6 +146,15 @@ fun OmdsScreennailPagerOverlay(
                     } ?: run {
                         // キャッシュがまだない（ダウンロード中など）場合はExif情報はクリアする
                         viewModel.clearExifInfo()
+                        if (showExif)
+                        {
+                            // --- キャッシュがないけどExif表示中...カメラからExifを取得する
+                            viewModel.updateExifInfo(
+                                path = currentFile.directory,
+                                fileName = currentFile.fileName,
+                                cacheFilePath = null
+                            )
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -284,6 +293,16 @@ fun OmdsScreennailPagerOverlay(
                     onClick = {
                         showExif = !showExif
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        val currentFile = fileList.getOrNull(pagerState.currentPage)
+                        if ((showExif)&&(currentFile != null))
+                        {
+                            // --- Exifを表示するように切り替えたとき...Exifを取得する
+                            viewModel.updateExifInfo(
+                                path = currentFile.directory,
+                                fileName = currentFile.fileName,
+                                cacheFilePath = null
+                            )
+                        }
                     },
                     modifier = Modifier
                         .padding(end = 12.dp)
