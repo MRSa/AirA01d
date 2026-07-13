@@ -118,8 +118,8 @@ fun LiveviewWidget(
                             // --- フォーカスアシストモード かつ Android 13 (API 33) 以上の時だけ輪郭強調を適用
                             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)&&(isFocusAssist.value == true)) {
                                 baseModifier.contourHighlight(
-                                    enabled = true, // ViewModel等から状態を取って切り替えてもOK
-                                    highlightColor = androidx.compose.ui.graphics.Color.White, // ハイライトの色
+                                    enabled = true,
+                                    highlightColor = Color.White, // ハイライトの色
                                     threshold = 0.12f // 感度（小さくするほど微細な輪郭も拾う）
                                 )
                             } else {
@@ -191,13 +191,13 @@ fun LiveviewWidget(
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun Modifier.contourHighlight(
     enabled: Boolean = true,
-    highlightColor: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Red,
+    highlightColor: Color = Color.Red,
     threshold: Float = 0.05f
 ): Modifier = if (!enabled) this else this.graphicsLayer {
     // 描画領域のサイズが確定していない場合はスキップ
     if (size.width <= 0f || size.height <= 0f) return@graphicsLayer
 
-    // ----- AGSL（Android Graphics Shading Language）によるシェーダーコード
+    // ----- AGSL（Android Graphics Shading Language）によるシェーダーコード (TIRAMISU : Android 13以降)
     val shaderCode = """
         uniform shader inputShader;
         layout(color) uniform vec4 uColor;

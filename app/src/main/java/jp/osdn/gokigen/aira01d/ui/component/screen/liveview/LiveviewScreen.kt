@@ -35,7 +35,7 @@ fun LiveviewScreen(
                 ICameraConnectionStatus.CameraConnectionStatus.NOT_FOUND,
                 ICameraConnectionStatus.CameraConnectionStatus.ERROR -> {
                     // ---- パラメータが自動接続 ONで、カメラが接続されていない場合...
-                    Log.v("LiveviewScreen", " $isEnabled : $connectionStatus")
+                    Log.v("LiveviewScreen", " $connectionStatus")
                     AppSingleton.cameraControl.connectToCamera()
                 }
                 else -> {}

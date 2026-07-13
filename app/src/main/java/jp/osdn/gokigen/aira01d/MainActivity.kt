@@ -28,7 +28,7 @@ import jp.osdn.gokigen.aira01d.ui.theme.AirA01dTheme
 class MainActivity : ComponentActivity()
 {
     // ----- ビューモデルの生成
-    private val myLiveviewViewModel: LiveviewViewModel by viewModels() { LiveviewViewModel.Factory }
+    private val myLiveviewViewModel: LiveviewViewModel by viewModels { LiveviewViewModel.Factory }
     private val myCameraStatusViewModel: CameraStatusViewModel by viewModels { CameraStatusViewModel.Factory }
     private val mySelfTimerViewModel: SelfTimerViewModel by viewModels()
     private val myPreferenceViewModel: PreferenceViewModel by viewModels { PreferenceViewModel.Factory }
