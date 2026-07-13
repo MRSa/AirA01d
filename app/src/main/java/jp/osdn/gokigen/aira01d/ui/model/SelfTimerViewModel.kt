@@ -11,6 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class SelfTimerViewModel : ViewModel()
 {
@@ -51,7 +52,7 @@ class SelfTimerViewModel : ViewModel()
                 // カウントダウンループ
                 for (i in seconds downTo 1) {
                     _isTimerRemainSec.value = i
-                    delay(1000)
+                    delay(1000.milliseconds)
                 }
 
                 _isTimerActivated.value = false
