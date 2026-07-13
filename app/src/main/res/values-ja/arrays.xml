@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="exif_exposure_program_value">
+        <item>不明</item>
+        <item>マニュアル</item>
+        <item>プログラム</item>
+        <item>絞り優先</item>
+        <item>シャッター優先</item>
+        <item>クリエイティブ</item>
+        <item>アクション</item>
+        <item>ポートレイト</item>
+        <item>ランドスケープ</item>
+        <item>その他</item>
+    </string-array>
+
+    <string-array name="exif_metering_mode_value">
+        <item>不明</item>
+        <item>平均</item>
+        <item>中央重点</item>
+        <item>スポット</item>
+        <item>マルチスポット</item>
+        <item>分割測光</item>
+        <item>部分測光</item>
+        <item>その他</item>
+    </string-array>
+</resources>

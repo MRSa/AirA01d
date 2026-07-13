@@ -5,19 +5,21 @@ splashscreen = "1.2.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
 kotlin = "2.4.0"
-composeBom = "2026.06.00"
+composeBom = "2026.06.01"
 appcompat = "1.7.1"
 preferenceKtx = "1.2.1"
-runtimeLivedata = "1.11.3"
+runtimeLivedata = "1.11.4"
 navigationRuntimeKtx = "2.9.8"
 navigationCompose = "2.9.8"
 roomKtx = "2.8.4"
-uiGraphics = "1.11.3"
-animation = "1.11.3"
+uiGraphics = "1.11.4"
+animation = "1.11.4"
 toolsCore = "1.0.0-alpha14"
 datastoreCore = "1.2.1"
 datastorePreferences = "1.2.1"
 coil3 = "3.5.0"
+exifinterface = "1.4.2"
+media3Exoplayer = "1.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,6 +46,8 @@ androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil3" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil3" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3Exoplayer" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

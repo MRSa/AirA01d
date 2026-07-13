@@ -12,6 +12,15 @@
     <string name="button_detail">Detail…</string>
     <string name="button_close">Close</string>
 
+    <string name="selected_count"> items.</string>
+    <string name="deselect_all">Deselect All</string>
+    <string name="select_all">Select All</string>
+    <string name="title_start_bulk_download">Bulk Download</string>
+    <string name="start_bulk_downloading_head">Start download:</string>
+    <string name="start_bulk_downloading_foot">item(s).</string>
+    <string name="finish_bulk_downloading_head">Finish download:</string>
+    <string name="finish_bulk_downloading_foot">item(s).</string>
+
     <string name="dialog_title_connect_failed">Connect failed.</string>
     <string name="dialog_button_retry">Retry</string>
     <string name="dialog_button_network_settings">WiFi Settings</string>
@@ -67,6 +76,15 @@
     <string name="image_size_1920">w:1920px</string>
     <string name="image_size_2048">w:2048px</string>
     <string name="image_size_2560">w:2560px</string>
+
+    <string name="exif_model">Model:</string>
+    <string name="exif_focal_length">Focal Length:</string>
+    <string name="exif_focal_length_equiv">35mm Equiv.:</string>
+    <string name="exif_exposure_program">Exposure:</string>
+    <string name="exif_metering_program">Metering:</string>
+    <string name="exif_f_value">Aperture: F</string>
+    <string name="exif_ss_value">Shutter:</string>
+    <string name="exif_iso_value">ISO:</string>
 
     <string name="label_return_to_liveview_screen">Back</string>
     <string name="label_switch_connect_camera_automatically">Auto-connect to Camera</string>

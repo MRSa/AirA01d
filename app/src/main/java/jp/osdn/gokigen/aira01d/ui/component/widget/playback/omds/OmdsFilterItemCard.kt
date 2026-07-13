@@ -2,6 +2,7 @@ package jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +49,14 @@ import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 
 @Composable
-fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Unit)
+fun OmdsFileItemCard(
+    file: ICameraFileInfo.ImageFileInfo,
+    isSelected: Boolean,
+    isSelectMode: Boolean,
+    onItemClick: () -> Unit,
+    onItemLongClick: () -> Unit,
+    modifier: Modifier = Modifier
+)
 {
     val context = LocalContext.current
     val baseUrl = AppSingleton.CAMERA_BASE_URL
@@ -58,7 +67,7 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
     // 例: http://192.168.0.10/get_thumbnail.cgi?DIR=/DCIM/100OLYMP/P6230001.JPG
     val baseThumbnailUrl = "$baseUrl/get_thumbnail.cgi?DIR=${file.directory}/${file.fileName}"
 
-    // retryCount が増えるたびに、URLの末尾が変化するようにします（例: &retry=1, &retry=2 ...）
+    // --- retryCount が増えるたびに、URLの末尾が変化するようにする（例: &retry=1, &retry=2 ...）
     val thumbnailUrl = if (retryCount > 0) "$baseThumbnailUrl&retry=$retryCount" else baseThumbnailUrl
 
     val customHeaders = NetworkHeaders.Builder()
@@ -71,7 +80,7 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
         .httpHeaders(customHeaders)
         .crossfade(true)
         .apply {
-            // タップされてリトライ中（retryCount > 0）なら、古いエラーキャッシュを無視して強制取得
+            // --- タップされてリトライ中（retryCount > 0）なら、古いエラーキャッシュを無視して強制取得
             if (retryCount > 0) {
                 memoryCachePolicy(CachePolicy.WRITE_ONLY)
                 diskCachePolicy(CachePolicy.WRITE_ONLY)
@@ -80,15 +89,26 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
         .build()
 
     Card(
-        modifier = Modifier
+        modifier = modifier
                     .aspectRatio(1f)
-                    .clickable { onItemClick() },
+                    //.clickable { onItemClick() }
+                    .combinedClickable(
+                        onClick = onItemClick,
+                        onLongClick = onItemLongClick
+                    ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+            //containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            }
         ),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Box(contentAlignment = Alignment.BottomStart) {
+        Box(modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomStart
+        ) {
 
             //----- サムネイル画像の表示
             SubcomposeAsyncImage(
@@ -97,7 +117,7 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
                 loading = {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 },
@@ -122,7 +142,18 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
                 }
             )
 
-            // 拡張子に応じたアイコンの表示（画像の上に重ねる）
+            // ----- 選択モード中のときの選択チェックボックス表示
+            if (isSelectMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onItemClick() },
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 0.dp, top = 0.dp)
+                )
+            }
+
+            // ----- 拡張子に応じたアイコンの表示（画像の上に重ねて表示）
             val isMovie = file.fileName.endsWith(".MOV", ignoreCase = true)
             val isRaw = file.fileName.endsWith(".ORF", ignoreCase = true)
             if (isMovie || isRaw)
@@ -131,12 +162,12 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(8.dp), // カードの縁から少し内側に配置
-                    contentAlignment = Alignment.TopEnd // 右上に配置（お好みで左上 Alignment.TopStart などに変更してください）
+                    contentAlignment = Alignment.TopEnd
                 ) {
                     if (isMovie) {
-                        // ムービーアイコン（例: 再生やビデオのアイコン）
+                        // --- ムービーアイコン (アイコン)
                         Icon(
-                            imageVector = Icons.Default.PlayCircle, // ※適宜プロジェクトに合ったアイコンに変更してください
+                            imageVector = Icons.Default.PlayCircle,
                             contentDescription = "Movie",
                             tint = Color.White,
                             modifier = Modifier
@@ -145,7 +176,7 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
                         )
                     }
                     if (isRaw) {
-                        // RAWファイルを示すアイコン（テキストバッジの例）
+                        // --- RAWファイルを示すアイコン (テキストバッジ)
                         Text(
                             text = "RAW",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -160,7 +191,7 @@ fun OmdsFileItemCard(file: ICameraFileInfo.ImageFileInfo, onItemClick: () -> Uni
                     }
                 }
             }
-            // 写真の上にファイル名を重ねる
+            // ----- 写真の上にファイル名を重ねる
             Text(
                 text = file.fileName,
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),

@@ -3,6 +3,7 @@ package jp.osdn.gokigen.aira01d.ui.component.widget.playback.omds
 import android.text.format.Formatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,13 +50,16 @@ import java.util.Locale
 @Composable
 fun OmdsFileItemRow(
     file: ICameraFileInfo.ImageFileInfo,
+    isSelected: Boolean,
+    isSelectMode: Boolean,
     onItemClick: () -> Unit,
+    onItemLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val baseUrl = AppSingleton.CAMERA_BASE_URL
 
-    // --- サムネイルの取得・リトライ処理 (Cardと同様のロジック)
+    // --- サムネイルの取得用
     var retryCount by rememberSaveable { mutableIntStateOf(0) }
     val baseThumbnailUrl = "$baseUrl/get_thumbnail.cgi?DIR=${file.directory}/${file.fileName}"
     val thumbnailUrl = if (retryCount > 0) "$baseThumbnailUrl&retry=$retryCount" else baseThumbnailUrl
@@ -90,9 +95,18 @@ fun OmdsFileItemRow(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onItemClick() },
+            .combinedClickable(
+                onClick = onItemClick,
+                onLongClick = onItemLongClick
+            ),
+            //.clickable { onItemClick() },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            // --- 選択されている場合は背景色をプライマリのコンテナ色などにして分かりやすくする
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            }
         )
     ) {
         Row(
@@ -101,12 +115,20 @@ fun OmdsFileItemRow(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // ─── 選択モード中なら左端にチェックボックスを表示
+            if (isSelectMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onItemClick() },
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            }
 
-            // --- サムネイル画像エリア ---
+            // --- サムネイル画像エリア
             Box(
                 modifier = Modifier
-                    .size(64.dp) // リストアイテムに適したサイズ
-                    .clip(RoundedCornerShape(8.dp)) // 少し角を丸めてモダンに
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 contentAlignment = Alignment.Center
             ) {
@@ -130,7 +152,7 @@ fun OmdsFileItemRow(
                                 .clickable { retryCount++ }, // タップでリトライ
                             contentAlignment = Alignment.Center
                         ) {
-                            // Row用に少しパディングを抑えたプレースホルダー
+                            // 画像未取得の場合のダミーアイコン
                             Icon(
                                 imageVector = Icons.Outlined.Image,
                                 contentDescription = null,
@@ -144,31 +166,31 @@ fun OmdsFileItemRow(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // --- メタ情報エリア ---
+            // --- メタ情報の表示エリア
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // ファイル名 (太字で強調)
+                // --- ファイル名 (太字で強調)
                 Text(
                     text = file.fileName,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                // メタ情報 (時刻とサイズ) の並び
+                // --- メタ情報 (時刻とサイズ) の並び
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 時刻
+                    // --- 時刻
                     Text(
                         text = formattedDate,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    // ファイルサイズ
+                    // --- ファイルサイズ
                     Text(
                         text = formattedSize,
                         style = MaterialTheme.typography.bodyMedium,

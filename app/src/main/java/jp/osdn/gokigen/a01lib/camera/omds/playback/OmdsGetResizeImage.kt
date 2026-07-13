@@ -33,7 +33,8 @@ class OmdsGetResizeImage(
             // コマンドの組み立て
             val command = if (useOpcProtocol) GET_RESIZEIMAGE_COMMAND_OPC else GET_RESIZEIMAGE_COMMAND
             val cleanCommand = command.removePrefix("/")
-            val commandUrl = "${baseUrl}${cleanCommand}?DIR=$directory&size=$size"
+            val formattedSize = "%04d".format(size)
+            val commandUrl = "${baseUrl}${cleanCommand}?DIR=$directory&size=$formattedSize"
            return (http.httpCommandBinary(url = commandUrl, method = "GET", headerMap = headerMap, postData = null, contentType = null, timeoutMs = timeoutMs))
         }
         catch (e: Exception)

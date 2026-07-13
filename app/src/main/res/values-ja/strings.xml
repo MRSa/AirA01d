@@ -11,6 +11,14 @@
     <string name="button_cancel">キャンセル</string>
     <string name="button_detail">詳細…</string>
     <string name="button_close">閉じる</string>
+    <string name="selected_count">件 選択中</string>
+    <string name="deselect_all">全解除</string>
+    <string name="select_all">全選択</string>
+    <string name="title_start_bulk_download">一括取得</string>
+    <string name="start_bulk_downloading_head">取得開始</string>
+    <string name="start_bulk_downloading_foot">件</string>
+    <string name="finish_bulk_downloading_head">取得終了</string>
+    <string name="finish_bulk_downloading_foot">件</string>
 
     <string name="dialog_title_connect_failed">接続失敗</string>
     <string name="dialog_button_retry">再試行</string>
@@ -67,6 +75,15 @@
     <string name="image_size_1920">幅1920px</string>
     <string name="image_size_2048">幅2048px</string>
     <string name="image_size_2560">幅2560px</string>
+
+    <string name="exif_model">モデル:</string>
+    <string name="exif_focal_length">焦点距離:</string>
+    <string name="exif_focal_length_equiv">35mm換算:</string>
+    <string name="exif_exposure_program">露出:</string>
+    <string name="exif_metering_program">測光:</string>
+    <string name="exif_f_value">絞り値: F</string>
+    <string name="exif_ss_value">シャッター速度:</string>
+    <string name="exif_iso_value">ISO:</string>
 
     <string name="label_return_to_liveview_screen">戻る</string>
     <string name="label_switch_connect_camera_automatically">カメラに自動接続</string>

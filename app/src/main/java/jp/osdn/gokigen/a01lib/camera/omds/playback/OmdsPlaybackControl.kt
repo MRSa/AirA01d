@@ -3,11 +3,13 @@ package jp.osdn.gokigen.a01lib.camera.omds.playback
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.exifinterface.media.ExifInterface
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl.IContentTransferCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl.IDownloadContentCallback
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IStillImageFileInfo
+import java.io.ByteArrayInputStream
 
 class OmdsPlaybackControl(
     userAgent: String = "OlympusCameraKit",
@@ -15,6 +17,7 @@ class OmdsPlaybackControl(
     timeoutMs: Int = TIMEOUT_MS
 ) : IPlaybackControl
 {
+    private var isOpcProtocol : Boolean = true
     private val imageListGetter = OmdsGetImageFileList(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
     private val fileInfoGetter = OmdsGetFileInfo(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
     private val getThumbnail = OmdsGetThumbnail(userAgent = userAgent, executeUrl = executeUrl, timeoutMs = timeoutMs)
@@ -30,6 +33,7 @@ class OmdsPlaybackControl(
         getScreennail.useOpcProtocol = isOpcProtocol
         resizeImage.useOpcProtocol = isOpcProtocol
         fileTransfer.useOpcProtocol = isOpcProtocol
+        this.isOpcProtocol = isOpcProtocol
     }
 
     override fun getRawFileSuffix(): String
@@ -89,6 +93,26 @@ class OmdsPlaybackControl(
         catch (t: Throwable)
         {
             Log.w(TAG, "ERR>get getResizeImage($directory, $size) : ${t.localizedMessage}")
+        }
+        return null
+    }
+
+    override fun getExif(directory: String): ExifInterface?
+    {
+        try
+        {
+            val size = if (isOpcProtocol) { 640 } else { 1024 }
+            val reply = resizeImage.getResizeImage(directory, size)
+            if (reply?.body != null)
+            {
+                // ----- ExifInterfaceを応答する
+                return (ByteArrayInputStream(reply.body).use { inputStream -> ExifInterface(inputStream) })
+            }
+            Log.w(TAG, "FAIL>getExif($directory)")
+        }
+        catch (t: Throwable)
+        {
+            Log.w(TAG, "ERR>getExif($directory) : ${t.localizedMessage}")
         }
         return null
     }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,14 +23,22 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IPlaybackControl
 import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsFileTransfer
 import jp.osdn.gokigen.a01lib.camera.utils.storage.MediaStoreStreamSaveHelper
 import jp.osdn.gokigen.aira01d.AppSingleton
+import jp.osdn.gokigen.aira01d.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 
-class ContentListViewModel(application: Application) : ViewModel()
+class ContentListViewModel(val application: Application) : ViewModel()
 {
     private val _runMode = MutableLiveData<String>()
     val runMode: LiveData<String> = _runMode
@@ -42,6 +51,9 @@ class ContentListViewModel(application: Application) : ViewModel()
 
     private val _contentStatus = MutableLiveData<ContentLoadingStatus>()
     val contentStatus: LiveData<ContentLoadingStatus> = _contentStatus
+
+    private val _currentExif = MutableStateFlow<ExifDataToDisplay?>(null)
+    val currentExif: StateFlow<ExifDataToDisplay?> = _currentExif.asStateFlow()
 
     // --- ダウンロードの状態管理用 State (Compose の mutableStateOf を使用)
     var isDownloading by mutableStateOf(false)
@@ -263,7 +275,7 @@ class ContentListViewModel(application: Application) : ViewModel()
 
         val streamSaver = MediaStoreStreamSaveHelper(context, storeFileName)
 
-        // ★重要: viewModelScope で実行することで画面回転に耐える
+        // viewModelScope で実行することで画面回転に耐える
         viewModelScope.launch(Dispatchers.IO) {
             val isReady = streamSaver.open()
             if (!isReady) {
@@ -317,6 +329,229 @@ class ContentListViewModel(application: Application) : ViewModel()
                 }
             )
         }
+    }
+
+    fun updateExifInfo(path: String, fileName: String, cacheFilePath: String?)
+    {
+        // --- 画像のExif情報を取得する
+        // Log.v(TAG, "updateExifInfo: $fileName")
+        _currentExif.value = null  // 新しい画像の読み込みが始まったら、一旦古いEXIF情報をクリア
+        viewModelScope.launch {
+            try {
+                val exifDataToDisplay = withContext(Dispatchers.IO) {
+
+                    val exif = if (_cameraProtocol.value == ICameraConnectionStatus.CameraProtocol.OPC)
+                    {
+                        // ----- OPC機の場合は、Exifをカメラから転送して取得
+                        AppSingleton.cameraControl.getCameraPlaybackControl().getExif("$path/$fileName")
+                    }
+                    else
+                    {
+                        // ----- OMDS機の場合は、キャッシュファイルから取得
+                        if (cacheFilePath != null)
+                        {
+                            ExifInterface(cacheFilePath)
+                        }
+                        else
+                        {
+                            // ----- キャッシュファイルがない(特定できない)場合は、Exifをカメラから転送して取得する
+                            AppSingleton.cameraControl.getCameraPlaybackControl().getExif("$path/$fileName")
+                        }
+                    }
+
+                    // 絞り値
+                    val fNumber = exif?.getAttribute(ExifInterface.TAG_F_NUMBER)
+
+                    // ISO感度
+                    val iso = exif?.getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)
+
+                    // 焦点距離
+                    val focalLengthDouble = exif?.getAttributeDouble(ExifInterface.TAG_FOCAL_LENGTH, 0.0) ?: 0.0
+
+                    // モデル
+                    val model = exif?.getAttribute(ExifInterface.TAG_MODEL)
+
+                    // GPS情報があるかどうか
+                    val latitude = exif?.getAttribute(ExifInterface.TAG_GPS_LATITUDE)
+                    val haGpsInfo = !latitude.isNullOrEmpty()
+
+                    // プログラムモード
+                    val programModeIndex = exif?.getAttributeInt(ExifInterface.TAG_EXPOSURE_PROGRAM, 0) ?: 0
+                    val exposurePrograms = application.applicationContext.resources.getStringArray(R.array.exif_exposure_program_value)
+                    val programModeStr = exposurePrograms.getOrNull(programModeIndex) ?: exposurePrograms[0]
+
+                    // 測光モード
+                    val meteringModeRaw = exif?.getAttributeInt(ExifInterface.TAG_METERING_MODE, 0) ?: 0
+                    val meteringModeIndex = when (meteringModeRaw) {
+                        in 0..6 -> meteringModeRaw // 0〜6（Unknown〜Partial）はそのまま
+                        255 -> 7                   // 255（Other）なら、配列の7番目を指定
+                        else -> 0                  // 規格外の値が来たら 0（Unknown）にする
+                    }
+                    val meteringModes = application.applicationContext.resources.getStringArray(R.array.exif_metering_mode_value)
+                    val meteringModeStr = meteringModes.getOrNull(meteringModeIndex) ?: meteringModes[0]
+
+                    // シャッタースピード
+                    val exposureTimeStr = exif?.getAttribute(ExifInterface.TAG_EXPOSURE_TIME)
+                    val value = exposureTimeStr?.toFloatOrNull() ?: 0.0f
+                    val exposureTime = if (value in 0.0f..0.5f) { // 0.0より大きく0.5未満 (1/value が 2.0 以上になる条件)
+                        // シャッター速度を分数で表示する (例: 1/250 s)
+                        val inv = 1.0f / value
+                        var intValue = inv.toInt()
+
+                        // 割り切れない数値の丸め処理 (4や9で終わる場合の補正)
+                        if (intValue % 10 in listOf(4, 9)) {
+                            intValue++
+                        }
+                        " 1/$intValue"
+                    } else {
+                        // シャッター速度を数値（秒数）で表示する (例: 1.5s / 0s)
+                        " ${exposureTimeStr ?: "0"} s"
+                    }
+
+                    // --- 取得した値を表示(仮)
+                    Log.v(TAG, "Read EXIF: $path/$fileName $cacheFilePath (SS:$exposureTime, F$fNumber, ISO$iso) $focalLengthDouble mm")
+
+                    // データクラスにして返す
+                    ExifDataToDisplay(
+                        fileName = fileName,
+                        aperture = fNumber,
+                        exposureTime = exposureTime,
+                        focalLength = focalLengthDouble,
+                        programMode = programModeStr,
+                        meteringMode = meteringModeStr,
+                        iso = iso,
+                        model = model,
+                        hasGpsInfo = haGpsInfo
+                    )
+                }
+                _currentExif.value = exifDataToDisplay
+            }
+            catch (e: Exception)
+            {
+                Log.e(TAG, "updateExifInfo : $fileName (${e.localizedMessage})")
+                //e.printStackTrace()
+                _currentExif.value = null
+            }
+        }
+    }
+
+    fun downloadMultipleFiles(files: List<ICameraFileInfo.ImageFileInfo>, imageSize: GetImageSize, context: Context)
+    {
+        isDownloading = true
+
+        viewModelScope.launch(Dispatchers.IO)
+        {
+            val baseUrl = AppSingleton.CAMERA_BASE_URL
+            val fileTransfer = OmdsFileTransfer(executeUrl = baseUrl)
+
+            var downloadCount = 0
+            var successCount = 0
+
+            for (file in files)
+            {
+                // ----- JPEGファイルの時には、指定された画像サイズでダウンロードする
+                val selectedSize = if (file.fileName.endsWith(suffix = "JPG", ignoreCase = true)) {
+                    imageSize
+                } else {
+                    GetImageSize.ORIGINAL
+                }
+
+                // ----- 保存するファイル名
+                val storeFileName = createTimestampedFileName(file.fileName)
+
+                // 状態の初期化
+                downloadCount++ // 画像取得数
+                isDownloading = true
+                downloadProgress = 0.0f
+                downloadStatusText = "${context.getString(R.string.now_downloading)} : $downloadCount/${files.size}"
+                downloadFileName = file.fileName
+
+                // --- 選択された画像サイズに応じてリクエストパスを調整
+                val downloadPath = when (selectedSize) {
+                    GetImageSize.WIDTH_640_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=0640"
+                    GetImageSize.WIDTH_1024_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1024"
+                    GetImageSize.WIDTH_1280_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1280"
+                    GetImageSize.WIDTH_1600_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1600"
+                    GetImageSize.WIDTH_1920_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1920"
+                    GetImageSize.WIDTH_2048_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2048"
+                    GetImageSize.WIDTH_2560_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2560"
+                    GetImageSize.ORIGINAL -> "${file.directory}/${file.fileName}"
+                }
+
+                val streamSaver = MediaStoreStreamSaveHelper(context, storeFileName)
+                val isReady = streamSaver.open()
+                if (!isReady)
+                {
+                    withContext(Dispatchers.Main) {
+                        isDownloading = false
+                        downloadFileName = ""
+                        Toast.makeText(context, context.getString(R.string.stored_image_ng), Toast.LENGTH_SHORT).show()
+                    }
+                    continue // 次のファイルのダウンロードへ
+                }
+
+                // --- ファイル取得実処理 (コールバックが完了するまで処理を一時停止する)
+                val isSuccess = suspendCancellableCoroutine { continuation ->
+                    fileTransfer.downloadContent(
+                        directory = downloadPath,
+                        callback = object : IPlaybackControl.IContentTransferCallback {
+                            override fun onReceive(readBytes: Int, length: Int, size: Int, data: ByteArray?) {
+                                if (data != null && data.isNotEmpty()) {
+                                    streamSaver.write(data)
+                                }
+                                if (length > 0) {
+                                    val percent = readBytes.toFloat() / length.toFloat()
+                                    downloadProgress = percent
+                                }
+                            }
+
+                            override fun onCompleted() {
+                                streamSaver.close(success = true)
+                                // コルーチン再開: 戻り値として true を返す
+                                if (continuation.isActive) continuation.resume(true)
+                            }
+
+                            override fun onErrorOccurred(e: Exception?) {
+                                streamSaver.close(success = false)
+                                // コルーチン再開: 戻り値として false を返す
+                                if (continuation.isActive) continuation.resume(false)
+                            }
+                        }
+                    )
+                    // コルーチンがキャンセルされた場合の処理
+                    continuation.invokeOnCancellation {
+                        streamSaver.close(success = false)
+                    }
+                }
+
+                // 一時停止が解除され、ここに流れてくる（UI更新と次のアイテムへの移行）
+                if (isSuccess)
+                {
+                    // --- ダウンロード成功
+                    successCount++
+                }
+                withContext(Dispatchers.Main) {
+                    downloadFileName = ""
+                }
+
+                // 1つのファイル処理が終わったら少し間隔をあける
+                delay(150.milliseconds)
+            }
+
+            // 一括ダウンロードの完了表示
+            val finishString = "${context.getString(R.string.finish_bulk_downloading_head)} $successCount/$downloadCount ${context.getString(R.string.finish_bulk_downloading_foot)}"
+            withContext(Dispatchers.Main) {
+                isDownloading = false
+                downloadFileName = ""
+                downloadProgress = 0.0f
+                Toast.makeText(context, finishString, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    fun clearExifInfo()
+    {
+        _currentExif.value = null  // 新しい画像の読み込みが始まったら、一旦古いEXIF情報をクリア
     }
 
     // --- ファイル名に現在のタイムスタンプを付与する関数  例: "R101010.JPG" -> "R101010_20261213123400.JPG"
