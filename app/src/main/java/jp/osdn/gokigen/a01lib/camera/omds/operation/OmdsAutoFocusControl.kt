@@ -3,12 +3,14 @@ package jp.osdn.gokigen.a01lib.camera.omds.operation
 import android.graphics.PointF
 import android.graphics.RectF
 import android.util.Log
+import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsFocusControl
 import jp.osdn.gokigen.a01lib.camera.utils.communication.SimpleHttpClient
 import java.lang.Exception
 import java.util.*
 import kotlin.math.floor
 
 class OmdsAutoFocusControl(
+    private val callback: OmdsFocusControl.IFocusingControlCallback? = null,
     userAgent: String = "OlympusCameraKit",
     private val executeUrl : String = "http://192.168.0.10",
 ) {
@@ -78,8 +80,8 @@ class OmdsAutoFocusControl(
             val posY = floor((point.y * SCALE_Y).toDouble()).toInt()
             Log.v(TAG, "AF ($posX, $posY)")
             val sendUrl = String.format(Locale.US, "%s%s&point=%04dx%04d", executeUrl, AF_FRAME_COMMAND, posX, posY)
-            val reply: String = http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: ""
-            if ((!reply.contains("ok"))&&(!reply.contains("OK")))
+            val reply: String = (http.httpGetWithHeader(sendUrl, headerMap, null, TIMEOUT_MS) ?: "").lowercase(Locale.US)
+            if (!reply.contains("ok"))
             {
                 Log.v(TAG, "OMDS: setTouchAFPosition() reply is illegal. : $reply ($sendUrl)")
             }
@@ -87,12 +89,14 @@ class OmdsAutoFocusControl(
             {
                 // AF FOCUSED
                 Log.v(TAG, "lockAutoFocus() : FOCUSED")
+                callback?.focusingResult(true, posX, posY)
                 //showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Focused, 0.0)
             }
             else
             {
                 // AF FOCUS FAILURE
                 Log.v(TAG, "lockAutoFocus() : ERROR")
+                callback?.focusingResult(false, -1, -1)
                 //showFocusFrame(preFocusFrameRect, IAutoFocusFrameDisplay.FocusFrameStatus.Failed, 1.0)
             }
         }
