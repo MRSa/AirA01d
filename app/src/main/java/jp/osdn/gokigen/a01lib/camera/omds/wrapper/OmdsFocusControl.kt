@@ -7,9 +7,9 @@ import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsAeLockControl
 import jp.osdn.gokigen.a01lib.camera.omds.operation.OmdsAutoFocusControl
 import java.lang.Exception
 
-class OmdsFocusControl : IFocusingControl
+class OmdsFocusControl(callback: IFocusingControlCallback? = null) : IFocusingControl
 {
-    private val afControl = OmdsAutoFocusControl()
+    private val afControl = OmdsAutoFocusControl(callback)
     private val aeControl = OmdsAeLockControl()
 
     fun setUseOpcProtocol(isOpcProtocol: Boolean)
@@ -69,6 +69,11 @@ class OmdsFocusControl : IFocusingControl
         {
             e.printStackTrace()
         }
+    }
+
+    interface IFocusingControlCallback
+    {
+        fun focusingResult(isFocused: Boolean, posX: Int, posY: Int)
     }
 
     companion object

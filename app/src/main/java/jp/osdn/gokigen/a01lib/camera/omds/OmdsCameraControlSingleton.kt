@@ -36,9 +36,14 @@ import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsPlaybackControl
 import jp.osdn.gokigen.a01lib.camera.omds.status.OmdsCameraStatusWatcher
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsCaptureControl
 import jp.osdn.gokigen.a01lib.camera.omds.wrapper.OmdsFocusControl
+import java.util.Locale
 
-class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatcher.IOpcEventReceive,
-    OmdsCameraStatusWatcher.IStatusWatcherStatus, ICameraControl
+class OmdsCameraControlSingleton:
+    ICameraConnectionStatus,
+    OmdsFocusControl.IFocusingControlCallback,
+    OmdsCameraStatusWatcher.IOpcEventReceive,
+    OmdsCameraStatusWatcher.IStatusWatcherStatus,
+    ICameraControl
 {
     private val statusWatcher = OmdsCameraStatusWatcher(this, this)
     private val liveviewControl = OmdsLiveViewControl()
@@ -83,7 +88,7 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
                 this.postCommand = OmdsPostCommand()
                 this.camInState = OmdsCamIndStatus()
                 this.camCommPathStatus = OmdsCommPathStatus()
-                this.focusControl = OmdsFocusControl()
+                this.focusControl = OmdsFocusControl(this)
                 this.captureControl = OmdsCaptureControl(statusWatcher)
                 this.getRecordImage = OmdsGetRecordImage()
                 this.liveviewMagnify = OmdsOpcLiveviewMagnifyControl()
@@ -383,6 +388,23 @@ class OmdsCameraControlSingleton : ICameraConnectionStatus, OmdsCameraStatusWatc
         {
             Log.e(TAG, "ERR>updateConsecutiveErrorCount($count): ${e.localizedMessage}")
         }
+    }
+
+    override fun focusingResult(isFocused: Boolean, posX: Int, posY: Int)
+    {
+        val result = if (isFocused) { "ok" } else { "ng" }
+        Log.v(TAG, "focusingResult($isFocused, $posX, $posY)")
+
+        // --- フォーカスされたというイベントを作成して送信
+        val resultByteArray = "<?xml version=\"1.0\"?><root><result>$result</result><location>${String.format(Locale.US, "%04dx%04d", (posX - 36), (posY - 36))}</location><size>0072x0072</size></root>".toByteArray(Charsets.UTF_8)
+        val resultLength = resultByteArray.size
+        val focusedEvent : ByteArray = byteArrayOf(
+            0x02.toByte(),
+            101.toByte(),
+            (resultLength shr 8 and 0xFF).toByte(),
+            (resultLength and 0xFF).toByte()
+        ) + resultByteArray
+        receivedOpcEvent(focusedEvent)
     }
 
     companion object
