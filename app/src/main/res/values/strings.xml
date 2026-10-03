@@ -31,6 +31,22 @@
     <string name="dialog_title_zoom_direction">Zoom</string>
     <string name="dialog_message_zoom_direction">direction</string>
 
+    <string name="dialog_camera_profiles">Operate camera profiles</string>
+    <string name="tab_title_camera_profiles_pull">Pull</string>
+    <string name="tab_title_camera_profiles_apply">Apply</string>
+    <string name="tab_title_camera_profiles_unknown">Unknown</string>
+    <string name="tab_label_camera_profiles_filename">File Name:</string>
+    <string name="button_camera_profiles_pull">Pull</string>
+    <string name="button_camera_profiles_apply">Apply</string>
+    <string name="button_camera_profiles_rename">Rename</string>
+    <string name="button_camera_profiles_delete">Delete</string>
+    <string name="button_camera_profiles_export">Export</string>
+    <string name="button_camera_profiles_import">Import</string>
+    <string name="dialog_title_confirm_pull">Pull Camera profiles</string>
+    <string name="dialog_message_confirm_pull">Read profile from camera and save to file \'%1$s\'. Proceed?</string>
+    <string name="dialog_title_finish_pull">Finished Pull Action</string>
+    <string name="dialog_message_finish_pull">Saved the camera profiles: \'%1$s\'.</string>
+
     <string name="title_camera_properties">Camera Property List</string>
     <string name="message_getting_properties">getting properties…</string>
     <string name="title_property">Property</string>

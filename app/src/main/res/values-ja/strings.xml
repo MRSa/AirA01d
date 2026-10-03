@@ -30,6 +30,22 @@
     <string name="dialog_title_zoom_direction">ズーム操作</string>
     <string name="dialog_message_zoom_direction">ズーム</string>
 
+    <string name="dialog_camera_profiles">カメラプロファイル操作</string>
+    <string name="tab_title_camera_profiles_pull">取得</string>
+    <string name="tab_title_camera_profiles_apply">展開</string>
+    <string name="tab_title_camera_profiles_unknown">不明</string>
+    <string name="tab_label_camera_profiles_filename">名称:</string>
+    <string name="button_camera_profiles_pull">取得</string>
+    <string name="button_camera_profiles_apply">展開</string>
+    <string name="button_camera_profiles_rename">改名</string>
+    <string name="button_camera_profiles_delete">削除</string>
+    <string name="button_camera_profiles_export">エクスポート</string>
+    <string name="button_camera_profiles_import">インポート</string>
+    <string name="dialog_title_confirm_pull">設定保存</string>
+    <string name="dialog_message_confirm_pull">カメラから設定を読み出し、「%1$s」に保存します。よろしいですか？</string>
+    <string name="dialog_title_finish_pull">保存完了</string>
+    <string name="dialog_message_finish_pull">カメラの設定を「%1$s」に保存しました。</string>
+
     <string name="title_camera_properties">カメラプロパティ一覧</string>
     <string name="message_getting_properties">プロパティ取得中…</string>
     <string name="title_property">プロパティ</string>

@@ -48,6 +48,7 @@ import jp.osdn.gokigen.aira01d.ui.component.widget.ShutterSpeedButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.TakeModeButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.WhiteBalanceButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.connect.WifiConfigButton
+import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
@@ -57,7 +58,8 @@ fun LiveviewScreenPortrait(
     navController: NavHostController,
     liveviewModel: LiveviewViewModel,
     cameraStatusViewModel: CameraStatusViewModel,
-    selfTimerViewModel: SelfTimerViewModel
+    selfTimerViewModel: SelfTimerViewModel,
+    cameraProfilesViewModel: CameraProfilesViewModel,
 ) {
     Column(
         modifier = Modifier
@@ -145,7 +147,7 @@ fun LiveviewScreenPortrait(
                 DriveModeButton(liveviewModel, cameraStatusViewModel, mod)
                 FocusModeButton(cameraStatusViewModel,mod)
                 AFLockUnlockButton(liveviewModel,mod)
-                CameraTuningButton(cameraStatusViewModel, mod)
+                CameraTuningButton(cameraProfilesViewModel, mod)
             }
 
             Spacer(Modifier.height(4.dp))
