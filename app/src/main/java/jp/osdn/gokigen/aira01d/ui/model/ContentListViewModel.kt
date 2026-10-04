@@ -208,7 +208,7 @@ class ContentListViewModel(val application: Application) : ViewModel()
             }
             catch (e: Exception)
             {
-                Log.e(TAG, "ERR>Change RunMode to playback ${e.message}")
+                Log.e(TAG, "ERR>get all content list ${e.message}")
             }
         }
     }

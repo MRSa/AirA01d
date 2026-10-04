@@ -72,6 +72,7 @@ import jp.osdn.gokigen.aira01d.ui.component.widget.ShutterSpeedButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.TakeModeButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.WhiteBalanceButton
 import jp.osdn.gokigen.aira01d.ui.component.widget.connect.WifiConfigButton
+import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
@@ -81,7 +82,8 @@ fun LiveviewScreenLandscape(
     navController: NavHostController,
     liveviewModel: LiveviewViewModel,
     cameraStatusViewModel: CameraStatusViewModel,
-    selfTimerViewModel: SelfTimerViewModel
+    selfTimerViewModel: SelfTimerViewModel,
+    cameraProfilesViewModel: CameraProfilesViewModel,
 ) {
     // 上部バーの表示状態を管理（初期状態は表示する）
     var isTopBarVisible by remember { mutableStateOf(true) }
@@ -196,7 +198,7 @@ fun LiveviewScreenLandscape(
 
             Row(Modifier.fillMaxWidth()) {
                 AFLockUnlockButton(liveviewModel,Modifier.weight(1f))
-                CameraTuningButton(cameraStatusViewModel, Modifier.weight(1f))
+                CameraTuningButton(cameraProfilesViewModel, Modifier.weight(1f))
             }
 
             Spacer(Modifier.height(1.dp))

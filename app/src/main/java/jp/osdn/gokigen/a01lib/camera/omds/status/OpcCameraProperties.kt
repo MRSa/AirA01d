@@ -46,16 +46,30 @@ class OpcCameraProperties(
         }
     }
 
-    fun setStatusString(propertyName: String, value: String)
+    fun setStatusString(propertyName: String, value: String): String
     {
         try
         {
-            sendSetPropertyRequest(propertyName, value)
+            return sendSetPropertyRequest(propertyName, value)
         }
         catch (e: Exception)
         {
             e.printStackTrace()
         }
+        return ""
+    }
+
+    fun getStatusString(propertyName: String): String
+    {
+        try
+        {
+            return sendGetPropertyRequest(propertyName)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return ""
     }
 
     fun getStatusList(key: CameraProperty): List<String>
@@ -209,12 +223,21 @@ class OpcCameraProperties(
         return emptyList()
     }
 
-    private fun sendSetPropertyRequest(property: String, value: String)
+    private fun sendSetPropertyRequest(property: String, value: String): String
     {
         val requestUrl = "$executeUrl/set_camprop.cgi?com=set&propname=$property"
         val postData = "<?xml version=\"1.0\"?><set><value>$value</value></set>"
         val response: String = http.httpPostWithHeader(requestUrl, postData, headerMap, null, TIMEOUT_MS) ?: ""
         dumpLog(requestUrl, response)
+        return response
+    }
+
+    private fun sendGetPropertyRequest(property: String): String
+    {
+        val requestUrl = "$executeUrl/get_camprop.cgi?com=get&propname=$property"
+        val response: String = http.httpGetWithHeader(requestUrl, headerMap, null, TIMEOUT_MS) ?: ""
+        dumpLog(requestUrl, response)
+        return response
     }
 
     private fun sendGetPropertyDescriptionRequest(property: String): String

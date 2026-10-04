@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.navigation.NavHostController
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.aira01d.AppSingleton
+import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 import jp.osdn.gokigen.aira01d.ui.model.PreferenceViewModel
@@ -19,7 +20,8 @@ fun LiveviewScreen(
     liveviewModel: LiveviewViewModel,
     cameraStatusViewModel: CameraStatusViewModel,
     selfTimerViewModel: SelfTimerViewModel,
-    preferenceViewModel: PreferenceViewModel
+    preferenceViewModel: PreferenceViewModel,
+    cameraProfilesViewModel: CameraProfilesViewModel,
 ) {
     val configuration = LocalConfiguration.current
 
@@ -51,7 +53,8 @@ fun LiveviewScreen(
             navController,
             liveviewModel,
             cameraStatusViewModel,
-            selfTimerViewModel
+            selfTimerViewModel,
+            cameraProfilesViewModel
         )
     } else {
         // ----- 縦向き
@@ -59,7 +62,8 @@ fun LiveviewScreen(
             navController,
             liveviewModel,
             cameraStatusViewModel,
-            selfTimerViewModel
+            selfTimerViewModel,
+            cameraProfilesViewModel
         )
     }
 }
