@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 // -----------------------------------------------------------------------------
 //   Pull : カメラから撮影プロファイルを読み出し、ファイルに保存する処理の呼び出し
@@ -29,7 +33,19 @@ fun CameraProfilesPullTab(
     viewModel: CameraProfilesViewModel,
     onPull: (String) -> Unit)
 {
-    var fileName by remember { mutableStateOf("") }
+    // 時刻フォーマット
+    val formatter = remember { SimpleDateFormat("yyMMdd_HHmmss", Locale.getDefault()) }
+
+    // 開いた時点の現在時刻文字列を取得する関数
+    fun generateDefaultFileName(): String = formatter.format(Date())
+
+    // 状態の初期化
+    var fileName by remember { mutableStateOf(generateDefaultFileName()) }
+
+    // ダイアログが開く（コンポーザブルが着脱・再表示される）度に最新の時刻に更新
+    LaunchedEffect(Unit) {
+        fileName = generateDefaultFileName()
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),

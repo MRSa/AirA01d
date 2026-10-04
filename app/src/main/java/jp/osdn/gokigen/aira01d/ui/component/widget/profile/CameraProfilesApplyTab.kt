@@ -10,21 +10,28 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.aira01d.R
@@ -32,7 +39,7 @@ import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
 
 
 // -----------------------------------------------------------------------------
-// 2. Apply 画面
+//   適用画面
 // -----------------------------------------------------------------------------
 @Composable
 fun CameraProfilesApplyTab(
@@ -43,21 +50,47 @@ fun CameraProfilesApplyTab(
     onExport: (String) -> Unit,
     onImport: (String) -> Unit
 ) {
-    val fileList = remember { listOf("aaaaa", "bbbbb", "ccccc", "ddddd", "eeeee") }
-    var selectedFile by remember { mutableStateOf(fileList.firstOrNull() ?: "") }
+    val haptic = LocalHapticFeedback.current
+    val fileList = viewModel.fileList
+    var selectedFile by remember { mutableStateOf("") }
     val colorScheme = MaterialTheme.colorScheme
+
+    // fileList が更新された際、selectedFile が未選択またはリスト外なら先頭を選択
+    LaunchedEffect(fileList) {
+        if (selectedFile.isEmpty() || !fileList.contains(selectedFile)) {
+            selectedFile = fileList.firstOrNull() ?: ""
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Column {
-            Text(
-                text = "File:",
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.tab_label_camera_profiles_file),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colorScheme.onSurface,
+                )
+                IconButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        viewModel.getAllFileList()
+                    },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.outline_refresh_24),
+                        contentDescription = "Reload",
+                        tint = colorScheme.onSurface,
+                    )
+                }
+            }
 
             // ファイルリスト選択ボックス
             Surface(

@@ -221,16 +221,22 @@ class OmdsCameraStatusWatcher(
         return (if (useOpcProtocol) { opcProperties.getDescriptor(propertyName) } else { omdsProperties.getDescriptor(propertyName) })
     }
 
-    override fun setStatusString(propertyName: String, value: String)
+    override fun setStatusString(propertyName: String, value: String): String
     {
         if (useOpcProtocol)
         {
-            opcProperties.setStatusString(propertyName, value)
+            return opcProperties.setStatusString(propertyName, value)
         }
-        else
+        return omdsProperties.setStatusString(propertyName, value)
+    }
+
+    override fun getStatusString(propertyName: String): String
+    {
+        if (useOpcProtocol)
         {
-            omdsProperties.setStatusString(propertyName, value)
+            return opcProperties.getStatusString(propertyName)
         }
+        return omdsProperties.getStatusString(propertyName)
     }
 
     init

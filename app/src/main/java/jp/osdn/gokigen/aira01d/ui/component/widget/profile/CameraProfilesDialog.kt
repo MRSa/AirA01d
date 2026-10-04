@@ -21,10 +21,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -48,6 +45,7 @@ fun CameraProfilesDialog(
     onExport: (String) -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val selectedTabIndex = viewModel.executionModeIndex.observeAsState()
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -84,7 +82,6 @@ fun CameraProfilesDialog(
                 HorizontalDivider(color = colorScheme.outline)
 
                 // --- メインコンテンツエリア ---
-                var selectedTabIndex by remember { mutableIntStateOf(0) }
                 val tabs = CameraProfilesDialogTab.entries.toTypedArray()
 
                 // Row の高さを右側コンテンツの最小必要高さ (IntrinsicSize.Min) に自動追従
@@ -101,7 +98,7 @@ fun CameraProfilesDialog(
                             .background(colorScheme.surfaceContainer)
                     ) {
                         tabs.forEachIndexed { index, tab ->
-                            val isSelected = selectedTabIndex == index
+                            val isSelected = selectedTabIndex.value == index
                             val tabTitle = when (tab)
                             {
                                 CameraProfilesDialogTab.PULL -> stringResource(R.string.tab_title_camera_profiles_pull)
@@ -109,7 +106,7 @@ fun CameraProfilesDialog(
                             }
                             Tab(
                                 selected = isSelected,
-                                onClick = { selectedTabIndex = index },
+                                onClick = { viewModel.setExecutionMode(index) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(48.dp)
@@ -151,7 +148,7 @@ fun CameraProfilesDialog(
                             .weight(3f)
                             .padding(16.dp)
                     ) {
-                        when (tabs[selectedTabIndex]) {
+                        when (tabs[selectedTabIndex.value ?: 0]) {
                             CameraProfilesDialogTab.PULL -> CameraProfilesPullTab(
                                 viewModel = viewModel,
                                 onPull = onPull,

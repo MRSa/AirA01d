@@ -11,6 +11,7 @@
     <string name="button_cancel">キャンセル</string>
     <string name="button_detail">詳細…</string>
     <string name="button_close">閉じる</string>
+    <string name="button_abort">中止</string>
     <string name="selected_count">件 選択中</string>
     <string name="deselect_all">全解除</string>
     <string name="select_all">全選択</string>
@@ -35,6 +36,7 @@
     <string name="tab_title_camera_profiles_apply">展開</string>
     <string name="tab_title_camera_profiles_unknown">不明</string>
     <string name="tab_label_camera_profiles_filename">名称:</string>
+    <string name="tab_label_camera_profiles_file">ファイル:</string>
     <string name="button_camera_profiles_pull">取得</string>
     <string name="button_camera_profiles_apply">展開</string>
     <string name="button_camera_profiles_rename">改名</string>
@@ -45,6 +47,24 @@
     <string name="dialog_message_confirm_pull">カメラから設定を読み出し、「%1$s」に保存します。よろしいですか？</string>
     <string name="dialog_title_finish_pull">保存完了</string>
     <string name="dialog_message_finish_pull">カメラの設定を「%1$s」に保存しました。</string>
+    <string name="dialog_title_failed_pull">保存失敗</string>
+    <string name="dialog_message_failed_pull">カメラの設定の保存に失敗しました。</string>
+    <string name="dialog_title_executing_pull">設定保存中</string>
+    <string name="dialog_message_executing_pull">カメラ設定を「%1$s」に保存…</string>
+    <string name="dialog_title_reading_file">設定ファイル確認中</string>
+    <string name="dialog_message_reading_file">設定ファイルを確認中…</string>
+    <string name="dialog_title_confirm_delete">設定ファイル削除</string>
+    <string name="dialog_message_confirm_delete">設定ファイル「%1$s」を削除します。よろしいですか？</string>
+    <string name="dialog_title_finish_delete">削除成功</string>
+    <string name="dialog_message_finish_delete">「%1$s」を削除しました。</string>
+    <string name="dialog_title_failed_delete">削除失敗</string>
+    <string name="dialog_message_failed_delete">設定ファイルの削除に失敗しました。</string>
+    <string name="dialog_title_finish_export">エクスポート終了</string>
+    <string name="dialog_message_finish_export">「%1$s」をエクスポートしました。</string>
+    <string name="dialog_title_failed_export">エクスポート失敗</string>
+    <string name="dialog_message_failed_export">「%1$s」のエクスポートに失敗しました。</string>
+    <string name="dialog_title_exporting_file">エクスポート中</string>
+    <string name="dialog_message_exporting_file">「%1$s」をエクスポートしています。お待ちください。</string>
 
     <string name="title_camera_properties">カメラプロパティ一覧</string>
     <string name="message_getting_properties">プロパティ取得中…</string>
