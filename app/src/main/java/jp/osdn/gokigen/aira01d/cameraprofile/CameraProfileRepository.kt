@@ -154,13 +154,28 @@ class CameraProfileRepository(private val context: Context)
 
     private fun setCameraPropertiesToCameraOmds(cameraProperties: List<CameraProperties>): Boolean
     {
-        // ----- OMDSカメラ用プロパティ反映ロジック
-        Log.v(TAG, "cameraProperties: ${cameraProperties.size}")
+        // ----- OMDSカメラ用プロパティ反映ロジック（OPCカメラと同じロジック）
+        var setPropertyCount = 0
         cameraProperties.forEach { cameraProperty ->
-            Log.v(TAG, "key: ${cameraProperty.propertyName} value: ${cameraProperty.value}")
+            //Log.v(TAG, "key: ${cameraProperty.propertyName} value: ${cameraProperty.value}")
+
+            // ----- 設定要否を確認する
+            val descriptor = AppSingleton.cameraControl.getCameraStatus().getDescriptor(cameraProperty.propertyName)
+            if ((descriptor.attribute.contains("set"))&&(descriptor.current != cameraProperty.value))
+            {
+                // ----- カメラプロパティが違うので設定する
+                AppSingleton.cameraControl.getCameraStatus().setStatusString(cameraProperty.propertyName, cameraProperty.value)
+                Log.v(TAG, "SET PROPERTY(${cameraProperty.propertyName}): ${descriptor.current} -> ${cameraProperty.value}")
+                setPropertyCount++
+
+                // ----- ちょっと "待ち" を入れてみる (値設定時)
+                Thread.sleep(15L + (0..10).random())
+            }
+            // ----- ちょっと "待ち" を入れてみる(毎回)
+            Thread.sleep(10L + (0..10).random())
         }
-        Log.v(TAG, "-----")
-        return false
+        Log.v(TAG, "Set Camera Properties: $setPropertyCount / ${cameraProperties.size}")
+        return true
     }
 
     fun exportCameraPropertyFile(fileName: String, destinationUri: Uri): Boolean
@@ -211,6 +226,7 @@ class CameraProfileRepository(private val context: Context)
         }
         if (exceptionCount > 0)
         {
+            // ----- 途中で通信エラーが発生した場合は取得失敗にする
             return emptyList()
         }
         return propertiesList
@@ -219,9 +235,50 @@ class CameraProfileRepository(private val context: Context)
     private fun getAllCameraPropertiesOmds() : List<CameraProperties>
     {
         // ----- プロパティの全件を取得する (OMDS用)
-        //val propertyValue = getPropertyValue("takemode")
+        var exceptionCount = 0
+        val propertiesList = ArrayList<CameraProperties>()
+        var cgiString = ""
+        val rawCommandList = AppSingleton.cameraControl.getCameraStatus().getRawCommandList()
+        val startPosIndex = rawCommandList.indexOf(string = "<cgi name=\"get_camprop\">", ignoreCase = true)
+        if (startPosIndex > 0) {
+            val endPosIndex = rawCommandList.indexOf(string =  "</cgi>", startIndex = startPosIndex, ignoreCase = true) + "</cgi>".length
+            cgiString = rawCommandList.substring(startPosIndex, endPosIndex)
+        }
+        if (cgiString.isEmpty())
+        {
+            // ----- コマンドプロパティリストが取れなかった
+            return emptyList()
+        }
 
-        return emptyList()
+        // --- 正規表現で <param2 name="xxx" を見つけるパターンを定義
+        val regex = """<param2\s+name="([^"]+)"\s*/?>""".toRegex()
+
+        // --- マッチした全ての抽出結果からキャプチャグループ（nameの中身）をSetとして取得
+        val propertyNames: Set<String> = regex.findAll(cgiString)
+            .map { matchResult -> matchResult.groupValues[1] } // キャプチャグループ1（名前部分）を取得
+            .toSet() // 自動的に重複を排除してSetに変換
+
+        propertyNames.forEach { propertyName ->
+            try
+            {
+                val propertyValue = getPropertyValue(propertyName)
+                if (propertyValue.isNotEmpty())
+                {
+                    propertiesList.add(CameraProperties(propertyName, propertyValue))
+                }
+            }
+            catch (e: Exception)
+            {
+                Log.v(TAG, "ERR>GET Property: $propertyName : ${e.localizedMessage}")
+                exceptionCount++
+            }
+        }
+        if (exceptionCount > 0)
+        {
+            // ----- 途中で通信エラーが発生した場合は取得失敗にする
+            return emptyList()
+        }
+        return propertiesList
     }
 
     private fun getPropertyValue(propertyName: String): String

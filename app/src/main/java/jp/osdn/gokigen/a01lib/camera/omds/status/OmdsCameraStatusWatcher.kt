@@ -25,6 +25,7 @@ class OmdsCameraStatusWatcher(
     private val omdsEventWatcher = OmdsEventStatusWatch(statusProvider)
     private val omdsProperties = OmdsCameraProperties()
 
+    private var omdsCommandList = ""
     private var isWatchingRtp = false
     private var isWatchingEvent = false
     private var useOpcProtocol : Boolean = true
@@ -53,7 +54,7 @@ class OmdsCameraStatusWatcher(
     override fun setOmdsCommandList(commandList: String)
     {
         Log.v(TAG, "setOmdsCommandList()")
-        //Log.v(TAG, "setOmdsCommandList:\n$commandList")
+        omdsCommandList = commandList
         startStatusWatch()
     }
 
@@ -67,6 +68,12 @@ class OmdsCameraStatusWatcher(
     {
         // ----- RTP拡張ヘッダを受信した
         rtpHeaderParser.receiveRtpHeader(byteBuffer)
+    }
+
+    override fun getRawCommandList(): String
+    {
+        // ----- コマンドリストを応答する
+        return omdsCommandList
     }
 
     private fun startEventWatch(portNumber: Int = 65000)

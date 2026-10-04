@@ -47,4 +47,5 @@ interface ICameraStatus
     fun getDescriptor(propertyName: String): CameraPropertyDescriptor
     fun setStatusString(propertyName: String, value: String) : String
     fun getStatusString(propertyName: String) : String
+    fun getRawCommandList(): String
 }
