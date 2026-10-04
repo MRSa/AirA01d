@@ -75,6 +75,13 @@
     <string name="dialog_message_finish_apply">カメラに「%1$s」の設定を展開しました。</string>
     <string name="dialog_title_failed_apply">適用失敗</string>
     <string name="dialog_message_failed_apply">「%1$s」の展開に失敗しました。</string>
+    <string name="dialog_title_rename_file">ファイル名変更</string>
+    <string name="dialog_message_rename_file">新しいファイル名</string>
+    <string name="dialog_info_rename_file">ファイル名を入力してください</string>
+    <string name="dialog_title_finish_rename">ファイル名変更</string>
+    <string name="dialog_message_finish_rename">ファイル名を変更しました。</string>
+    <string name="dialog_title_failed_rename">ファイル名変更失敗</string>
+    <string name="dialog_message_failed_rename">ファイル名の変更に失敗しました。</string>
 
     <string name="title_camera_properties">カメラプロパティ一覧</string>
     <string name="message_getting_properties">プロパティ取得中…</string>

@@ -30,6 +30,9 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
     private val _fileNameToDelete = MutableLiveData<String>()
     val fileNameToDelete: LiveData<String> = _fileNameToDelete
 
+    private val _fileNameToRename = MutableLiveData<String>()
+    val fileNameToRename: LiveData<String> = _fileNameToRename
+
     private val _fileNameToExport = MutableLiveData<String>()
     val fileNameToExport: LiveData<String> = _fileNameToExport
 
@@ -65,11 +68,14 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
             CameraProfileOperationStatus.FailedPullAction -> { getAllFileList() }
             CameraProfileOperationStatus.FinishedDeleteAction -> { getAllFileList() }
             CameraProfileOperationStatus.FailedDeleteAction -> { getAllFileList() }
+            CameraProfileOperationStatus.FinishedRenameFile -> { getAllFileList() }
+            CameraProfileOperationStatus.FailedRenameFile -> { getAllFileList() }
             CameraProfileOperationStatus.FinishedExportToFile -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
             CameraProfileOperationStatus.FailedExportToFile -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
             CameraProfileOperationStatus.FinishedApplyAction -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
             CameraProfileOperationStatus.FailedApplyAction -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
             CameraProfileOperationStatus.AbortExportAction -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
+            CameraProfileOperationStatus.SetRenameFileName -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
             else -> {}
         }
         Log.v(TAG, "Camera Profile Status: ${_cameraProfileOperationStatus.value}")
@@ -124,6 +130,56 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
             {
                 e.printStackTrace()
                 _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FailedDeleteAction)
+            }
+        }
+    }
+
+    // ----- ファイル名のリネーム処理
+    fun renameProfile(fileName : String)
+    {
+        Log.v(TAG, "Rename profile: $fileName")
+        if (fileName.isEmpty())
+        {
+            // ----- ファイル名が指定されていない場合は、何もしない
+            return
+        }
+        _fileNameToRename.value = fileName
+        _cameraProfileOperationStatus.value = CameraProfileOperationStatus.SetRenameFileName
+    }
+
+    fun confirmRenameProfile(newFileName: String)
+    {
+        if (newFileName.isEmpty())
+        {
+            // ----- ファイル名が指定されていない場合は、何もしない
+            _cameraProfileOperationStatus.value = CameraProfileOperationStatus.SetRenameFileName
+            return
+        }
+        _cameraProfileOperationStatus.value = CameraProfileOperationStatus.FileRenaming
+        val fileNameToRename = _fileNameToRename.value?: ""
+        viewModelScope.launch {
+            try
+            {
+                // ファイル名の変更処理
+                _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FileRenaming)
+
+                // Dispatchers.IO で非同期取得
+                val result = withContext(Dispatchers.IO) {
+                    repository.renameProfileFile(fileNameToRename, newFileName)
+                }
+                // メインスレッドで安全にComposeのStateへ反映...読み出し状況に合わせて応答を反映
+                if (result) {
+                    _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FinishedRenameFile)
+                }
+                else
+                {
+                    _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FailedRenameFile)
+                }
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+                _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FailedRenameFile)
             }
         }
     }
@@ -321,9 +377,9 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
         FinishedApplyAction,
         FailedApplyAction,
         SetRenameFileName,
-        ConfirmationRenameFile,
         FileRenaming,
         FinishedRenameFile,
+        FailedRenameFile,
     }
 
     companion object {

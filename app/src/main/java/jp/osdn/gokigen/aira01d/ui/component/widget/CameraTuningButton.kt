@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.component.widget.profile.CameraProfileActionConfirmDialog
 import jp.osdn.gokigen.aira01d.ui.component.widget.profile.CameraProfilesDialog
+import jp.osdn.gokigen.aira01d.ui.component.widget.profile.RenameFileDialog
 import jp.osdn.gokigen.aira01d.ui.component.widget.profile.ShowActionResultDialog
 import jp.osdn.gokigen.aira01d.ui.component.widget.profile.ShowBusyActionDialog
 import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
@@ -34,6 +35,7 @@ fun CameraTuningButton(
     val fileNameToDelete = viewModel.fileNameToDelete.observeAsState()
     val fileNameToExport = viewModel.fileNameToExport.observeAsState()
     val fileNameToApply = viewModel.fileNameToApply.observeAsState()
+    val fileNameToRename = viewModel.fileNameToRename.observeAsState()
 
     // ----- ダイアログの表示状態を管理する State -----
     val showDialog by viewModel.cameraProfileOperationStatus.observeAsState(initial = CameraProfileOperationStatus.NoDialog)
@@ -78,6 +80,7 @@ fun CameraTuningButton(
     val showFileNameToDelete = fileNameToDelete.value ?: ""
     val showFileNameToExport = fileNameToExport.value ?: ""
     val showFileNameToApply = fileNameToApply.value ?: ""
+    val showFileNameToRename = fileNameToRename.value ?: ""
     when (showDialog)
     {
         CameraProfileOperationStatus.OpenedDialog -> {
@@ -93,7 +96,7 @@ fun CameraTuningButton(
                     viewModel.proceedCameraProfileOperation()
                 },
                 onExport = { fileName ->
-                    // ----- Export 処理 : export先を指定する
+                    // Export 処理 : export先を指定する
                     viewModel.exportProfileFile(fileName)
                     exportLauncher.launch(fileName)
                 },
@@ -102,8 +105,8 @@ fun CameraTuningButton(
                     viewModel.deleteProfile(fileName)
                 },
                 onRename = { fileName ->
-                    // TODO: ViewModelで Rename 処理を呼ぶ
-                    // viewModel.renameProfile(fileName)
+                    // ファイル名のリネーム処理を開始する
+                    viewModel.renameProfile(fileName)
                 },
                 onApply = { fileName ->
                     // カメラへ設定を反映させる処理の実行
@@ -258,6 +261,29 @@ fun CameraTuningButton(
                 isSuccess = false,
                 title = stringResource(R.string.dialog_title_abort_export),
                 message = stringResource(id = R.string.dialog_message_abort_export),
+                onDismiss = { viewModel.proceedCameraProfileOperation() }
+            )
+        }
+        CameraProfileOperationStatus.SetRenameFileName -> {
+            RenameFileDialog(
+                currentName = showFileNameToRename,
+                onDismissRequest = { viewModel.proceedCameraProfileOperation() },
+                onConfirm = { newName -> viewModel.confirmRenameProfile(newName) }
+            )
+        }
+        CameraProfileOperationStatus.FinishedRenameFile -> {
+            ShowActionResultDialog(
+                isSuccess = true,
+                title = stringResource(R.string.dialog_title_finish_rename),
+                message = stringResource(id = R.string.dialog_message_finish_rename),
+                onDismiss = { viewModel.proceedCameraProfileOperation() }
+            )
+        }
+        CameraProfileOperationStatus.FailedRenameFile -> {
+            ShowActionResultDialog(
+                isSuccess = false,
+                title = stringResource(R.string.dialog_title_failed_rename),
+                message = stringResource(id = R.string.dialog_message_failed_rename),
                 onDismiss = { viewModel.proceedCameraProfileOperation() }
             )
         }

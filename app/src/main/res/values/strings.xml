@@ -76,6 +76,13 @@
     <string name="dialog_message_finish_apply">Applied the property: \'%1$s\'.</string>
     <string name="dialog_title_failed_apply">Failed Apply Action</string>
     <string name="dialog_message_failed_apply">Failed to apply the property: \'%1$s\'.</string>
+    <string name="dialog_title_rename_file">Rename File</string>
+    <string name="dialog_message_rename_file">New file name</string>
+    <string name="dialog_info_rename_file">please input new file name</string>
+    <string name="dialog_title_finish_rename">Finished Rename Action</string>
+    <string name="dialog_message_finish_rename">Renamed the property file.</string>
+    <string name="dialog_title_failed_rename">Failed Rename Action</string>
+    <string name="dialog_message_failed_rename">Failed to rename the property file.</string>
 
     <string name="title_camera_properties">Camera Property List</string>
     <string name="message_getting_properties">getting properties…</string>

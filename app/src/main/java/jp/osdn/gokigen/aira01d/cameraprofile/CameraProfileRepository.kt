@@ -87,6 +87,31 @@ class CameraProfileRepository(private val context: Context)
         return false
     }
 
+    fun renameProfileFile(oldFileName: String, newFileName: String): Boolean
+    {
+        if ((oldFileName.isEmpty())||(newFileName.isEmpty()))
+        {
+            // ファイル名が指定されていないときはエラー応答
+            return false
+        }
+        try
+        {
+            // アプリ専用の内部ストレージディレクトリからファイルを削除する
+            val directory = context.filesDir
+            val file = File(directory, oldFileName)
+            if (file.exists())
+            {
+                val fileName = newFileName.removeSuffix(".json")
+                return file.renameTo(getUniqueFile(directory, fileName))
+            }
+        }
+        catch (e: Exception)
+        {
+            Log.v(TAG, "ERR>File Rename: $oldFileName -> $newFileName (${e.localizedMessage})")
+        }
+        return false
+    }
+
     fun readCameraPropertyFile(fileName: String): List<CameraProperties>
     {
         // ----- ファイルから読み込んで、リストに入れる
