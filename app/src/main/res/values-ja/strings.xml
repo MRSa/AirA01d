@@ -31,7 +31,7 @@
     <string name="dialog_title_zoom_direction">ズーム操作</string>
     <string name="dialog_message_zoom_direction">ズーム</string>
 
-    <string name="dialog_camera_profiles">カメラプロファイル操作</string>
+    <string name="dialog_camera_profiles">カメラ設定操作</string>
     <string name="tab_title_camera_profiles_pull">取得</string>
     <string name="tab_title_camera_profiles_apply">展開</string>
     <string name="tab_title_camera_profiles_unknown">不明</string>
@@ -63,8 +63,18 @@
     <string name="dialog_message_finish_export">「%1$s」をエクスポートしました。</string>
     <string name="dialog_title_failed_export">エクスポート失敗</string>
     <string name="dialog_message_failed_export">「%1$s」のエクスポートに失敗しました。</string>
+    <string name="dialog_title_abort_export">エクスポート中止</string>
+    <string name="dialog_message_abort_export">エクスポート処理を中止しました。</string>
     <string name="dialog_title_exporting_file">エクスポート中</string>
     <string name="dialog_message_exporting_file">「%1$s」をエクスポートしています。お待ちください。</string>
+    <string name="dialog_title_confirm_apply">設定展開</string>
+    <string name="dialog_message_confirm_apply">「%1$s」の設定をカメラに展開します。よろしいですか？</string>
+    <string name="dialog_title_applying_profile">設定展開中</string>
+    <string name="dialog_message_applying_profile">「%1$s」の設定をカメラに展開中です。お待ちください。</string>
+    <string name="dialog_title_finish_apply">展開完了</string>
+    <string name="dialog_message_finish_apply">カメラに「%1$s」の設定を展開しました。</string>
+    <string name="dialog_title_failed_apply">適用失敗</string>
+    <string name="dialog_message_failed_apply">「%1$s」の展開に失敗しました。</string>
 
     <string name="title_camera_properties">カメラプロパティ一覧</string>
     <string name="message_getting_properties">プロパティ取得中…</string>

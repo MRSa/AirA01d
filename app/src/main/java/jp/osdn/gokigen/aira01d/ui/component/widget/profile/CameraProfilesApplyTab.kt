@@ -131,23 +131,32 @@ fun CameraProfilesApplyTab(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
         ) {
-            // インポート指示（ローカルから読み出す）
+            // 削除：ローカルストレージのファイル削除
+            OutlinedButton(onClick = { onDelete(selectedFile) }) {
+                Text(text = stringResource(R.string.button_camera_profiles_delete))
+            }
+            // 改名：ローカルストレージの名称変更
+            OutlinedButton(onClick = { onRename(selectedFile) }) {
+                Text(text = stringResource(R.string.button_camera_profiles_rename))
+            }
+            // 展開：ローカルストレージからカメラへ設定
+            Button(onClick = { onApply(selectedFile) }) {
+                Text(text = stringResource(R.string.button_camera_profiles_apply))
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)
+        ) {
+            // インポート指示（外部ストレージから読み出してローカルに保存する）
             OutlinedButton(
                 onClick = { onImport(selectedFile) }
             ) {
                 Text(text = stringResource(R.string.button_camera_profiles_import))
             }
+            // エクスポート指示（ローカルから読み出して外部ストレージに保存する）
             OutlinedButton(onClick = { onExport(selectedFile) }) {
                 Text(text = stringResource(R.string.button_camera_profiles_export))
-            }
-            OutlinedButton(onClick = { onDelete(selectedFile) }) {
-                Text(text = stringResource(R.string.button_camera_profiles_delete))
-            }
-            OutlinedButton(onClick = { onRename(selectedFile) }) {
-                Text(text = stringResource(R.string.button_camera_profiles_rename))
-            }
-            Button(onClick = { onApply(selectedFile) }) {
-                Text(text = stringResource(R.string.button_camera_profiles_apply))
             }
         }
     }

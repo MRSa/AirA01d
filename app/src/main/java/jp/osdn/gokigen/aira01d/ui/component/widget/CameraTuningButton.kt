@@ -12,7 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,6 +33,7 @@ fun CameraTuningButton(
     val fileNameToPull = viewModel.fileNameToPull.observeAsState()
     val fileNameToDelete = viewModel.fileNameToDelete.observeAsState()
     val fileNameToExport = viewModel.fileNameToExport.observeAsState()
+    val fileNameToApply = viewModel.fileNameToApply.observeAsState()
 
     // ----- ダイアログの表示状態を管理する State -----
     val showDialog by viewModel.cameraProfileOperationStatus.observeAsState(initial = CameraProfileOperationStatus.NoDialog)
@@ -67,12 +67,17 @@ fun CameraTuningButton(
             // ファイルのexport実処理...
             viewModel.exportCameraPropertyFile(uri)
         }
+        else
+        {
+            viewModel.abortExport()
+        }
     }
 
     // ----- ダイアログの表示(状態によって表示を変える) -----
     val showFileNameToPull = fileNameToPull.value ?: ""
     val showFileNameToDelete = fileNameToDelete.value ?: ""
     val showFileNameToExport = fileNameToExport.value ?: ""
+    val showFileNameToApply = fileNameToApply.value ?: ""
     when (showDialog)
     {
         CameraProfileOperationStatus.OpenedDialog -> {
@@ -101,9 +106,9 @@ fun CameraTuningButton(
                     // viewModel.renameProfile(fileName)
                 },
                 onApply = { fileName ->
-                    // TODO: ViewModelで Apply 処理を呼ぶ
-                    // viewModel.applyProfile(fileName)
-                    viewModel.proceedCameraProfileOperation()
+                    // カメラへ設定を反映させる処理の実行
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    viewModel.applyProfile(fileName)
                 },
                 onPull = { fileName ->
                     // カメラからの設定読み出しと保存処理の実行
@@ -117,6 +122,14 @@ fun CameraTuningButton(
                 title = stringResource(R.string.dialog_title_confirm_pull),
                 message = stringResource(id = R.string.dialog_message_confirm_pull, showFileNameToPull),
                 onConfirm = { viewModel.confirmPullProfile() },
+                onDismiss = { viewModel.cancelAction() }
+            )
+        }
+        CameraProfileOperationStatus.ApplyActionConfirmation -> {
+            CameraProfileActionConfirmDialog(
+                title = stringResource(R.string.dialog_title_confirm_apply),
+                message = stringResource(id = R.string.dialog_message_confirm_apply, showFileNameToApply),
+                onConfirm = { viewModel.confirmApplyProfile() },
                 onDismiss = { viewModel.cancelAction() }
             )
         }
@@ -145,14 +158,6 @@ fun CameraTuningButton(
             )
         }
         CameraProfileOperationStatus.ReadingFileList -> {
-            ShowBusyActionDialog(
-                isAbortable = false,
-                title = stringResource(R.string.dialog_title_reading_file),
-                message = stringResource(id = R.string.dialog_message_reading_file),
-                onDismiss = { viewModel.cancelAction() }
-            )
-        }
-        CameraProfileOperationStatus.ReadingProfileFromFile -> {
             ShowBusyActionDialog(
                 isAbortable = false,
                 title = stringResource(R.string.dialog_title_reading_file),
@@ -202,7 +207,7 @@ fun CameraTuningButton(
         }
         CameraProfileOperationStatus.FinishedExportToFile -> {
             ShowActionResultDialog(
-                isSuccess = false,
+                isSuccess = true,
                 title = stringResource(R.string.dialog_title_finish_export),
                 message = stringResource(id = R.string.dialog_message_finish_export, showFileNameToExport),
                 onDismiss = { viewModel.proceedCameraProfileOperation() }
@@ -213,6 +218,46 @@ fun CameraTuningButton(
                 isSuccess = false,
                 title = stringResource(R.string.dialog_title_failed_export),
                 message = stringResource(id = R.string.dialog_message_failed_export, showFileNameToExport),
+                onDismiss = { viewModel.proceedCameraProfileOperation() }
+            )
+        }
+        CameraProfileOperationStatus.ReadingProfileFromFile -> {
+            ShowBusyActionDialog(
+                isAbortable = false,
+                title = stringResource(R.string.dialog_title_reading_file),
+                message = stringResource(id = R.string.dialog_message_reading_file),
+                onDismiss = { viewModel.cancelAction() }
+            )
+        }
+        CameraProfileOperationStatus.ApplyingProfileToCamera -> {
+            ShowBusyActionDialog(
+                isAbortable = false,
+                title = stringResource(R.string.dialog_title_applying_profile),
+                message = stringResource(id = R.string.dialog_message_applying_profile, showFileNameToApply),
+                onDismiss = { viewModel.cancelAction() }
+            )
+        }
+        CameraProfileOperationStatus.FinishedApplyAction -> {
+            ShowActionResultDialog(
+                isSuccess = true,
+                title = stringResource(R.string.dialog_title_finish_apply),
+                message = stringResource(id = R.string.dialog_message_finish_apply, showFileNameToApply),
+                onDismiss = { viewModel.proceedCameraProfileOperation() }
+            )
+        }
+        CameraProfileOperationStatus.FailedApplyAction -> {
+            ShowActionResultDialog(
+                isSuccess = false,
+                title = stringResource(R.string.dialog_title_failed_apply),
+                message = stringResource(id = R.string.dialog_message_failed_apply, showFileNameToApply),
+                onDismiss = { viewModel.proceedCameraProfileOperation() }
+            )
+        }
+        CameraProfileOperationStatus.AbortExportAction -> {
+            ShowActionResultDialog(
+                isSuccess = false,
+                title = stringResource(R.string.dialog_title_abort_export),
+                message = stringResource(id = R.string.dialog_message_abort_export),
                 onDismiss = { viewModel.proceedCameraProfileOperation() }
             )
         }

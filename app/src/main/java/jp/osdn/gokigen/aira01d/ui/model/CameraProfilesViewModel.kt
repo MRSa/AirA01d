@@ -2,8 +2,6 @@ package jp.osdn.gokigen.aira01d.ui.model
 
 import android.net.Uri
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -25,6 +23,9 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
 
     private val _fileNameToPull = MutableLiveData<String>()
     val fileNameToPull: LiveData<String> = _fileNameToPull
+
+    private val _fileNameToApply = MutableLiveData<String>()
+    val fileNameToApply: LiveData<String> = _fileNameToApply
 
     private val _fileNameToDelete = MutableLiveData<String>()
     val fileNameToDelete: LiveData<String> = _fileNameToDelete
@@ -66,6 +67,9 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
             CameraProfileOperationStatus.FailedDeleteAction -> { getAllFileList() }
             CameraProfileOperationStatus.FinishedExportToFile -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
             CameraProfileOperationStatus.FailedExportToFile -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
+            CameraProfileOperationStatus.FinishedApplyAction -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
+            CameraProfileOperationStatus.FailedApplyAction -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
+            CameraProfileOperationStatus.AbortExportAction -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
             else -> {}
         }
         Log.v(TAG, "Camera Profile Status: ${_cameraProfileOperationStatus.value}")
@@ -74,6 +78,11 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
     fun cancelAction()
     {
         _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog
+    }
+
+    fun abortExport()
+    {
+        _cameraProfileOperationStatus.value = CameraProfileOperationStatus.AbortExportAction
     }
 
     fun deleteProfile(fileName: String)
@@ -105,20 +114,69 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
                 // メインスレッドで安全にComposeのStateへ反映...読み出し状況に合わせて応答を反映
                 if (result) {
                     _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FinishedDeleteAction)
-
-                    // ファイル一覧を更新する
-                    //getAllFileList()
                 }
                 else
                 {
                     _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FailedDeleteAction)
                 }
-
             }
             catch (e: Exception)
             {
                 e.printStackTrace()
                 _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FailedDeleteAction)
+            }
+        }
+    }
+
+    // ----- カメラへプロファイルを設定する指示
+    fun applyProfile(fileName : String)
+    {
+        Log.v(TAG, "Apply profile: $fileName")
+        if (fileName.isEmpty())
+        {
+            // ----- ファイル名が指定されていない場合は、何もしない
+            return
+        }
+        _fileNameToApply.value = fileName
+        _cameraProfileOperationStatus.value = CameraProfileOperationStatus.ApplyActionConfirmation
+    }
+
+    fun confirmApplyProfile()
+    {
+        val fileNameToApply = _fileNameToApply.value?: ""
+        viewModelScope.launch {
+            try
+            {
+                // カメラからの設定読み出しを開始する
+                _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.ReadingProfileFromFile)
+
+                // Dispatchers.IO で非同期取得
+                val result = withContext(Dispatchers.IO) {
+                    val cameraProperties = repository.readCameraPropertyFile(fileNameToApply)
+                    if (cameraProperties.isEmpty())
+                    {
+                        // ----- ファイルからカメラプロパティが読み込めなかった...
+                        false
+                    }
+                    else {
+                        _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.ApplyingProfileToCamera)
+                        // カメラプロパティを設定する
+                        repository.setCameraPropertiesToCamera(cameraProperties)
+                    }
+                }
+                // メインスレッドで安全にComposeのStateへ反映...読み出し状況に合わせて応答を反映
+                if (result) {
+                    _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FinishedApplyAction)
+                }
+                else
+                {
+                    _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FailedApplyAction)
+                }
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+                _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FailedApplyAction)
             }
         }
     }
@@ -253,18 +311,19 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
         FinishedDeleteAction,
         FailedDeleteAction,
         SelectExportDirectory,
+        AbortExportAction,
         ExportingProfileToFile,
         FinishedExportToFile,
         FailedExportToFile,
+        ApplyActionConfirmation,
+        ReadingProfileFromFile,
+        ApplyingProfileToCamera,
+        FinishedApplyAction,
+        FailedApplyAction,
         SetRenameFileName,
         ConfirmationRenameFile,
         FileRenaming,
         FinishedRenameFile,
-        ApplyActionConfirmation,
-        ReadingProfileFromFile,
-        ApplyingProfileToCamera,
-        AbortApply,
-        FinishedApply,
     }
 
     companion object {

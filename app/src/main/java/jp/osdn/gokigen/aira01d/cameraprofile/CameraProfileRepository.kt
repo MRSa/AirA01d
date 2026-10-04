@@ -87,6 +87,82 @@ class CameraProfileRepository(private val context: Context)
         return false
     }
 
+    fun readCameraPropertyFile(fileName: String): List<CameraProperties>
+    {
+        // ----- ファイルから読み込んで、リストに入れる
+        return try
+        {
+            // 拡張子が付いていない場合は ".json" を付与
+            val fullFileName = if (fileName.endsWith(".json")) fileName else "$fileName.json"
+
+            // 対象のファイルオブジェクト
+            val file = File(context.filesDir, fullFileName)
+
+            // ファイルが存在しない場合は emptyList を返す
+            if (!file.exists()) {
+                return emptyList()
+            }
+            // ファイルの内容（JSON文字列）を読み込み
+            val jsonString = file.readText()
+
+            // JSON文字列を ArrayList<CameraProperties> オブジェクトにデコード
+            val list: List<CameraProperties> = Json.decodeFromString(jsonString)
+            return list
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    fun setCameraPropertiesToCamera(cameraProperties: List<CameraProperties>): Boolean
+    {
+        return when (AppSingleton.cameraControl.getCameraConnectionProtocol())
+        {
+            ICameraConnectionStatus.CameraProtocol.OPC -> { setCameraPropertiesToCameraOpc(cameraProperties) }
+            ICameraConnectionStatus.CameraProtocol.OMDS -> { setCameraPropertiesToCameraOmds(cameraProperties) }
+        }
+    }
+
+    private fun setCameraPropertiesToCameraOpc(cameraProperties: List<CameraProperties>): Boolean
+    {
+        // ----- OPCカメラ用プロパティ反映ロジック
+        var setPropertyCount = 0
+        cameraProperties.forEach { cameraProperty ->
+            //Log.v(TAG, "key: ${cameraProperty.propertyName} value: ${cameraProperty.value}")
+
+            // ----- 設定要否を確認する
+            val descriptor = AppSingleton.cameraControl.getCameraStatus().getDescriptor(cameraProperty.propertyName)
+            if ((descriptor.attribute.contains("set"))&&(descriptor.current != cameraProperty.value))
+            {
+                // ----- カメラプロパティが違うので設定する
+                AppSingleton.cameraControl.getCameraStatus().setStatusString(cameraProperty.propertyName, cameraProperty.value)
+
+                Log.v(TAG, "SET PROPERTY(${cameraProperty.propertyName}): ${descriptor.current} -> ${cameraProperty.value}")
+                setPropertyCount++
+
+                // ----- ちょっと "待ち" を入れてみる (値設定時)
+                Thread.sleep(15L + (0..10).random())
+            }
+            // ----- ちょっと "待ち" を入れてみる(毎回)
+            Thread.sleep(10L + (0..10).random())
+        }
+        Log.v(TAG, "Set Camera Properties: $setPropertyCount / ${cameraProperties.size}")
+        return true
+    }
+
+    private fun setCameraPropertiesToCameraOmds(cameraProperties: List<CameraProperties>): Boolean
+    {
+        // ----- OMDSカメラ用プロパティ反映ロジック
+        Log.v(TAG, "cameraProperties: ${cameraProperties.size}")
+        cameraProperties.forEach { cameraProperty ->
+            Log.v(TAG, "key: ${cameraProperty.propertyName} value: ${cameraProperty.value}")
+        }
+        Log.v(TAG, "-----")
+        return false
+    }
+
     fun exportCameraPropertyFile(fileName: String, destinationUri: Uri): Boolean
     {
         // ----- ファイルエクスポート実処理
