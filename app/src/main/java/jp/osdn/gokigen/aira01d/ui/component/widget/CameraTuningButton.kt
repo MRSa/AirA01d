@@ -75,6 +75,20 @@ fun CameraTuningButton(
         }
     }
 
+    // ファイル選択ダイアログ用ランチャー
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            viewModel.importCameraPropertyFile(uri)
+        }
+        else
+        {
+            // --- ファイル選択（インポート処理）をキャンセル
+            viewModel.cancelAction()
+        }
+    }
+
     // ----- ダイアログの表示(状態によって表示を変える) -----
     val showFileNameToPull = fileNameToPull.value ?: ""
     val showFileNameToDelete = fileNameToDelete.value ?: ""
@@ -90,10 +104,9 @@ fun CameraTuningButton(
                     // --- ダイアログを閉じる
                     viewModel.proceedCameraProfileOperation()
                 },
-                onImport = { fileName ->
-                    // TODO: ViewModelで Import 処理を呼ぶ
-                    //viewModel.importProfile(fileName)
-                    viewModel.proceedCameraProfileOperation()
+                onImport = { _ ->
+                    // インポートするファイルの選択
+                    importLauncher.launch(arrayOf("application/json"))
                 },
                 onExport = { fileName ->
                     // Export 処理 : export先を指定する
@@ -284,6 +297,30 @@ fun CameraTuningButton(
                 isSuccess = false,
                 title = stringResource(R.string.dialog_title_failed_rename),
                 message = stringResource(id = R.string.dialog_message_failed_rename),
+                onDismiss = { viewModel.proceedCameraProfileOperation() }
+            )
+        }
+        CameraProfileOperationStatus.ImportingProfileFromStorage -> {
+            ShowBusyActionDialog(
+                isAbortable = false,
+                title = stringResource(R.string.dialog_title_importing_profile),
+                message = stringResource(id = R.string.dialog_message_importing_profile),
+                onDismiss = { viewModel.cancelAction() }
+            )
+        }
+        CameraProfileOperationStatus.FinishedImportAction -> {
+            ShowActionResultDialog(
+                isSuccess = true,
+                title = stringResource(R.string.dialog_title_finish_import),
+                message = stringResource(id = R.string.dialog_message_finish_import),
+                onDismiss = { viewModel.proceedCameraProfileOperation() }
+            )
+        }
+        CameraProfileOperationStatus.FailedImportAction -> {
+            ShowActionResultDialog(
+                isSuccess = false,
+                title = stringResource(R.string.dialog_title_failed_import),
+                message = stringResource(id = R.string.dialog_message_failed_import),
                 onDismiss = { viewModel.proceedCameraProfileOperation() }
             )
         }

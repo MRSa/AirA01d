@@ -83,6 +83,12 @@
     <string name="dialog_message_finish_rename">Renamed the property file.</string>
     <string name="dialog_title_failed_rename">Failed Rename Action</string>
     <string name="dialog_message_failed_rename">Failed to rename the property file.</string>
+    <string name="dialog_title_importing_profile">Import File</string>
+    <string name="dialog_message_importing_profile">Importing file, please wait…</string>
+    <string name="dialog_title_finish_import">Finished Import Action</string>
+    <string name="dialog_message_finish_import">Imported the property file.</string>
+    <string name="dialog_title_failed_import">Failed Import Action</string>
+    <string name="dialog_message_failed_import">Failed to import the property file.</string>
 
     <string name="title_camera_properties">Camera Property List</string>
     <string name="message_getting_properties">getting properties…</string>

@@ -149,11 +149,11 @@ fun CameraProfilesApplyTab(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)
         ) {
             // インポート指示（外部ストレージから読み出してローカルに保存する）
-            //OutlinedButton(
-            //    onClick = { onImport(selectedFile) }
-            //) {
-            //    Text(text = stringResource(R.string.button_camera_profiles_import))
-            //}
+            OutlinedButton(
+                onClick = { onImport(selectedFile) }
+            ) {
+                Text(text = stringResource(R.string.button_camera_profiles_import))
+            }
             // エクスポート指示（ローカルから読み出して外部ストレージに保存する）
             OutlinedButton(onClick = { onExport(selectedFile) }) {
                 Text(text = stringResource(R.string.button_camera_profiles_export))

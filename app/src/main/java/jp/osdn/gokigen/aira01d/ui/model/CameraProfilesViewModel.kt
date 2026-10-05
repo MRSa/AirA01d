@@ -76,6 +76,8 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
             CameraProfileOperationStatus.FailedApplyAction -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
             CameraProfileOperationStatus.AbortExportAction -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
             CameraProfileOperationStatus.SetRenameFileName -> { _cameraProfileOperationStatus.value = CameraProfileOperationStatus.OpenedDialog }
+            CameraProfileOperationStatus.FinishedImportAction -> { getAllFileList() }
+            CameraProfileOperationStatus.FailedImportAction -> { getAllFileList() }
             else -> {}
         }
         Log.v(TAG, "Camera Profile Status: ${_cameraProfileOperationStatus.value}")
@@ -355,6 +357,32 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
         }
     }
 
+    fun importCameraPropertyFile(sourceUri: Uri)
+    {
+        viewModelScope.launch {
+            try
+            {
+                _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.ImportingProfileFromStorage)
+
+                // --- ファイル名の一覧
+                val result = withContext(Dispatchers.IO) { repository.importCameraPropertyFile(sourceUri) }
+                // メインスレッドで安全にComposeのStateへ反映...読み出し状況に合わせて応答を反映
+                if (result) {
+                    _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FinishedImportAction)
+                }
+                else
+                {
+                    _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FailedImportAction)
+                }
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+                _cameraProfileOperationStatus.postValue(CameraProfileOperationStatus.FailedImportAction)
+            }
+        }
+    }
+
     enum class CameraProfileOperationStatus {
         NoDialog,
         OpenedDialog,
@@ -380,6 +408,9 @@ class CameraProfilesViewModel(private val repository: CameraProfileRepository) :
         FileRenaming,
         FinishedRenameFile,
         FailedRenameFile,
+        ImportingProfileFromStorage,
+        FinishedImportAction,
+        FailedImportAction,
     }
 
     companion object {
