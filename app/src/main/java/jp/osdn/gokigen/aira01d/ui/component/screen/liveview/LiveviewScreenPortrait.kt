@@ -147,7 +147,7 @@ fun LiveviewScreenPortrait(
                 DriveModeButton(liveviewModel, cameraStatusViewModel, mod)
                 FocusModeButton(cameraStatusViewModel,mod)
                 AFLockUnlockButton(liveviewModel,mod)
-                CameraTuningButton(cameraProfilesViewModel, mod)
+                CameraTuningButton(liveviewModel, cameraProfilesViewModel, mod)
             }
 
             Spacer(Modifier.height(4.dp))
