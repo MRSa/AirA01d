@@ -33,7 +33,6 @@ import java.util.Locale
 @Composable
 fun CameraProfilesPullTab(
     liveViewModel: LiveviewViewModel,
-    viewModel: CameraProfilesViewModel,
     onPull: (String) -> Unit)
 {
     // Liveview動作中かどうか

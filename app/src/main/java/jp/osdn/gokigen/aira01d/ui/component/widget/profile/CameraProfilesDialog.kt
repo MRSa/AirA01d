@@ -153,7 +153,6 @@ fun CameraProfilesDialog(
                         when (tabs[selectedTabIndex.value ?: 0]) {
                             CameraProfilesDialogTab.PULL -> CameraProfilesPullTab(
                                 liveViewModel = liveViewModel,
-                                viewModel = viewModel,
                                 onPull = onPull,
                             )
                             CameraProfilesDialogTab.APPLY -> CameraProfilesApplyTab(
