@@ -33,7 +33,6 @@ fun CameraTuningButton(
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
-    val isLvActivated = liveViewModel.isLvActivated.observeAsState()
     val fileNameToPull = viewModel.fileNameToPull.observeAsState()
     val fileNameToDelete = viewModel.fileNameToDelete.observeAsState()
     val fileNameToExport = viewModel.fileNameToExport.observeAsState()
@@ -46,16 +45,12 @@ fun CameraTuningButton(
     // ----- ステータスに合わせてアイコンと色を決める -----
     val iconId = R.drawable.outline_tune_24
     val iconColor = MaterialTheme.colorScheme.primary
-    val isEditable = (isLvActivated.value == true)
 
     // ----- ボタンの表示 -----
     IconButton(
         onClick = {
-            if (isEditable)
-            {
-                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                viewModel.proceedCameraProfileOperation()
-            }
+            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+            viewModel.proceedCameraProfileOperation()
         },
         enabled = true,
         modifier = modifier.size(48.dp)
@@ -106,6 +101,7 @@ fun CameraTuningButton(
     {
         CameraProfileOperationStatus.OpenedDialog -> {
             CameraProfilesDialog(
+                liveViewModel = liveViewModel,
                 viewModel = viewModel,
                 onDismissRequest = {
                     // --- ダイアログを閉じる

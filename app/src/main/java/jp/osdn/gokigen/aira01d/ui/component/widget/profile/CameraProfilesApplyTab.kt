@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
+import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 
 
 // -----------------------------------------------------------------------------
@@ -43,6 +45,7 @@ import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
 // -----------------------------------------------------------------------------
 @Composable
 fun CameraProfilesApplyTab(
+    liveViewModel: LiveviewViewModel,
     viewModel: CameraProfilesViewModel,
     onDelete: (String) -> Unit,
     onRename: (String) -> Unit,
@@ -50,10 +53,13 @@ fun CameraProfilesApplyTab(
     onExport: (String) -> Unit,
     onImport: (String) -> Unit
 ) {
+    val isLvActivated = liveViewModel.isLvActivated.observeAsState()
     val haptic = LocalHapticFeedback.current
     val fileList = viewModel.fileList
     var selectedFile by remember { mutableStateOf("") }
     val colorScheme = MaterialTheme.colorScheme
+
+    val isCameraConnected = (isLvActivated.value == true)
 
     // fileList が更新された際、selectedFile が未選択またはリスト外なら先頭を選択
     LaunchedEffect(fileList) {
@@ -140,7 +146,10 @@ fun CameraProfilesApplyTab(
                 Text(text = stringResource(R.string.button_camera_profiles_rename))
             }
             // 展開：ローカルストレージからカメラへ設定
-            Button(onClick = { onApply(selectedFile) }) {
+            Button(
+                onClick = { onApply(selectedFile) },
+                enabled = isCameraConnected
+            ) {
                 Text(text = stringResource(R.string.button_camera_profiles_apply))
             }
         }
