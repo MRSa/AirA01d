@@ -198,7 +198,7 @@ fun LiveviewScreenLandscape(
 
             Row(Modifier.fillMaxWidth()) {
                 AFLockUnlockButton(liveviewModel,Modifier.weight(1f))
-                CameraTuningButton(cameraProfilesViewModel, Modifier.weight(1f))
+                CameraTuningButton(liveviewModel, cameraProfilesViewModel, Modifier.weight(1f))
             }
 
             Spacer(Modifier.height(1.dp))

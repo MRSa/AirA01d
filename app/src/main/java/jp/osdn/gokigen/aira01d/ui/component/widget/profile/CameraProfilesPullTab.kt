@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -21,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
+import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -30,9 +32,12 @@ import java.util.Locale
 // -----------------------------------------------------------------------------
 @Composable
 fun CameraProfilesPullTab(
-    viewModel: CameraProfilesViewModel,
+    liveViewModel: LiveviewViewModel,
     onPull: (String) -> Unit)
 {
+    // Liveview動作中かどうか
+    val isLvActivated = liveViewModel.isLvActivated.observeAsState()
+    val isCameraConnected = (isLvActivated.value == true)
     // 時刻フォーマット
     val formatter = remember { SimpleDateFormat("yyMMdd_HHmmss", Locale.getDefault()) }
 
@@ -77,7 +82,8 @@ fun CameraProfilesPullTab(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
         ) {
             Button(
-                onClick = { onPull(fileName) }
+                onClick = { onPull(fileName) },
+                enabled = isCameraConnected
             ) {
                 Text(text = stringResource(R.string.button_camera_profiles_pull))
             }

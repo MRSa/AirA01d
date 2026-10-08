@@ -2,6 +2,7 @@ package jp.osdn.gokigen.aira01d.cameraprofile
 
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Log
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.aira01d.AppSingleton
@@ -369,6 +370,51 @@ class CameraProfileRepository(private val context: Context)
             }
         }
         return fileNamesList
+    }
+
+    fun importCameraPropertyFile(sourceUri: Uri): Boolean
+    {
+        return runCatching {
+            val contentResolver = context.contentResolver
+
+            // ----- Uri から JSON 文字列を読み込む
+            val jsonString = contentResolver.openInputStream(sourceUri)?.use { inputStream ->
+                inputStream.bufferedReader().use { it.readText() }
+            } ?: return@runCatching false
+
+            // ----- List<CameraProperties> にデシリアライズ（失敗時は例外がスローされ catch される）
+            val cameraPropertiesList: List<CameraProperties> = Json.decodeFromString(jsonString)
+
+            // ----- リストの空チェック
+            if (cameraPropertiesList.isEmpty()) {
+                return@runCatching false
+            }
+
+            // ----- ローカルストレージ (filesDir) に一意な保存用ファイル名を作成して書き出し
+            val destinationFile = getUniqueFile(context.filesDir, getFileNameFromUri(sourceUri) ?: "property")
+            val serializedJson = Json.encodeToString(cameraPropertiesList)
+            destinationFile.writeText(serializedJson)
+
+            true  // 処理成功
+        }.getOrDefault(false)
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String?
+    {
+        // Uri からファイル名を取得する
+        var fileName: String? = null
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex != -1) fileName = cursor.getString(nameIndex)
+            }
+        }
+        // .json (または .JSON) で終わっている場合は末尾を削除
+        return if (fileName?.endsWith(".json", ignoreCase = true) == true) {
+            fileName.dropLast(".json".length)
+        } else {
+            fileName
+        }
     }
 
     companion object {

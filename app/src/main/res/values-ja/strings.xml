@@ -82,6 +82,12 @@
     <string name="dialog_message_finish_rename">ファイル名を変更しました。</string>
     <string name="dialog_title_failed_rename">ファイル名変更失敗</string>
     <string name="dialog_message_failed_rename">ファイル名の変更に失敗しました。</string>
+    <string name="dialog_title_importing_profile">ファイルのインポート</string>
+    <string name="dialog_message_importing_profile">ファイルをインポートしています。しばらくお待ちください。</string>
+    <string name="dialog_title_finish_import">インポート終了</string>
+    <string name="dialog_message_finish_import">ファイルのインポートが終了しました。</string>
+    <string name="dialog_title_failed_import">インポート失敗</string>
+    <string name="dialog_message_failed_import">ファイルのインポートに失敗しました。</string>
 
     <string name="title_camera_properties">カメラプロパティ一覧</string>
     <string name="message_getting_properties">プロパティ取得中…</string>

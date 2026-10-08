@@ -30,11 +30,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import jp.osdn.gokigen.aira01d.R
 import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
+import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
 
 enum class CameraProfilesDialogTab{ PULL, APPLY }
 
 @Composable
 fun CameraProfilesDialog(
+    liveViewModel: LiveviewViewModel,
     viewModel: CameraProfilesViewModel,
     onDismissRequest: () -> Unit = {},
     onPull: (String) -> Unit = {},
@@ -150,10 +152,11 @@ fun CameraProfilesDialog(
                     ) {
                         when (tabs[selectedTabIndex.value ?: 0]) {
                             CameraProfilesDialogTab.PULL -> CameraProfilesPullTab(
-                                viewModel = viewModel,
+                                liveViewModel = liveViewModel,
                                 onPull = onPull,
                             )
                             CameraProfilesDialogTab.APPLY -> CameraProfilesApplyTab(
+                                liveViewModel = liveViewModel,
                                 viewModel = viewModel,
                                 onDelete = onDelete,
                                 onRename = onRename,
