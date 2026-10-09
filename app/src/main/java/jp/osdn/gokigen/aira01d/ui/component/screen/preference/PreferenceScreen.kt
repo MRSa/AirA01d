@@ -44,11 +44,13 @@ fun PreferenceScreen(
 ) {
     val cameraAutoConnect by prefsModel.connectCameraAutomatically.collectAsStateWithLifecycle()
     val commandIssueSingle by prefsModel.commandIssueSingle.collectAsStateWithLifecycle()
+    val useCameraLevel by prefsModel.useCameraLevel.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
 
     PreferenceScreenMain(
         cameraAutoConnect = cameraAutoConnect,
         commandIssueSingle = commandIssueSingle,
+        useCameraLevel = useCameraLevel,
         onBackClick = {
             // 安全なポップバックスタック
             navController.popBackStack()
@@ -58,6 +60,9 @@ fun PreferenceScreen(
         },
         onCommandIssueSingle = { isChecked ->
             prefsModel.setCommandIssueSingle(isChecked)
+        },
+        onUseCameraLevel = { isChecked ->
+            prefsModel.setUseCameraLevel(isChecked)
         },
         onOpenUri = { url ->
             try {
@@ -77,9 +82,11 @@ fun PreferenceScreen(
 fun PreferenceScreenMain(
     cameraAutoConnect: Boolean,
     commandIssueSingle: Boolean,
+    useCameraLevel: Boolean,
     onBackClick: () -> Unit,
     onAutoConnectChanged: (Boolean) -> Unit,
     onCommandIssueSingle: (Boolean) -> Unit,
+    onUseCameraLevel: (Boolean) -> Unit,
     onOpenUri: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -115,6 +122,15 @@ fun PreferenceScreenMain(
                 description = stringResource(R.string.description_switch_command_issue_single),
                 checked = commandIssueSingle,
                 onCheckedChange = onCommandIssueSingle
+            )
+            HorizontalDivider()
+
+            // カメラの水準器を使用する
+            SettingSwitchItem(
+                title = stringResource(R.string.label_switch_use_camera_level),
+                description = stringResource(R.string.description_switch_use_camera_level),
+                checked = useCameraLevel,
+                onCheckedChange = onUseCameraLevel
             )
             HorizontalDivider()
 

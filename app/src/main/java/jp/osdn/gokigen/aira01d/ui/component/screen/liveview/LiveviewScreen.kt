@@ -54,6 +54,7 @@ fun LiveviewScreen(
             liveviewModel,
             cameraStatusViewModel,
             selfTimerViewModel,
+            preferenceViewModel,
             cameraProfilesViewModel
         )
     } else {
@@ -63,6 +64,7 @@ fun LiveviewScreen(
             liveviewModel,
             cameraStatusViewModel,
             selfTimerViewModel,
+            preferenceViewModel,
             cameraProfilesViewModel
         )
     }

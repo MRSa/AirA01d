@@ -149,7 +149,8 @@
     <string name="description_switch_connect_camera_automatically">Wi-Fi接続を確立後、自動的にカメラと接続し撮影状態へ移行します。</string>
     <string name="label_switch_command_issue_single">コマンド同時送信数の削減</string>
     <string name="description_switch_command_issue_single">カメラへのコマンド送信を極力減らし、カメラ側のコマンド詰まり発生を抑えます。</string>
-
+    <string name="label_switch_use_camera_level">カメラの水準器を使用する</string>
+    <string name="description_switch_use_camera_level">カメラの水準器の状態を表示します。</string>
 
     <string name="pref_cat_gokigen">GOKIGEN</string>
     <string name="pref_instruction_manual">操作説明</string>

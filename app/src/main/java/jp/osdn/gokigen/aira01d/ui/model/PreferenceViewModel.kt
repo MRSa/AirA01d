@@ -27,7 +27,14 @@ class PreferenceViewModel(private val repository: PreferenceRepository) : ViewMo
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = PreferenceSettings.Camera.PREFERENCE_CAMERA_CONNECT_AUTOMATICALLY_DEFAULT_VALUE
+            initialValue = PreferenceSettings.Camera.PREFERENCE_CAMERA_COMMAND_SINGLE_ISSUE_DEFAULT_VALUE
+        )
+
+    val useCameraLevel: StateFlow<Boolean> = repository.useCameraLevelFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PreferenceSettings.Camera.PREFERENCE_USE_CAMERA_LEVEL_DEFAULT_VALUE
         )
 
     fun setConnectCameraAutomatically(value: Boolean) {
@@ -50,12 +57,26 @@ class PreferenceViewModel(private val repository: PreferenceRepository) : ViewMo
         }
     }
 
+    fun setUseCameraLevel(value: Boolean) {
+        viewModelScope.launch {
+            try {
+                repository.updateUseCameraLevel(value)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to update preference", e)
+            }
+        }
+    }
+
     suspend fun getConnectCameraAutomaticallySync(): Boolean {
         return repository.connectCameraAutomaticallyFlow.first()
     }
 
     //suspend fun getIssueCommandSingleSync(): Boolean {
     //    return repository.issueCommandSingleFlow.first()
+    //}
+
+    //suspend fun getUseCameraLevelSync(): Boolean {
+    //    return repository.useCameraLevelFlow.first()
     //}
 
     companion object {

@@ -51,6 +51,7 @@ import jp.osdn.gokigen.aira01d.ui.component.widget.connect.WifiConfigButton
 import jp.osdn.gokigen.aira01d.ui.model.CameraProfilesViewModel
 import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
+import jp.osdn.gokigen.aira01d.ui.model.PreferenceViewModel
 import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
 
 @Composable
@@ -59,6 +60,7 @@ fun LiveviewScreenPortrait(
     liveviewModel: LiveviewViewModel,
     cameraStatusViewModel: CameraStatusViewModel,
     selfTimerViewModel: SelfTimerViewModel,
+    preferenceViewModel: PreferenceViewModel,
     cameraProfilesViewModel: CameraProfilesViewModel,
 ) {
     Column(
