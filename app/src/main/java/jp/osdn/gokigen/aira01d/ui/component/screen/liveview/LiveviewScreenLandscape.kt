@@ -160,9 +160,11 @@ fun LiveviewScreenLandscape(
         ) {
             // 背面：ライブビュー画面 (fillMaxSize でBoxの全領域を使用)
             LiveviewWidget(
-                liveviewModel,
-                selfTimerViewModel,
-                Modifier.fillMaxSize()
+                viewModel = liveviewModel,
+                cameraStatusViewModel = cameraStatusViewModel,
+                preferenceViewModel = preferenceViewModel,
+                selfTimer = selfTimerViewModel,
+                modifier = Modifier.fillMaxSize()
             )
 
             // 前面：半透明の上部バー (AnimatedVisibility でアニメーションし、表示・非表示を切り替える)

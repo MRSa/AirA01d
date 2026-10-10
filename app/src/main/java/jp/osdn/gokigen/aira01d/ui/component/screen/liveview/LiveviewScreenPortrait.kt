@@ -91,9 +91,11 @@ fun LiveviewScreenPortrait(
 
         // --- ライブビューの表示画面 ---
         LiveviewWidget(
-            liveviewModel,
-            selfTimerViewModel,
-            Modifier
+            viewModel = liveviewModel,
+            cameraStatusViewModel = cameraStatusViewModel,
+            preferenceViewModel = preferenceViewModel,
+            selfTimer = selfTimerViewModel,
+            modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f) // 空きスペースをすべて使う
                 .padding(vertical = 1.dp)

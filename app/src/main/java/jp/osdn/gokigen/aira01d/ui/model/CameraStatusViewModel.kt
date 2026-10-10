@@ -146,6 +146,18 @@ class CameraStatusViewModel(
     private val _checkingCameraHardware = MutableLiveData<Boolean>()
     val checkingCameraHardware: LiveData<Boolean> = _checkingCameraHardware
 
+    //private val _levelGaugeAccuracy = MutableLiveData<Int>()
+    //val levelGaugeAccuracy: LiveData<Int> = _levelGaugeAccuracy
+
+    private val _levelGaugeOrientation = MutableLiveData<Int>()
+    val levelGaugeOrientation: LiveData<Int> = _levelGaugeOrientation
+
+    private val _levelGaugeRoll = MutableLiveData<Int>()
+    val levelGaugeRoll: LiveData<Int> = _levelGaugeRoll
+
+    private val _levelGaugePitch = MutableLiveData<Int>()
+    val levelGaugePitch: LiveData<Int> = _levelGaugePitch
+
     private val _allOpcProperties = mutableStateOf<List<OpcProperty>>(emptyList())
     val groupedOpcProperties: Map<String, List<OpcProperty>> by derivedStateOf {
         _allOpcProperties.value.groupBy { it.category }
@@ -237,6 +249,10 @@ class CameraStatusViewModel(
             _meteringMode.value = ""
             _electricZoom.value = ""
             _checkingCameraHardware.value = false
+            //_levelGaugeAccuracy.value = 0
+            _levelGaugeOrientation.value = 0
+            _levelGaugeRoll.value = 0
+            _levelGaugePitch.value = 0
             _digitalZoomScaleMin.value = 100
             _digitalZoomScaleMax.value = 100
             _digitalZoomScaleCurrent.value = 100
@@ -436,7 +452,31 @@ class CameraStatusViewModel(
         _focalLengthTele.postValue(tele)
     }
 
-    override fun updatedLevelGauge(accuracy: Int, orientation: Int, roll: Int, pitch: Int) {}
+    override fun updatedLevelGauge(accuracy: Int, orientation: Int, roll: Int, pitch: Int)
+    {
+        // ----- 水準器のデータを保持する
+        // Log.v(TAG, "LevelGauge:[$accuracy], o:$orientation, r:$roll, p:$pitch")
+        //if (_levelGaugeAccuracy.value != accuracy)
+        //{
+        //    _levelGaugeAccuracy.postValue(accuracy)
+        //}
+        if (_levelGaugeOrientation.value != orientation)
+        {
+            _levelGaugeOrientation.postValue(orientation)
+        }
+
+        // ロール角の信頼性が「あり」(ビット0が1) かつ 値が変化している場合に値を反映
+        if (((accuracy and 0x01) != 0) && _levelGaugeRoll.value != roll)
+        {
+            _levelGaugeRoll.postValue(roll)
+        }
+
+        // ピッチ角の信頼性が「あり」(ビット1が1) かつ 値が変化している場合に値を反映
+        if (((accuracy and 0x02) != 0) && _levelGaugePitch.value != pitch)
+        {
+            _levelGaugePitch.postValue(pitch)
+        }
+    }
 
     fun getPropertyDescriptorList()
     {
