@@ -455,7 +455,7 @@ class CameraStatusViewModel(
     override fun updatedLevelGauge(accuracy: Int, orientation: Int, roll: Int, pitch: Int)
     {
         // ----- 水準器のデータを保持する
-        // Log.v(TAG, "LevelGauge:[$accuracy], o:$orientation, r:$roll, p:$pitch")
+        //Log.v(TAG, "LevelGauge:[$accuracy], o:$orientation, r:$roll, p:$pitch")
         //if (_levelGaugeAccuracy.value != accuracy)
         //{
         //    _levelGaugeAccuracy.postValue(accuracy)
