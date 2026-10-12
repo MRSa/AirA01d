@@ -150,6 +150,8 @@
     <string name="description_switch_connect_camera_automatically">After Wi-Fi connection is established, the app automatically enters shooting mode.</string>
     <string name="label_switch_command_issue_single">Reduce simultaneous command issue</string>
     <string name="description_switch_command_issue_single">Minimize the number of commands sent to the camera to prevent command stuck on the camera side.</string>
+    <string name="label_switch_use_camera_level">Use camera level</string>
+    <string name="description_switch_use_camera_level">Turn on to show the camera level.</string>
 
     <string name="pref_cat_gokigen">GOKIGEN</string>
     <string name="pref_instruction_manual">Instructions</string>

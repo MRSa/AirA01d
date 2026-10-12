@@ -203,7 +203,7 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
             // データがそろっていないので何もしない
             return
         }
-        val exposureWarningValue = getUInt32(buffer, position + 4)
+        val exposureWarningValue = getUInt32(buffer, position + 4).toInt()
          statusProvider.updateExposureWarning(exposureWarningValue)
     }
 
@@ -243,7 +243,7 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
             // データがそろっていないので何もしない
             return
         }
-        val orientationValue = getUInt32(buffer, position + 4)
+        val orientationValue = getUInt32(buffer, position + 4).toInt()
         statusProvider.updatedOrientation(orientationValue)
     }
 
@@ -254,7 +254,7 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
             // データがそろっていないので何もしない
             return
         }
-        val remainValue = getUInt32(buffer, position + 4)
+        val remainValue = getUInt32(buffer, position + 4).toInt()
         statusProvider.updatedAvailableShots(remainValue)
     }
 
@@ -280,16 +280,16 @@ class OpcRtpHeaderParser(private val statusProvider: ICameraStatusUpdateNotify)
         }
         val accuracy    = getUInt16(buffer, position + 4)
         val orientation = getUInt16(buffer, position + 6)
-        val roll = getUInt16(buffer, position + 8)
-        val pitch = getUInt16(buffer, position + 12)
+        val roll = getUInt32(buffer, position + 8).toInt()
+        val pitch = getUInt32(buffer, position + 12).toInt()
         statusProvider.updatedLevelGauge(accuracy, orientation, roll, pitch)
     }
 
-    private fun getUInt32(buffer: ByteArray, pos: Int): Int {
-        return (buffer[pos].toUByte().toInt()     shl 24) or
-                (buffer[pos + 1].toUByte().toInt() shl 16) or
-                (buffer[pos + 2].toUByte().toInt() shl 8) or
-                (buffer[pos + 3].toUByte().toInt())
+    private fun getUInt32(buffer: ByteArray, pos: Int): UInt {
+        return (buffer[pos].toUByte().toUInt()     shl 24) or
+                (buffer[pos + 1].toUByte().toUInt() shl 16) or
+                (buffer[pos + 2].toUByte().toUInt() shl 8) or
+                (buffer[pos + 3].toUByte().toUInt())
     }
 
     private fun getUInt16(buffer: ByteArray, pos: Int): Int {

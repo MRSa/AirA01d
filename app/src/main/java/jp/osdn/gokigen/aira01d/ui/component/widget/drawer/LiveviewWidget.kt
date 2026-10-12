@@ -40,12 +40,16 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import jp.osdn.gokigen.aira01d.ui.model.CameraStatusViewModel
 import jp.osdn.gokigen.aira01d.ui.model.LiveviewViewModel
+import jp.osdn.gokigen.aira01d.ui.model.PreferenceViewModel
 import jp.osdn.gokigen.aira01d.ui.model.SelfTimerViewModel
 
 @Composable
 fun LiveviewWidget(
     viewModel: LiveviewViewModel,
+    cameraStatusViewModel: CameraStatusViewModel,
+    preferenceViewModel: PreferenceViewModel,
     selfTimer: SelfTimerViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -57,7 +61,7 @@ fun LiveviewWidget(
     val focusFrameStatus = viewModel.focusFrameStatus.observeAsState()
     val focusFrameRectangle = viewModel.focusFrameRectangle.observeAsState()
     val isFocusAssist = viewModel.isFocusAssist.observeAsState()
-
+    val isLevelOn = preferenceViewModel.useCameraLevel.collectAsStateWithLifecycle()
 
     // SelfTimerViewModel の監視
     val isTimerActivated by selfTimer.isTimerActivated.collectAsStateWithLifecycle()
@@ -145,6 +149,17 @@ fun LiveviewWidget(
                 if (isGridOn.value == true) {
                     GridDrawer(
                         imageSize = Size(imageBitmap.width.toFloat(), imageBitmap.height.toFloat()),
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(1.dp)
+                    )
+                }
+
+                // ----- 水準器の表示 -----
+                if (isLevelOn.value)
+                {
+                    CameraLevelDrawer(
+                        cameraStatusViewModel = cameraStatusViewModel,
                         modifier = Modifier
                             .matchParentSize()
                             .padding(1.dp)

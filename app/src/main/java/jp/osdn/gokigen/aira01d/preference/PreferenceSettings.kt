@@ -7,5 +7,8 @@ object PreferenceSettings {
 
         const val PREFERENCE_CAMERA_COMMAND_SINGLE_ISSUE = "command_issue_single"
         const val PREFERENCE_CAMERA_COMMAND_SINGLE_ISSUE_DEFAULT_VALUE = false
+
+        const val PREFERENCE_USE_CAMERA_LEVEL = "use_camera_level"
+        const val PREFERENCE_USE_CAMERA_LEVEL_DEFAULT_VALUE = false
     }
 }
