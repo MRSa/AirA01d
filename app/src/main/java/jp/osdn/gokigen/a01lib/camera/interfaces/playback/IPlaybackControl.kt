@@ -30,7 +30,7 @@ interface IPlaybackControl
     // ----- サイズを調整した画像を取得する -----
     fun getResizeImage(directory: String, size: Int): Bitmap?
 
-    // ----- 指定した
+    // ----- 指定した画像ファイルのExif情報を取得する
     fun getExif(directory: String): ExifInterface?
 
     // ----- 画面表示用の画像を取得する -----

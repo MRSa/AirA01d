@@ -4,7 +4,9 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import androidx.exifinterface.media.ExifInterface
 import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
+import jp.osdn.gokigen.a01lib.camera.interfaces.playback.IStillImageFileInfo
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
 import kotlinx.serialization.Serializable
@@ -415,6 +417,43 @@ class CameraProfileRepository(private val context: Context)
         } else {
             fileName
         }
+    }
+
+    fun storeCameraProfileFromStillImage(fileName: String, exifInfo: ExifInterface?, cameraProfile: IStillImageFileInfo.StillFileParameterInfo): Boolean
+    {
+        // ---- カメラ画像から読み込んだ撮影条件を、カメラプロファイル形式に変換する
+        val profileFormatter = OpcCameraProfileFormatter()
+
+        // 読み出した撮影条件をローカルファイルに保存する
+        val properties = profileFormatter.formatCameraProfile(fileName, exifInfo, cameraProfile)
+        if (properties.isEmpty())
+        {
+            // ----- カメラプロパティの取得に失敗した
+            return false
+        }
+        // --- カメラプロパティの取得に成功した。指定されたファイル名で、ローカルストレージ（ファイル）に保存する。
+        Log.v(TAG, "Properties: ${properties.size}")
+
+        try {
+            // 保存用ディレクトリ（アプリ専用の内部ストレージ: filesDir）
+            val directory = context.filesDir
+
+            // 同名ファイルが存在する場合に重複しないファイル名を生成
+            val targetFile = getUniqueFile(directory, fileName.substringBeforeLast(".") + ".json")
+
+            // リストデータをJSON文字列に変換
+            val jsonString = Json.encodeToString(properties)
+
+            // ファイルに書き込み
+            targetFile.writeText(jsonString)
+
+            return true
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return false
     }
 
     companion object {
