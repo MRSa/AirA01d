@@ -29,7 +29,7 @@ interface IStillImageFileInfo {
         @SerialName("WhiteEdge") val whiteEdge: String = "OFF", // ホワイトエッジ効果 (ON/OFF)
         @SerialName("FrameJaggy") val frameJaggy: String = "OFF", // フレーム効果 (ON/OFF)
         @SerialName("Starlight") val starlight: String = "OFF", // スターライト効果 (ON/OFF)
-        @SerialName("MiniatureVerticl") val miniatureVerticl: String = "OFF", // 上下ぼかし効果 (ON/OFF)
+        @SerialName("MiniatureVertical") val miniatureVertical: String = "OFF", // 上下ぼかし効果 (ON/OFF)
 
         // --- p.75 掲載パラメータ ---
         @SerialName("MiniatureHorizon") val miniatureHorizon: String = "OFF", // 左右ぼかし効果 (ON/OFF)

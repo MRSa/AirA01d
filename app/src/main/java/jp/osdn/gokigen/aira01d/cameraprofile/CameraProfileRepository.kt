@@ -439,7 +439,7 @@ class CameraProfileRepository(private val context: Context)
             val directory = context.filesDir
 
             // 同名ファイルが存在する場合に重複しないファイル名を生成
-            val targetFile = getUniqueFile(directory, fileName.substringBeforeLast(".") + ".json")
+            val targetFile = getUniqueFile(directory, fileName.substringBeforeLast("."))
 
             // リストデータをJSON文字列に変換
             val jsonString = Json.encodeToString(properties)

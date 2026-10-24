@@ -60,6 +60,7 @@ fun CameraProfilesApplyTab(
     val colorScheme = MaterialTheme.colorScheme
 
     val isCameraConnected = (isLvActivated.value == true)
+    val hasSelectedFile = selectedFile.isNotEmpty()
 
     // fileList が更新された際、selectedFile が未選択またはリスト外なら先頭を選択
     LaunchedEffect(fileList) {
@@ -135,24 +136,44 @@ fun CameraProfilesApplyTab(
         // アクションボタン（Delete, Rename, Apply）
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // 削除：ローカルストレージのファイル削除
-            OutlinedButton(onClick = { onDelete(selectedFile) }) {
-                Text(text = stringResource(R.string.button_camera_profiles_delete))
-            }
-            // 改名：ローカルストレージの名称変更
-            OutlinedButton(onClick = { onRename(selectedFile) }) {
-                Text(text = stringResource(R.string.button_camera_profiles_rename))
-            }
-            // 展開：ローカルストレージからカメラへ設定
-            Button(
-                onClick = { onApply(selectedFile) },
-                enabled = isCameraConnected
+            // 削除
+            IconButton(
+                onClick = { onDelete(selectedFile) },
+                enabled = hasSelectedFile,
+                modifier = Modifier.size(48.dp)
             ) {
-                Text(text = stringResource(R.string.button_camera_profiles_apply))
+                Icon(
+                    painter = painterResource(R.drawable.outline_scan_delete_24),
+                    contentDescription = stringResource(R.string.button_camera_profiles_delete),
+                    tint = if (hasSelectedFile) colorScheme.error else colorScheme.onSurface.copy(alpha = 0.38f)
+                )
+            }
+
+            // 右側の操作系ボタンをグループ化
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 改名
+                OutlinedButton(
+                    onClick = { onRename(selectedFile) },
+                    enabled = hasSelectedFile
+                ) {
+                    Text(text = stringResource(R.string.button_camera_profiles_rename))
+                }
+                // 展開
+                Button(
+                    onClick = { onApply(selectedFile) },
+                    enabled = isCameraConnected && hasSelectedFile
+                ) {
+                    Text(text = stringResource(R.string.button_camera_profiles_apply))
+                }
             }
         }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)
