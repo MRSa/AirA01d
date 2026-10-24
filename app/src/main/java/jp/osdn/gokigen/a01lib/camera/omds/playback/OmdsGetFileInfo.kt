@@ -83,7 +83,7 @@ class OmdsGetFileInfo(
         val whiteEdge = extractTagContent(response, "WhiteEdge") ?: ""
         val frameJaggy = extractTagContent(response, "FrameJaggy") ?: ""
         val starlight = extractTagContent(response, "Starlight") ?: ""
-        val miniatureVerticl = extractTagContent(response, "MiniatureVerticl") ?: ""
+        val miniatureVertical = extractTagContent(response, "MiniatureVertical") ?: ""
 
         val miniatureHorizon = extractTagContent(response, "MiniatureHorizon") ?: ""
         val shadingHorizon = extractTagContent(response, "ShadingHorizon") ?: ""
@@ -106,7 +106,7 @@ class OmdsGetFileInfo(
         val photoStory = extractTagContent(response, "PhotoStory") ?: ""
         val photoStoryMode = extractTagContent(response, "PhotoStoryMode") ?: ""
         val photoStoryType = extractTagContent(response, "PhotoStoryType") ?: ""
-        val photoStoryDevideNumAspectRatio = extractTagContent(response, "PhotoStoryDevideNumAspectRatio") ?: ""
+        val photoStoryDivideNumAspectRatio = extractTagContent(response, "PhotoStoryDevideNumAspectRatio") ?: ""
 
         val photoStoryLayout = extractTagContent(response, "PhotoStoryLayout") ?: ""
         val photoStoryEffect = extractTagContent(response, "PhotoStoryEffect") ?: ""
@@ -141,7 +141,7 @@ class OmdsGetFileInfo(
             whiteEdge = whiteEdge,
             frameJaggy = frameJaggy,
             starlight = starlight,
-            miniatureVerticl = miniatureVerticl,
+            miniatureVertical = miniatureVertical,
             miniatureHorizon = miniatureHorizon,
             shadingHorizon = shadingHorizon,
             shadingVertical = shadingVertical,
@@ -162,7 +162,7 @@ class OmdsGetFileInfo(
             photoStory = photoStory,
             photoStoryMode = photoStoryMode,
             photoStoryType = photoStoryType,
-            photoStoryDevideNumAspectRatio = photoStoryDevideNumAspectRatio,
+            photoStoryDevideNumAspectRatio = photoStoryDivideNumAspectRatio,
             photoStoryLayout = photoStoryLayout,
             photoStoryEffect = photoStoryEffect,
             rollAngleReliability = rollAngleReliability,

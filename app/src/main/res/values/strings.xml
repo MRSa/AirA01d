@@ -145,6 +145,12 @@
     <string name="exif_ss_value">Shutter:</string>
     <string name="exif_iso_value">ISO:</string>
 
+    <string name="dialog_title_confirm_get_camera_profile">Get camera profile from image</string>
+    <string name="dialog_message_confirm_get_camera_profile">Retrieve shooting conditions from this image and save to a local file. Start?</string>
+    <string name="finished_get_profile_from_image">Finished to get camera profile: </string>
+    <string name="failed_get_profile_from_image">ERROR>Failed to get camera profile: </string>
+    <string name="cannot_use_this_function">This feature is not available.</string>
+
     <string name="label_return_to_liveview_screen">Back</string>
     <string name="label_switch_connect_camera_automatically">Auto-connect to Camera</string>
     <string name="description_switch_connect_camera_automatically">After Wi-Fi connection is established, the app automatically enters shooting mode.</string>

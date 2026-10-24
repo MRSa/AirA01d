@@ -24,6 +24,7 @@ import jp.osdn.gokigen.a01lib.camera.omds.playback.OmdsFileTransfer
 import jp.osdn.gokigen.a01lib.camera.utils.storage.MediaStoreStreamSaveHelper
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
+import jp.osdn.gokigen.aira01d.cameraprofile.CameraProfileRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,6 +64,8 @@ class ContentListViewModel(val application: Application) : ViewModel()
     var downloadStatusText by mutableStateOf("")
         private set
     var downloadFileName by mutableStateOf("")
+        private set
+    var isProfilePulling by mutableStateOf(false)
         private set
 
     init
@@ -447,35 +450,35 @@ class ContentListViewModel(val application: Application) : ViewModel()
             var downloadCount = 0
             var successCount = 0
 
-            for (file in files)
+            for ((directory, fileName) in files)
             {
                 // ----- JPEGファイルの時には、指定された画像サイズでダウンロードする
-                val selectedSize = if (file.fileName.endsWith(suffix = "JPG", ignoreCase = true)) {
+                val selectedSize = if (fileName.endsWith(suffix = "JPG", ignoreCase = true)) {
                     imageSize
                 } else {
                     GetImageSize.ORIGINAL
                 }
 
                 // ----- 保存するファイル名
-                val storeFileName = createTimestampedFileName(file.fileName)
+                val storeFileName = createTimestampedFileName(fileName)
 
                 // 状態の初期化
                 downloadCount++ // 画像取得数
                 isDownloading = true
                 downloadProgress = 0.0f
                 downloadStatusText = "${context.getString(R.string.now_downloading)} : $downloadCount/${files.size}"
-                downloadFileName = file.fileName
+                downloadFileName = fileName
 
                 // --- 選択された画像サイズに応じてリクエストパスを調整
                 val downloadPath = when (selectedSize) {
-                    GetImageSize.WIDTH_640_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=0640"
-                    GetImageSize.WIDTH_1024_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1024"
-                    GetImageSize.WIDTH_1280_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1280"
-                    GetImageSize.WIDTH_1600_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1600"
-                    GetImageSize.WIDTH_1920_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=1920"
-                    GetImageSize.WIDTH_2048_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2048"
-                    GetImageSize.WIDTH_2560_PX -> "/get_resizeimg.cgi?DIR=${file.directory}/${file.fileName}&size=2560"
-                    GetImageSize.ORIGINAL -> "${file.directory}/${file.fileName}"
+                    GetImageSize.WIDTH_640_PX -> "/get_resizeimg.cgi?DIR=$directory/$fileName&size=0640"
+                    GetImageSize.WIDTH_1024_PX -> "/get_resizeimg.cgi?DIR=$directory/$fileName&size=1024"
+                    GetImageSize.WIDTH_1280_PX -> "/get_resizeimg.cgi?DIR=$directory/$fileName&size=1280"
+                    GetImageSize.WIDTH_1600_PX -> "/get_resizeimg.cgi?DIR=$directory/$fileName&size=1600"
+                    GetImageSize.WIDTH_1920_PX -> "/get_resizeimg.cgi?DIR=$directory/$fileName&size=1920"
+                    GetImageSize.WIDTH_2048_PX -> "/get_resizeimg.cgi?DIR=$directory/$fileName&size=2048"
+                    GetImageSize.WIDTH_2560_PX -> "/get_resizeimg.cgi?DIR=$directory/$fileName&size=2560"
+                    GetImageSize.ORIGINAL -> "$directory/$fileName"
                 }
 
                 val streamSaver = MediaStoreStreamSaveHelper(context, storeFileName)
@@ -552,6 +555,55 @@ class ContentListViewModel(val application: Application) : ViewModel()
     fun clearExifInfo()
     {
         _currentExif.value = null  // 新しい画像の読み込みが始まったら、一旦古いEXIF情報をクリア
+    }
+
+    fun getCameraPropertiesFromImage(context: Context, file: ICameraFileInfo.ImageFileInfo?)
+    {
+        // --- カメラプロファイルを画像ファイルから取得し、ローカルファイルへ保存する（ただし、OPC機のJPEGファイル）
+        viewModelScope.launch(Dispatchers.IO) {
+            try
+            {
+                val cameraProtocol = AppSingleton.cameraControl.getCameraProtocol()
+                if ((file != null)&&(cameraProtocol == ICameraConnectionStatus.CameraProtocol.OPC))
+                {
+                    //  OPC機のときのみ、画像プロファイルの読み込みを実行し、ローカルファイルに保存する
+                    isProfilePulling = true
+                    val playbackControl = AppSingleton.cameraControl.getCameraPlaybackControl()
+                    val exifInfo = playbackControl.getExif("${file.directory}/${file.fileName}")
+                    val fileInfo = playbackControl.getStillImageFileInfo("${file.directory}/${file.fileName}")
+
+                    // Repositoryでファイルを保存する
+                    val repository = CameraProfileRepository(context)
+                    val isSuccess = repository.storeCameraProfileFromStillImage(file.fileName, exifInfo, fileInfo)
+
+                    // ----- 成功か失敗を toast で通知する
+                    withContext(Dispatchers.Main) {
+                        val finishString = if (isSuccess) {
+                            "${context.getString(R.string.finished_get_profile_from_image)} ${file.fileName}"
+                        } else {
+                            "${context.getString(R.string.failed_get_profile_from_image)} ${file.fileName}"
+                        }
+                        Toast.makeText(context, finishString, Toast.LENGTH_LONG).show()
+                    }
+                }
+                else
+                {
+                    //  この機能は OPCのみ使用可能...
+                    withContext(Dispatchers.Main) {
+                        val finishString = context.getString(R.string.cannot_use_this_function)
+                        Toast.makeText(context, finishString, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+            catch (e: Exception)
+            {
+                Log.e(TAG, "ERR>getCameraPropertiesFromImage(): ${e.message}")
+            }
+            finally
+            {
+                isProfilePulling = false
+            }
+        }
     }
 
     // --- ファイル名に現在のタイムスタンプを付与する関数  例: "R101010.JPG" -> "R101010_20261213123400.JPG"

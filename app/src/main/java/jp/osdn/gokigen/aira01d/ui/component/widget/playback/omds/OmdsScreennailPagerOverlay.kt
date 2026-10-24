@@ -51,6 +51,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,6 +68,7 @@ import jp.osdn.gokigen.a01lib.camera.interfaces.ICameraConnectionStatus
 import jp.osdn.gokigen.a01lib.camera.interfaces.playback.ICameraFileInfo
 import jp.osdn.gokigen.aira01d.AppSingleton
 import jp.osdn.gokigen.aira01d.R
+import jp.osdn.gokigen.aira01d.ui.component.widget.profile.CameraProfileActionConfirmDialog
 import jp.osdn.gokigen.aira01d.ui.model.ContentListViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -99,6 +101,7 @@ fun OmdsScreennailPagerOverlay(
     var showSizeDialog by remember { mutableStateOf(false) }
     var sizeOptions by remember { mutableStateOf<List<ContentListViewModel.GetImageSize>>(emptyList()) }
     var selectedSize by remember { mutableStateOf(ContentListViewModel.GetImageSize.ORIGINAL) }
+    var confirmGetPictureProfileDialog by remember { mutableStateOf(false) }
 
     // --- EXIF情報の表示 ON/OFF管理
     var showExif by remember { mutableStateOf(false) }
@@ -173,7 +176,7 @@ fun OmdsScreennailPagerOverlay(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
             pageSpacing = 16.dp, // ページ間の余白
-            userScrollEnabled = !viewModel.isDownloading && !showSizeDialog // ダイアログ表示中はページ変更を禁止する
+            userScrollEnabled = !viewModel.isDownloading && !showSizeDialog && !confirmGetPictureProfileDialog // ダイアログ表示中はページ変更を禁止する
         ) { page ->
             val file = fileList[page]
             var retryCount by remember { mutableIntStateOf(0) }
@@ -288,12 +291,13 @@ fun OmdsScreennailPagerOverlay(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val currentFile = fileList.getOrNull(pagerState.currentPage)
                 // ---EXIFトグルボタン
                 IconButton(
                     onClick = {
                         showExif = !showExif
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        val currentFile = fileList.getOrNull(pagerState.currentPage)
+                        //val currentFile = fileList.getOrNull(pagerState.currentPage)
                         if ((showExif)&&(currentFile != null))
                         {
                             // --- Exifを表示するように切り替えたとき...Exifを取得する
@@ -318,12 +322,29 @@ fun OmdsScreennailPagerOverlay(
                         tint = Color.White
                     )
                 }
+                // --- 画像の撮影情報取得ボタン
+                if (currentFile != null && !viewModel.isDownloading && !showSizeDialog && !confirmGetPictureProfileDialog) {
+                    val lowerName = currentFile.fileName.lowercase()
+                    if (lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".orf")) {
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                confirmGetPictureProfileDialog = true
+                            },
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .background(Color.Black.copy(alpha = 0.5f), shape = CircleShape)
+                        ) {
+                            Icon(painter = painterResource(R.drawable.outline_file_open_24), contentDescription = null, tint = Color.White)
+                        }
+                    }
+                }
+
                 // --- 画像のダウンロードボタン
                 IconButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        val currentFile = fileList.getOrNull(pagerState.currentPage)
-                        if (currentFile != null && !viewModel.isDownloading && !showSizeDialog) {
+                        if (currentFile != null && !viewModel.isDownloading && !showSizeDialog && !confirmGetPictureProfileDialog) {
                             val lowerName = currentFile.fileName.lowercase()
 
                             // 拡張子に応じてダイアログの選択肢を切り替える
@@ -517,6 +538,22 @@ fun OmdsScreennailPagerOverlay(
         )
     }
 
+    // --- 表示中画像のプロファイルを取得するかどうか確認するダイアログ
+    if (confirmGetPictureProfileDialog)
+    {
+        CameraProfileActionConfirmDialog(
+            title = stringResource(R.string.dialog_title_confirm_get_camera_profile),
+            message = stringResource(id = R.string.dialog_message_confirm_get_camera_profile),
+            onConfirm = {
+                // ----- 画像ファイルからカメラプロファイルを取得する
+                confirmGetPictureProfileDialog = false
+                val currentFile = fileList.getOrNull(pagerState.currentPage)
+                viewModel.getCameraPropertiesFromImage(context, currentFile)
+            },
+            onDismiss = { confirmGetPictureProfileDialog = false }
+        )
+    }
+
     if (viewModel.isDownloading) {
         AlertDialog(
             onDismissRequest = { },
@@ -555,4 +592,34 @@ fun OmdsScreennailPagerOverlay(
             )
         )
     }
+    if (viewModel.isProfilePulling)
+    {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text(text = stringResource(R.string.dialog_title_confirm_get_camera_profile)) },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = viewModel.downloadStatusText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    CircularProgressIndicator(color = Color.White)
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            },
+            confirmButton = {},
+            dismissButton = {},
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        )
+    }
+
+
 }
