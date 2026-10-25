@@ -204,7 +204,7 @@ fun CameraTuningButton(
             ShowActionResultDialog(
                 isSuccess = true,
                 title = stringResource(R.string.dialog_title_finish_delete),
-                message = stringResource(id = R.string.dialog_message_finish_delete, showFileNameToPull),
+                message = stringResource(id = R.string.dialog_message_finish_delete, showFileNameToDelete),
                 onDismiss = { viewModel.proceedCameraProfileOperation() }
             )
         }
