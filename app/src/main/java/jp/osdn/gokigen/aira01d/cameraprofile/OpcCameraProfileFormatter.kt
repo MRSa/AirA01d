@@ -351,9 +351,8 @@ class OpcCameraProfileFormatter
             val fNumber = exifInfo?.getAttribute(ExifInterface.TAG_F_NUMBER)
 
             // GPS情報があるかどうか
-            val latitude = exifInfo?.getAttribute(ExifInterface.TAG_GPS_LATITUDE)
-            val longitude = exifInfo?.getAttribute(ExifInterface.TAG_GPS_LONGITUDE)
-            val hasGpsInfo = !latitude.isNullOrEmpty()
+            val latLong = exifInfo?.getLatLong()
+            val hasGpsInfo = (latLong != null)
 
             // プログラムモード
             val takeMode = getTakeMode(exifInfo?.getAttributeInt(ExifInterface.TAG_EXPOSURE_PROGRAM, 0) ?: 0)
@@ -370,14 +369,23 @@ class OpcCameraProfileFormatter
             {
                 "ART" -> {
                     // ----- アートフィルター種別モード
-                    properties.add(CameraProperties("RECENTLY_ART_FILTER", getRecentlyArtFilter(cameraProfile.colorTone)))
+                    if (cameraProfile.colorTone != "ERROR") {
+                        properties.add(
+                            CameraProperties(
+                                "RECENTLY_ART_FILTER",
+                                getRecentlyArtFilter(cameraProfile.colorTone)
+                            )
+                        )
+                    }
 
                     // ----- 露出補正値
                     properties.add(CameraProperties("EXPREV", getExposureCompensation(expComp)))
                 }
                 "M" -> {
                     // ----- ピクチャーモード
-                    properties.add(CameraProperties("COLORTONE", cameraProfile.colorTone))
+                    if (cameraProfile.colorTone != "ERROR") {
+                        properties.add(CameraProperties("COLORTONE", cameraProfile.colorTone))
+                    }
 
                     // ----- シャッター速度
                     if (exposureTimeStr != null)
@@ -393,7 +401,9 @@ class OpcCameraProfileFormatter
                 }
                 "S" -> {
                     // ----- ピクチャーモード
-                    properties.add(CameraProperties("COLORTONE", cameraProfile.colorTone))
+                    if (cameraProfile.colorTone != "ERROR") {
+                        properties.add(CameraProperties("COLORTONE", cameraProfile.colorTone))
+                    }
 
                     // ----- シャッター速度
                     if (exposureTimeStr != null)
@@ -406,7 +416,9 @@ class OpcCameraProfileFormatter
                 }
                 "A" -> {
                     // ----- ピクチャーモード
-                    properties.add(CameraProperties("COLORTONE", cameraProfile.colorTone))
+                    if (cameraProfile.colorTone != "ERROR") {
+                        properties.add(CameraProperties("COLORTONE", cameraProfile.colorTone))
+                    }
 
                     // ----- 絞り値
                     if (fNumber != null)
@@ -419,20 +431,20 @@ class OpcCameraProfileFormatter
                 }
                 else -> {
                     // ----- ピクチャーモード
-                    properties.add(CameraProperties("COLORTONE", cameraProfile.colorTone))
+                    if (cameraProfile.colorTone != "ERROR") {
+                        properties.add(CameraProperties("COLORTONE", cameraProfile.colorTone))
+                    }
 
                     // ----- 露出補正値
                     properties.add(CameraProperties("EXPREV", getExposureCompensation(expComp)))
                 }
             }
 
-
             // ----- ホワイトバランス
             properties.add(CameraProperties("WB", getWhiteBalance(cameraProfile.whiteBalance)))
 
             // ----- WBオート電球色残し
-            properties.add(CameraProperties("AUTO_WB_DENKYU_COLORED_LEAVING", getWhiteBalance(cameraProfile.wbAutoLightBulbColorLeaving)))
-
+            properties.add(CameraProperties("AUTO_WB_DENKYU_COLORED_LEAVING", cameraProfile.wbAutoLightBulbColorLeaving))
 
             if (takeMode != "ART")
             {
@@ -444,6 +456,24 @@ class OpcCameraProfileFormatter
                     // ----- カスタムホワイトバランス色温度
                     properties.add(CameraProperties("CUSTOM_WB_KELVIN_1", cameraProfile.customWbBias.toString()))
                 }
+
+                // ----- WB補正(A)
+                properties.add(CameraProperties("WB_REV_AUTO", cameraProfile.wbBiasA.toString()))
+                properties.add(CameraProperties("WB_REV_5300K", cameraProfile.wbBiasA.toString()))
+                properties.add(CameraProperties("WB_REV_7500K", cameraProfile.wbBiasA.toString()))
+                properties.add(CameraProperties("WB_REV_6000K", cameraProfile.wbBiasA.toString()))
+                properties.add(CameraProperties("WB_REV_3000K", cameraProfile.wbBiasA.toString()))
+                properties.add(CameraProperties("WB_REV_4000K", cameraProfile.wbBiasA.toString()))
+                properties.add(CameraProperties("WB_REV_AUTO_UNDER_WATER", cameraProfile.wbBiasA.toString()))
+
+                // ----- WB補正(G)
+                properties.add(CameraProperties("WB_REV_G_AUTO", cameraProfile.wbBiasG.toString()))
+                properties.add(CameraProperties("WB_REV_G_5300K", cameraProfile.wbBiasG.toString()))
+                properties.add(CameraProperties("WB_REV_G_7500K", cameraProfile.wbBiasG.toString()))
+                properties.add(CameraProperties("WB_REV_G_6000K", cameraProfile.wbBiasG.toString()))
+                properties.add(CameraProperties("WB_REV_G_3000K", cameraProfile.wbBiasG.toString()))
+                properties.add(CameraProperties("WB_REV_G_4000K", cameraProfile.wbBiasG.toString()))
+                properties.add(CameraProperties("WB_REV_G_AUTO_UNDER_WATER", cameraProfile.wbBiasG.toString()))
             }
 
             if (cameraProfile.monotoneFilter != "ERROR")
@@ -570,7 +600,7 @@ class OpcCameraProfileFormatter
             // ----- ログ出力
             Log.v(TAG, "----------------------")
             Log.v(TAG, "[$fileName] ")
-            Log.v(TAG, "   hasGps:$hasGpsInfo lat:$latitude lng:$longitude")
+            Log.v(TAG, "   hasGps:$hasGpsInfo lat:${latLong?.get(0)?:0.0f} lng:${latLong?.get(1)?:0.0f}")
             Log.v(TAG, "   Mode:$takeMode  F:$fNumber Shutter: ${getShutterSpeed(exposureTimeStr ?: "")}($exposureTimeStr)")
             Log.v(TAG, "   $cameraProfile")
             Log.v(TAG, "----------------------")

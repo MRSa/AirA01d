@@ -143,6 +143,7 @@
     <string name="exif_f_value">絞り値: F</string>
     <string name="exif_ss_value">シャッター速度:</string>
     <string name="exif_iso_value">ISO:</string>
+    <string name="exif_has_gps_location">位置情報: %1$.3f, %2$.3f</string>
 
     <string name="dialog_title_confirm_get_camera_profile">撮影条件の取得</string>
     <string name="dialog_message_confirm_get_camera_profile">画像から撮影条件を取得し、ローカルファイルに保存します。開始しますか?</string>

@@ -9,5 +9,7 @@ data class ExifDataToDisplay(
     val meteringMode: String?,
     val programMode: String?,
     val model: String?,
-    val hasGpsInfo: Boolean?
+    val hasGpsInfo: Boolean,
+    val latitude: Double?,
+    val longitude: Double?
 )

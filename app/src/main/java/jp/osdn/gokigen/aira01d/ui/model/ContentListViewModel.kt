@@ -375,8 +375,8 @@ class ContentListViewModel(val application: Application) : ViewModel()
                     val model = exif?.getAttribute(ExifInterface.TAG_MODEL)
 
                     // GPS情報があるかどうか
-                    val latitude = exif?.getAttribute(ExifInterface.TAG_GPS_LATITUDE)
-                    val haGpsInfo = !latitude.isNullOrEmpty()
+                    val latLong = exif?.getLatLong()
+                    val hasGpsInfo = (latLong != null)
 
                     // プログラムモード
                     val programModeIndex = exif?.getAttributeInt(ExifInterface.TAG_EXPOSURE_PROGRAM, 0) ?: 0
@@ -415,17 +415,37 @@ class ContentListViewModel(val application: Application) : ViewModel()
                     Log.v(TAG, "Read EXIF: $path/$fileName $cacheFilePath (SS:$exposureTime, F$fNumber, ISO$iso) $focalLengthDouble mm")
 
                     // データクラスにして返す
-                    ExifDataToDisplay(
-                        fileName = fileName,
-                        aperture = fNumber,
-                        exposureTime = exposureTime,
-                        focalLength = focalLengthDouble,
-                        programMode = programModeStr,
-                        meteringMode = meteringModeStr,
-                        iso = iso,
-                        model = model,
-                        hasGpsInfo = haGpsInfo
-                    )
+                    if (hasGpsInfo) {
+                        // ----- 位置情報ありのとき
+                        ExifDataToDisplay(
+                            fileName = fileName,
+                            aperture = fNumber,
+                            exposureTime = exposureTime,
+                            focalLength = focalLengthDouble,
+                            programMode = programModeStr,
+                            meteringMode = meteringModeStr,
+                            iso = iso,
+                            model = model,
+                            hasGpsInfo = true,
+                            latitude = latLong[0],
+                            longitude = latLong[1]
+                        )
+                    } else {
+                        // ----- 位置情報なしのとき
+                        ExifDataToDisplay(
+                            fileName = fileName,
+                            aperture = fNumber,
+                            exposureTime = exposureTime,
+                            focalLength = focalLengthDouble,
+                            programMode = programModeStr,
+                            meteringMode = meteringModeStr,
+                            iso = iso,
+                            model = model,
+                            hasGpsInfo = false,
+                            latitude = null,
+                            longitude = null
+                        )
+                    }
                 }
                 _currentExif.value = exifDataToDisplay
             }

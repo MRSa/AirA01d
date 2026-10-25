@@ -144,6 +144,7 @@
     <string name="exif_f_value">Aperture: F</string>
     <string name="exif_ss_value">Shutter:</string>
     <string name="exif_iso_value">ISO:</string>
+    <string name="exif_has_gps_location">GPS: %1$.3f, %2$.3f</string>
 
     <string name="dialog_title_confirm_get_camera_profile">Get camera profile from image</string>
     <string name="dialog_message_confirm_get_camera_profile">Retrieve shooting conditions from this image and save to a local file. Start?</string>

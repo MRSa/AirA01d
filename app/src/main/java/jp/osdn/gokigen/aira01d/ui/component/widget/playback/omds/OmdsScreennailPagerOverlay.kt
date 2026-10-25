@@ -260,6 +260,16 @@ fun OmdsScreennailPagerOverlay(
                             Text(text = "${stringResource(R.string.exif_iso_value)} ${exifData?.iso ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
                             Text(text = "${stringResource(R.string.exif_exposure_program)} ${exifData?.programMode ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
                             Text(text = "${stringResource(R.string.exif_metering_program)} ${exifData?.meteringMode ?: "--"}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                            if (exifData?.hasGpsInfo == true)
+                            {
+                                // 位置情報あり (位置情報を表示する）
+                                Text(
+                                    text = stringResource(id = R.string.exif_has_gps_location, exifData?.latitude?: 0.0f, exifData?.longitude ?: 0.0f),
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                 }
