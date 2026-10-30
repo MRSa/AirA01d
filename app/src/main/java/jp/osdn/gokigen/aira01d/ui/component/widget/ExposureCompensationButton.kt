@@ -20,10 +20,9 @@ fun ExposureCompensationButton(
     val xv = controlModel.xv.observeAsState()
 
     val isEditable = (isLvActivated.value == true)&&(when (takeMode.value) {
-        "P" -> { true }
-        "A" -> { true }
-        "S" -> { true }
-        else -> { false }
+        "iAuto" -> { false }
+        "M" -> { false }
+        else -> { true }
     })
 
     PropertyTextButton(
